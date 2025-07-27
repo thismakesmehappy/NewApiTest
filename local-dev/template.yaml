@@ -51,6 +51,18 @@ Resources:
       CodeUri: ../service/target/toyapi-service-1.0-SNAPSHOT.jar
       Handler: co.thismakesmehappy.toyapi.service.AuthHandler
       Description: "Handles authentication endpoints (local development)"
+      Environment:
+        Variables:
+          ENVIRONMENT: local
+          DYNAMODB_ENDPOINT: http://host.docker.internal:8000
+          TABLE_NAME: toyapi-local-items
+          USER_POOL_ID: local-user-pool
+          USER_POOL_CLIENT_ID: local-client-id
+          MOCK_AUTHENTICATION: "true"
+          LOCAL_TEST_USER_ID: local-user-12345
+          SKIP_COGNITO_VALIDATION: "true"
+          DEBUG: "true"
+          LOG_LEVEL: DEBUG
       Events:
         AuthLogin:
           Type: Api
@@ -78,6 +90,15 @@ Resources:
       CodeUri: ../service/target/toyapi-service-1.0-SNAPSHOT.jar
       Handler: co.thismakesmehappy.toyapi.service.ItemsHandler
       Description: "Handles items CRUD operations (local development)"
+      Environment:
+        Variables:
+          ENVIRONMENT: local
+          DYNAMODB_ENDPOINT: http://host.docker.internal:8000
+          TABLE_NAME: toyapi-local-items
+          MOCK_AUTHENTICATION: "true"
+          LOCAL_TEST_USER_ID: local-user-12345
+          DEBUG: "true"
+          LOG_LEVEL: DEBUG
       Events:
         ItemsList:
           Type: Api

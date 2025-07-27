@@ -40,6 +40,9 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         logger.info("Handling auth request: {} {}", input.getHttpMethod(), input.getPath());
+        logger.info("Environment: {}", environment);
+        logger.info("Mock Authentication: {}", mockAuthentication);
+        logger.info("MOCK_AUTHENTICATION env var: {}", System.getenv("MOCK_AUTHENTICATION"));
         
         try {
             String path = input.getPath();

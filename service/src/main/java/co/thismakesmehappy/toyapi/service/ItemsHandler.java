@@ -29,7 +29,20 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final DynamoDbClient dynamoDb;
 
     public ItemsHandler() {
-        this.dynamoDb = DynamoDbClient.builder().build();
+        String dynamoEndpoint = System.getenv("DYNAMODB_ENDPOINT");
+        if (dynamoEndpoint != null && !dynamoEndpoint.isEmpty()) {
+            // Local development with DynamoDB Local
+            this.dynamoDb = DynamoDbClient.builder()
+                    .endpointOverride(java.net.URI.create(dynamoEndpoint))
+                    .region(software.amazon.awssdk.regions.Region.US_EAST_1)
+                    .credentialsProvider(() -> software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create("local", "local"))
+                    .build();
+        } else {
+            // AWS environment
+            this.dynamoDb = DynamoDbClient.builder()
+                    .region(software.amazon.awssdk.regions.Region.US_EAST_1)
+                    .build();
+        }
     }
 
     @Override
@@ -310,7 +323,17 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
      * Extracts user ID from the request (from JWT token or mock authorization)
      */
     private String getUserIdFromRequest(APIGatewayProxyRequestEvent input) {
-        // TODO: Implement proper JWT token validation
+        // Use mock authentication for local development
+        String mockAuth = System.getenv("MOCK_AUTHENTICATION");
+        if ("true".equals(mockAuth)) {
+            String localUserId = System.getenv("LOCAL_TEST_USER_ID");
+            if (localUserId != null) {
+                return localUserId;
+            }
+            return "local-user-12345";
+        }
+        
+        // TODO: Implement proper JWT token validation for AWS environments
         // For now, extract from Authorization header or use mock user
         Map<String, String> headers = input.getHeaders();
         if (headers != null) {

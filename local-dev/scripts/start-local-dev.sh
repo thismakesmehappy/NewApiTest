@@ -120,4 +120,4 @@ trap cleanup EXIT
 
 # Change to local-dev directory and start SAM
 cd "$LOCAL_DEV_DIR"
-sam local start-api --template template.yaml --port ${SAM_LOCAL_PORT:-3000} --host 0.0.0.0 --env-vars .env.local
+sam local start-api --template template.yaml --port ${SAM_LOCAL_PORT:-3000} --host 0.0.0.0 --env-vars .env.local.json
