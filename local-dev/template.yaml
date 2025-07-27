@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: ToyApi Local Development Template
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: java17
+    Environment:
+      Variables:
+        ENVIRONMENT: local
+        REGION: us-east-1
+        TABLE_NAME: toyapi-local-items
+        USER_POOL_ID: local-user-pool
+        USER_POOL_CLIENT_ID: local-client-id
+
+Resources:
+  # API Gateway
+  ToyApiLocalGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: local
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: NONE
+        ApiKeyRequired: false
+
+  # Public Function
+  PublicFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../service/target/toyapi-service-1.0-SNAPSHOT.jar
+      Handler: co.thismakesmehappy.toyapi.service.PublicHandler
+      Description: "Handles public API endpoints (local development)"
+      Events:
+        PublicMessage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /public/message
+            Method: get
+
+  # Auth Function
+  AuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../service/target/toyapi-service-1.0-SNAPSHOT.jar
+      Handler: co.thismakesmehappy.toyapi.service.AuthHandler
+      Description: "Handles authentication endpoints (local development)"
+      Events:
+        AuthLogin:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /auth/login
+            Method: post
+        AuthMessage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /auth/message
+            Method: get
+        AuthUserMessage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /auth/user/{userId}/message
+            Method: get
+
+  # Items Function
+  ItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../service/target/toyapi-service-1.0-SNAPSHOT.jar
+      Handler: co.thismakesmehappy.toyapi.service.ItemsHandler
+      Description: "Handles items CRUD operations (local development)"
+      Events:
+        ItemsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /items
+            Method: get
+        ItemsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /items
+            Method: post
+        ItemsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /items/{id}
+            Method: get
+        ItemsUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /items/{id}
+            Method: put
+        ItemsDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /items/{id}
+            Method: delete
+
+Outputs:
+  ToyApiLocalUrl:
+    Description: "API Gateway endpoint URL for local development"
+    Value: !Sub "https://${ToyApiLocalGateway}.execute-api.${AWS::Region}.amazonaws.com/local/"
+    Export:
+      Name: ToyApiLocalUrl
+
+  ToyApiLocalGatewayId:
+    Description: "API Gateway ID for local development"
+    Value: !Ref ToyApiLocalGateway
+    Export:
+      Name: ToyApiLocalGatewayId

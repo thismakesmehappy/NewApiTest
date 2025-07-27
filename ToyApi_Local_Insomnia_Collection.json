@@ -1,0 +1,386 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-07-27T12:30:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_00_public_message",
+      "parentId": "fld_public",
+      "modified": 1690403700000,
+      "created": 1690403700000,
+      "url": "{{ _.base_url }}/public/message",
+      "name": "Get Public Message",
+      "description": "Returns a public message that anyone can access",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1690403700000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_01_auth_login",
+      "parentId": "fld_auth",
+      "modified": 1690403800000,
+      "created": 1690403800000,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login (Mock JWT for Local)",
+      "description": "Authenticate user and return mock JWT tokens for local development",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"localuser\",\n  \"password\": \"localpass\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690403800000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_02_auth_message",
+      "parentId": "fld_auth",
+      "modified": 1690403900000,
+      "created": 1690403900000,
+      "url": "{{ _.base_url }}/auth/message",
+      "name": "Get Authenticated Message",
+      "description": "Returns a message for authenticated users (local development)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690403900000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_03_auth_user_message",
+      "parentId": "fld_auth",
+      "modified": 1690404000000,
+      "created": 1690404000000,
+      "url": "{{ _.base_url }}/auth/user/{{ _.local_user_id }}/message",
+      "name": "Get User-Specific Message",
+      "description": "Returns a personalized message for a specific user (local development)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690404000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_04_items_list",
+      "parentId": "fld_items",
+      "modified": 1690404100000,
+      "created": 1690404100000,
+      "url": "{{ _.base_url }}/items",
+      "name": "List Items",
+      "description": "Get all items for the authenticated user (local development)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690404100000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_05_items_create",
+      "parentId": "fld_items",
+      "modified": 1690404200000,
+      "created": 1690404200000,
+      "url": "{{ _.base_url }}/items",
+      "name": "Create Item",
+      "description": "Create a new item for the authenticated user (local development)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"message\": \"My local development test item\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690404200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_06_items_get",
+      "parentId": "fld_items",
+      "modified": 1690404300000,
+      "created": 1690404300000,
+      "url": "{{ _.base_url }}/items/{{ _.item_id }}",
+      "name": "Get Item by ID",
+      "description": "Get a specific item by ID (local development)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690404300000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_07_items_update",
+      "parentId": "fld_items",
+      "modified": 1690404400000,
+      "created": 1690404400000,
+      "url": "{{ _.base_url }}/items/{{ _.item_id }}",
+      "name": "Update Item",
+      "description": "Update an existing item (local development)",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"message\": \"My updated local development item\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690404400000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_08_items_delete",
+      "parentId": "fld_items",
+      "modified": 1690404500000,
+      "created": 1690404500000,
+      "url": "{{ _.base_url }}/items/{{ _.item_id }}",
+      "name": "Delete Item",
+      "description": "Delete an existing item (local development)",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690404500000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_09_dynamodb_admin",
+      "parentId": "fld_dev_tools",
+      "modified": 1690404600000,
+      "created": 1690404600000,
+      "url": "http://localhost:8001",
+      "name": "DynamoDB Admin UI",
+      "description": "Open local DynamoDB admin interface",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1690404600000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_public",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690403600000,
+      "created": 1690403600000,
+      "name": "🌐 Public Endpoints",
+      "description": "Endpoints that don't require authentication",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1690403600000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690403650000,
+      "created": 1690403650000,
+      "name": "🔐 Authentication Endpoints",
+      "description": "Login and authenticated message endpoints (mock auth for local)",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1690403650000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_items",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690403700000,
+      "created": 1690403700000,
+      "name": "📦 Items Endpoints (Protected)",
+      "description": "CRUD operations for items - local development with mock auth",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1690403700000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_dev_tools",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690403750000,
+      "created": 1690403750000,
+      "name": "🔧 Development Tools",
+      "description": "Local development tools and utilities",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1690403750000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_toyapi_local",
+      "parentId": null,
+      "modified": 1690403500000,
+      "created": 1690403500000,
+      "name": "ToyApi - Local Development",
+      "description": "Complete ToyApi collection for LOCAL DEVELOPMENT with mock authentication and local DynamoDB",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_local",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690403550000,
+      "created": 1690403550000,
+      "name": "Local Development Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "dynamodb_endpoint": "http://localhost:8000",
+        "dynamodb_admin_url": "http://localhost:8001",
+        "table_name": "toyapi-local-items",
+        "environment_name": "local",
+        "local_user_id": "local-user-12345",
+        "mock_token": "local-dev-mock-token-12345",
+        "item_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "dynamodb_endpoint",
+          "dynamodb_admin_url",
+          "table_name",
+          "environment_name",
+          "local_user_id",
+          "mock_token",
+          "item_id"
+        ]
+      },
+      "color": "#00d924",
+      "isPrivate": false,
+      "metaSortKey": 1690403550000,
+      "_type": "environment"
+    }
+  ]
+}

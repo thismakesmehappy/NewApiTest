@@ -34,6 +34,7 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
     private final String environment = System.getenv("ENVIRONMENT");
     private final String userPoolId = System.getenv("USER_POOL_ID");
     private final String userPoolClientId = System.getenv("USER_POOL_CLIENT_ID");
+    private final boolean mockAuthentication = "true".equals(System.getenv("MOCK_AUTHENTICATION"));
     private final CognitoIdentityProviderClient cognitoClient;
 
     @Override
@@ -77,6 +78,19 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
             
             if (username == null || password == null) {
                 return createErrorResponse(400, "BAD_REQUEST", "Username and password are required", null);
+            }
+            
+            // Use mock authentication for local development
+            if (mockAuthentication) {
+                logger.info("Using mock authentication for local development");
+                Map<String, Object> response = new HashMap<>();
+                response.put("accessToken", "mock-access-token-" + username);
+                response.put("idToken", "local-dev-mock-token-12345");
+                response.put("refreshToken", "mock-refresh-token-" + username);
+                response.put("tokenType", "Bearer");
+                response.put("expiresIn", 3600);
+                
+                return createSuccessResponse(200, response);
             }
             
             // Authenticate with Cognito
@@ -181,7 +195,16 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
      * Extracts user ID from the request (from JWT token or mock authorization)
      */
     private String getUserIdFromRequest(APIGatewayProxyRequestEvent input) {
-        // TODO: Implement proper JWT token validation
+        // Use mock authentication for local development
+        if (mockAuthentication) {
+            String localUserId = System.getenv("LOCAL_TEST_USER_ID");
+            if (localUserId != null) {
+                return localUserId;
+            }
+            return "local-user-12345";
+        }
+        
+        // TODO: Implement proper JWT token validation for AWS environments
         // For now, extract from Authorization header or use mock user
         Map<String, String> headers = input.getHeaders();
         if (headers != null) {
