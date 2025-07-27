@@ -1,0 +1,367 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-07-27T15:22:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_public_message",
+      "parentId": "fld_toyapi_local",
+      "modified": 1690454520000,
+      "created": 1690454520000,
+      "url": "{{ _.base_url }}/public/message",
+      "name": "Public Message",
+      "description": "Test the public endpoint - no authentication required",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454520000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_login",
+      "parentId": "fld_toyapi_local",
+      "modified": 1690454525000,
+      "created": 1690454525000,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login (Mock Auth)",
+      "description": "Test mock authentication - any username/password works in local mode",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"localuser\",\n  \"password\": \"localpass\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454525000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_message",
+      "parentId": "fld_toyapi_local",
+      "modified": 1690454530000,
+      "created": 1690454530000,
+      "url": "{{ _.base_url }}/auth/message",
+      "name": "Authenticated Message",
+      "description": "Test protected endpoint with mock Bearer token",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454530000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_user_message",
+      "parentId": "fld_toyapi_local",
+      "modified": 1690454535000,
+      "created": 1690454535000,
+      "url": "{{ _.base_url }}/auth/user/{{ _.user_id }}/message",
+      "name": "User-Specific Message",
+      "description": "Test user-specific endpoint with mock authentication",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454535000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_items_list",
+      "parentId": "fld_items_crud",
+      "modified": 1690454540000,
+      "created": 1690454540000,
+      "url": "{{ _.base_url }}/items",
+      "name": "List Items",
+      "description": "Get all items for the authenticated user",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454540000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_items_create",
+      "parentId": "fld_items_crud",
+      "modified": 1690454545000,
+      "created": 1690454545000,
+      "url": "{{ _.base_url }}/items",
+      "name": "Create Item",
+      "description": "Create a new item for the authenticated user",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"message\": \"This is a test item created from Insomnia!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454545000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_items_get",
+      "parentId": "fld_items_crud",
+      "modified": 1690454550000,
+      "created": 1690454550000,
+      "url": "{{ _.base_url }}/items/{{ _.sample_item_id }}",
+      "name": "Get Specific Item",
+      "description": "Get a specific item by ID (update sample_item_id in environment)",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454550000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_items_update",
+      "parentId": "fld_items_crud",
+      "modified": 1690454555000,
+      "created": 1690454555000,
+      "url": "{{ _.base_url }}/items/{{ _.sample_item_id }}",
+      "name": "Update Item",
+      "description": "Update an existing item (update sample_item_id in environment)",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"message\": \"This item has been updated via Insomnia!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454555000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_items_delete",
+      "parentId": "fld_items_crud",
+      "modified": 1690454560000,
+      "created": 1690454560000,
+      "url": "{{ _.base_url }}/items/{{ _.sample_item_id }}",
+      "name": "Delete Item",
+      "description": "Delete an item (update sample_item_id in environment)",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.mock_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690454560000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_toyapi_local",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690454500000,
+      "created": 1690454500000,
+      "name": "Authentication & Messages",
+      "description": "Authentication and message endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1690454500000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_items_crud",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690454505000,
+      "created": 1690454505000,
+      "name": "Items CRUD",
+      "description": "Full CRUD operations for items",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1690454505000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_toyapi_local",
+      "parentId": null,
+      "modified": 1690454490000,
+      "created": 1690454490000,
+      "name": "ToyApi Local Development",
+      "description": "ToyApi endpoints for local development with SAM Local",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_local_dev",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690454495000,
+      "created": 1690454495000,
+      "name": "Local Development Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "mock_token": "local-dev-mock-token-12345",
+        "user_id": "local-user-12345",
+        "sample_item_id": "item-12345-example",
+        "environment": "local"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "mock_token", 
+          "user_id",
+          "sample_item_id",
+          "environment"
+        ]
+      },
+      "color": "#00ff00",
+      "isPrivate": false,
+      "metaSortKey": 1690454495000,
+      "_type": "environment"
+    },
+    {
+      "_id": "jar_cookies",
+      "parentId": "wrk_toyapi_local",
+      "modified": 1690454490000,
+      "created": 1690454490000,
+      "name": "Default Jar",
+      "cookies": [],
+      "_type": "cookie_jar"
+    }
+  ]
+}

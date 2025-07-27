@@ -134,24 +134,63 @@ Local development uses simplified authentication:
 
 ## 🧪 Testing Strategies
 
+### Quick Test Suite
+```bash
+# Start local environment
+./scripts/start-local-dev.sh
+
+# Run all endpoint tests (in another terminal)
+./scripts/test-local-api.sh
+```
+
+### Manual Testing with cURL
+```bash
+# 1. Test public endpoint
+curl http://localhost:3000/public/message
+
+# 2. Test login (mock authentication)
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"localuser","password":"localpass"}'
+
+# 3. Test authenticated endpoints
+curl -H "Authorization: Bearer local-dev-mock-token-12345" \
+  http://localhost:3000/auth/message
+
+curl -H "Authorization: Bearer local-dev-mock-token-12345" \
+  http://localhost:3000/auth/user/local-user-12345/message
+
+# 4. Test items CRUD
+# List items (initially empty)
+curl -H "Authorization: Bearer local-dev-mock-token-12345" \
+  http://localhost:3000/items
+
+# Create an item
+curl -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer local-dev-mock-token-12345" \
+  -d '{"message":"My test item"}'
+
+# List items again (should show 1 item)
+curl -H "Authorization: Bearer local-dev-mock-token-12345" \
+  http://localhost:3000/items
+```
+
 ### Unit Testing
 ```bash
 cd service
 mvn test
 ```
 
-### Integration Testing
-```bash
-# Start local environment
-./scripts/start-local-dev.sh
-
-# Run integration tests (in another terminal)
-./scripts/test-local-api.sh
-
-# Or test specific endpoints
-curl http://localhost:3000/public/message
-curl -H "Authorization: Bearer mock-token" http://localhost:3000/items
-```
+### Integration Testing with Insomnia
+1. Import `ToyApi_Local_Insomnia_Collection.json`
+2. Select "Local Development Environment"
+3. Collection provides complete coverage:
+   - **Authentication & Messages folder**: Public, login, auth endpoints
+   - **Items CRUD folder**: Complete item management workflow
+4. All requests pre-configured with mock authentication
+5. Environment variables automatically set for local development
+6. Perfect for interactive testing and API exploration
 
 ### Load Testing (Optional)
 ```bash

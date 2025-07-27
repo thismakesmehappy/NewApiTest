@@ -55,8 +55,12 @@ The local environment uses:
 
 ### Using Insomnia
 1. Import `ToyApi_Local_Insomnia_Collection.json`
-2. Use the "Local Development Environment" 
-3. No authentication needed - uses mock tokens
+2. Select the "Local Development Environment"
+3. Test all endpoints with pre-configured mock authentication
+4. Collection includes:
+   - **Authentication & Messages**: Public, login, auth message, user message
+   - **Items CRUD**: List, create, get, update, delete items
+   - All requests use mock tokens automatically
 
 ### Using cURL
 
