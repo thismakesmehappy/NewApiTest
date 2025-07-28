@@ -88,7 +88,7 @@ jobs:
           
           const status = '${{ job.status }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
           const body = `🤖 Pull Request Validation
-
+          
 **Status**: ${status}
 
 **Checks completed**:
