@@ -1,0 +1,34 @@
+{
+  "version": "33.0.0",
+  "files": {
+    "3390cee5d79bf677a684df3116a15a8e17ef18b98c1aecf874ca1585f697d63f": {
+      "source": {
+        "path": "asset.3390cee5d79bf677a684df3116a15a8e17ef18b98c1aecf874ca1585f697d63f.jar",
+        "packaging": "file"
+      },
+      "destinations": {
+        "375004071203-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-375004071203-us-east-1",
+          "objectKey": "3390cee5d79bf677a684df3116a15a8e17ef18b98c1aecf874ca1585f697d63f.jar",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::375004071203:role/cdk-hnb659fds-file-publishing-role-375004071203-us-east-1"
+        }
+      }
+    },
+    "78d42eabe4b464a8945f59f5cb10135bf6776fbf850dbcf29c8b7be14bdf9eed": {
+      "source": {
+        "path": "ToyApiStack-stage.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "375004071203-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-375004071203-us-east-1",
+          "objectKey": "78d42eabe4b464a8945f59f5cb10135bf6776fbf850dbcf29c8b7be14bdf9eed.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::375004071203:role/cdk-hnb659fds-file-publishing-role-375004071203-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

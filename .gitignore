@@ -55,3 +55,7 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+# Local development logs and cache
+local-dev/*.log
+local-dev/dynamodb-data/
+service/*.log

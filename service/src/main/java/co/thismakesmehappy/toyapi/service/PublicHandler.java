@@ -51,7 +51,7 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
     private APIGatewayProxyResponseEvent handleGetPublicMessage(APIGatewayProxyRequestEvent input, Context context) {
         try {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Hello from ToyApi public endpoint! Environment: " + environment);
+            response.put("message", "Hello from ToyApi public endpoint2! Environment: " + environment);
             response.put("timestamp", Instant.now().toString());
             
             logger.info("Returning public message for environment: {}", environment);

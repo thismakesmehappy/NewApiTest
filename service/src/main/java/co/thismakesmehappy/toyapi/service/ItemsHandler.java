@@ -27,6 +27,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final String environment = System.getenv("ENVIRONMENT");
     private final String tableName = System.getenv("TABLE_NAME");
     private final DynamoDbClient dynamoDb;
+    private final boolean useLocalMock = true; // Test warm containers with mock
 
     public ItemsHandler() {
         String dynamoEndpoint = System.getenv("DYNAMODB_ENDPOINT");
@@ -81,7 +82,23 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         try {
             String userId = getUserIdFromRequest(input);
             
-            // Query items for this user
+            if (useLocalMock) {
+                // Use mock database for local development
+                List<MockDatabase.Item> mockItems = MockDatabase.getUserItems(userId);
+                List<Map<String, Object>> items = new ArrayList<>();
+                for (MockDatabase.Item item : mockItems) {
+                    items.add(item.toMap());
+                }
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("items", items);
+                response.put("count", items.size());
+                
+                logger.info("Returning {} items for user: {} (using mock database)", items.size(), userId);
+                return createSuccessResponse(200, response);
+            }
+            
+            // Query items for this user using DynamoDB
             Map<String, AttributeValue> keyCondition = new HashMap<>();
             keyCondition.put(":userId", AttributeValue.builder().s(userId).build());
             
@@ -137,6 +154,19 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 return createErrorResponse(400, "BAD_REQUEST", "Message is required", null);
             }
             
+            if (useLocalMock) {
+                // Use mock database for local development
+                String itemId = MockDatabase.createItem(userId, message.trim());
+                Optional<MockDatabase.Item> createdItem = MockDatabase.getItem(itemId, userId);
+                
+                if (createdItem.isPresent()) {
+                    logger.info("Created item {} for user: {} (using mock database)", itemId, userId);
+                    return createSuccessResponse(201, createdItem.get().toMap());
+                } else {
+                    return createErrorResponse(500, "INTERNAL_ERROR", "Failed to create item in mock database", null);
+                }
+            }
+            
             String itemId = "item-" + UUID.randomUUID().toString();
             String now = Instant.now().toString();
             
@@ -179,6 +209,17 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         try {
             String userId = getUserIdFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
+            
+            if (useLocalMock) {
+                // Use mock database for local development
+                Optional<MockDatabase.Item> item = MockDatabase.getItem(itemId, userId);
+                if (item.isPresent()) {
+                    logger.info("Retrieved item {} for user: {} (using mock database)", itemId, userId);
+                    return createSuccessResponse(200, item.get().toMap());
+                } else {
+                    return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                }
+            }
             
             // Get item from DynamoDB
             Map<String, AttributeValue> key = new HashMap<>();
@@ -233,6 +274,19 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 return createErrorResponse(400, "BAD_REQUEST", "Message is required", null);
             }
             
+            if (useLocalMock) {
+                // Use mock database for local development
+                boolean updated = MockDatabase.updateItem(itemId, userId, message.trim());
+                if (updated) {
+                    Optional<MockDatabase.Item> updatedItem = MockDatabase.getItem(itemId, userId);
+                    if (updatedItem.isPresent()) {
+                        logger.info("Updated item {} for user: {} (using mock database)", itemId, userId);
+                        return createSuccessResponse(200, updatedItem.get().toMap());
+                    }
+                }
+                return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+            }
+            
             String now = Instant.now().toString();
             
             // Update item in DynamoDB
@@ -284,6 +338,17 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         try {
             String userId = getUserIdFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
+            
+            if (useLocalMock) {
+                // Use mock database for local development
+                boolean deleted = MockDatabase.deleteItem(itemId, userId);
+                if (deleted) {
+                    logger.info("Deleted item {} for user: {} (using mock database)", itemId, userId);
+                    return createSuccessResponse(204, null);
+                } else {
+                    return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                }
+            }
             
             // Delete item from DynamoDB
             Map<String, AttributeValue> key = new HashMap<>();
