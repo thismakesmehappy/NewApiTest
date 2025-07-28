@@ -160,18 +160,10 @@
             </plugins>
         </pluginManagement>
         
+        <!-- Plugins with automatic execution removed - run via CI/CD pipeline separately -->
         <plugins>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- OWASP dependency check removed from automatic execution -->
+            <!-- Run via: mvn org.owasp:dependency-check-maven:check -->
         </plugins>
     </build>
 </project>
