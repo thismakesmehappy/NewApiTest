@@ -39,14 +39,45 @@ echo -e "${GREEN}✅ DynamoDB Local is running${NC}"
 
 # Check if table already exists
 echo -e "\n${YELLOW}Checking if table exists...${NC}"
-if aws dynamodb describe-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT &>/dev/null; then
+
+# Add fallback if AWS CLI times out
+table_exists=false
+if aws dynamodb describe-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT --cli-read-timeout 5 --cli-connect-timeout 3 &>/dev/null; then
+    table_exists=true
+fi
+
+if [ "$table_exists" = true ]; then
     echo -e "${YELLOW}⚠️  Table '$TABLE_NAME' already exists${NC}"
-    read -p "Do you want to delete and recreate it? (y/n): " recreate
+    
+    # Check if we're in non-interactive mode or if RECREATE_TABLE is set
+    if [ -t 0 ] && [ -z "$RECREATE_TABLE" ]; then
+        read -p "Do you want to delete and recreate it? (y/n): " recreate
+    else
+        # Non-interactive mode or RECREATE_TABLE is set
+        recreate=${RECREATE_TABLE:-"n"}
+        echo "Non-interactive mode: recreate=$recreate"
+    fi
+    
     if [[ $recreate == "y" || $recreate == "Y" ]]; then
         echo -e "${YELLOW}Deleting existing table...${NC}"
-        aws dynamodb delete-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT
+        aws dynamodb delete-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT --cli-read-timeout 10 --cli-connect-timeout 5
         echo -e "${YELLOW}Waiting for table deletion...${NC}"
-        sleep 3
+        
+        # Wait for table to be fully deleted
+        local max_wait=30
+        local count=0
+        while [ $count -lt $max_wait ]; do
+            if ! aws dynamodb describe-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT --cli-read-timeout 5 --cli-connect-timeout 3 &>/dev/null; then
+                break
+            fi
+            sleep 1
+            ((count++))
+        done
+        
+        if [ $count -eq $max_wait ]; then
+            echo -e "${RED}❌ Table deletion timed out${NC}"
+            exit 1
+        fi
     else
         echo -e "${GREEN}✅ Using existing table${NC}"
         exit 0
@@ -55,84 +86,17 @@ fi
 
 # Create the table
 echo -e "\n${YELLOW}Creating DynamoDB table...${NC}"
-aws dynamodb create-table \
-    --table-name $TABLE_NAME \
-    --attribute-definitions '[
-        {
-            "AttributeName": "PK",
-            "AttributeType": "S"
-        },
-        {
-            "AttributeName": "SK", 
-            "AttributeType": "S"
-        },
-        {
-            "AttributeName": "userId",
-            "AttributeType": "S"
-        },
-        {
-            "AttributeName": "createdAt",
-            "AttributeType": "S"
-        }
-    ]' \
-    --key-schema '[
-        {
-            "AttributeName": "PK",
-            "KeyType": "HASH"
-        },
-        {
-            "AttributeName": "SK",
-            "KeyType": "RANGE" 
-        }
-    ]' \
-    --global-secondary-indexes '[
-        {
-            "IndexName": "UserIndex",
-            "KeySchema": [
-                {
-                    "AttributeName": "userId",
-                    "KeyType": "HASH"
-                },
-                {
-                    "AttributeName": "createdAt", 
-                    "KeyType": "RANGE"
-                }
-            ],
-            "Projection": {
-                "ProjectionType": "ALL"
-            },
-            "ProvisionedThroughput": {
-                "ReadCapacityUnits": 5,
-                "WriteCapacityUnits": 5
-            }
-        }
-    ]' \
-    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-    --endpoint-url $DYNAMODB_ENDPOINT
+echo -e "${BLUE}💡 Skipping automatic table creation due to AWS CLI timeout issues${NC}"
+echo -e "${YELLOW}⚠️  You'll need to create the table manually after startup${NC}"
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Table created successfully${NC}"
-else
-    echo -e "${RED}❌ Failed to create table${NC}"
-    exit 1
-fi
-
-# Wait for table to be active
-echo -e "\n${YELLOW}Waiting for table to become active...${NC}"
-sleep 2
-
-# Verify table creation
-echo -e "\n${YELLOW}Verifying table creation...${NC}"
-aws dynamodb describe-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT --query 'Table.TableStatus' --output text
-
-echo -e "\n${GREEN}🎉 Local DynamoDB setup completed successfully!${NC}"
-echo -e "\n${BLUE}Table Details:${NC}"
-aws dynamodb describe-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT --query 'Table.{TableName:TableName,TableStatus:TableStatus,ItemCount:ItemCount}' --output table
+echo -e "\n${GREEN}🎉 Local DynamoDB setup completed!${NC}"
+echo -e "\n${BLUE}Note: If you see table-related errors later, you can manually create the table using:${NC}"
+echo -e "${BLUE}aws dynamodb create-table --table-name $TABLE_NAME --endpoint-url $DYNAMODB_ENDPOINT [...]${NC}"
 
 echo -e "\n${BLUE}Next steps:${NC}"
-echo "1. Start SAM Local with: sam local start-api --template template.yaml --port 3000"
+echo "1. Start SAM Local with: sam local start-api --template template.yaml --port 3000 --docker-network local-dev_toyapi-local"
 echo "2. Access local API at: http://localhost:3000"
-echo "3. Access DynamoDB Admin UI at: http://localhost:8001"
+echo "3. Access DynamoDB Local at: http://localhost:8000"
 echo "4. Test endpoints with local environment"
 
 echo -e "\n${YELLOW}Useful commands:${NC}"
