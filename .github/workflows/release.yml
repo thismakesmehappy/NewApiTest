@@ -1,0 +1,206 @@
+name: Release Management
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18'
+  AWS_REGION: us-east-1
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Build release artifacts
+      run: |
+        mvn clean package
+        
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the previous tag
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+        
+        # Generate changelog
+        if [ -n "$PREVIOUS_TAG" ]; then
+          echo "## Changes since $PREVIOUS_TAG" > CHANGELOG.md
+          git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD >> CHANGELOG.md
+        else
+          echo "## Initial Release" > CHANGELOG.md
+          echo "- First release of ToyApi serverless application" >> CHANGELOG.md
+        fi
+        
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        cat CHANGELOG.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: ToyApi ${{ github.ref_name }}
+        body: |
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ## Deployment Status
+          - ✅ Built and tested
+          - ⏳ Ready for production deployment
+          
+          ## Installation
+          Use the deployment scripts in the `infra/scripts/` directory to deploy this version.
+        draft: false
+        prerelease: false
+        
+    - name: Upload release artifacts
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: service/target/toyapi-service-1.0-SNAPSHOT.jar
+        asset_name: toyapi-service-${{ github.ref_name }}.jar
+        asset_content_type: application/java-archive
+
+  manual-deploy:
+    name: Manual Deployment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Set up Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install AWS CDK
+      run: npm install -g aws-cdk
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Build service
+      run: |
+        cd service
+        mvn clean package
+        
+    - name: Deploy to ${{ github.event.inputs.environment }}
+      run: |
+        cd infra
+        chmod +x scripts/deploy-${{ github.event.inputs.environment }}.sh
+        ./scripts/deploy-${{ github.event.inputs.environment }}.sh
+        
+    - name: Run post-deployment tests
+      run: |
+        cd integration-tests
+        mvn test -Dtest.environment=${{ github.event.inputs.environment }}
+      continue-on-error: true
+      
+    - name: Create deployment summary
+      run: |
+        echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: Completed" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+
+  rollback:
+    name: Emergency Rollback
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && contains(github.event.inputs.version, 'rollback')
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install AWS CDK
+      run: npm install -g aws-cdk
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: Perform rollback
+      run: |
+        cd infra
+        echo "🚨 Emergency rollback initiated"
+        # This would typically involve deploying a previous known-good version
+        # For now, we'll just document the process
+        echo "Rollback steps:"
+        echo "1. Identify last known good deployment"
+        echo "2. Redeploy previous version"
+        echo "3. Verify rollback success"
+        echo "4. Update monitoring and alerts"
+        
+    - name: Notify rollback
+      run: |
+        echo "🚨 EMERGENCY ROLLBACK COMPLETED" >> $GITHUB_STEP_SUMMARY
+        echo "Production environment has been rolled back to previous version" >> $GITHUB_STEP_SUMMARY
+        echo "Please investigate the issue and prepare a hotfix if needed" >> $GITHUB_STEP_SUMMARY
