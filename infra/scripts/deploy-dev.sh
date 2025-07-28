@@ -42,18 +42,21 @@ fi
 
 echo -e "${GREEN}✅ CDK CLI found${NC}"
 
-# Build the service module first
-echo -e "\n${YELLOW}Building service module...${NC}"
-cd ../service
+# Build all modules from root (ensures correct dependency order)
+echo -e "\n${YELLOW}Building all modules...${NC}"
+# Get the project root directory (parent of infra)
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+echo -e "${BLUE}Project root: ${PROJECT_ROOT}${NC}"
+cd "${PROJECT_ROOT}"
 mvn clean package -q
 if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Service build failed${NC}"
+    echo -e "${RED}❌ Build failed${NC}"
     exit 1
 fi
-echo -e "${GREEN}✅ Service built successfully${NC}"
+echo -e "${GREEN}✅ All modules built successfully${NC}"
 
 # Return to infra directory
-cd ../infra
+cd "${PROJECT_ROOT}/infra"
 
 # Bootstrap CDK if needed
 echo -e "\n${YELLOW}Checking CDK bootstrap...${NC}"
