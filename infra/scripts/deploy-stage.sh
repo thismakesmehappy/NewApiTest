@@ -62,7 +62,7 @@ echo -e "\n${YELLOW}Building all modules...${NC}"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 echo -e "${BLUE}Project root: ${PROJECT_ROOT}${NC}"
 cd "${PROJECT_ROOT}"
-mvn clean package -q
+mvn clean install -q -DskipTests
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Build failed${NC}"
     exit 1

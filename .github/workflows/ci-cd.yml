@@ -38,8 +38,8 @@ jobs:
       
     - name: Build service
       run: |
-        # Build from root to ensure all modules are built in correct order
-        mvn clean package
+        # Build and install all modules to local repository for integration tests
+        mvn clean install -DskipTests
         
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -136,8 +136,8 @@ jobs:
         
     - name: Build service
       run: |
-        # Build from root to ensure all modules are built in correct order
-        mvn clean package
+        # Build and install all modules to local repository for integration tests
+        mvn clean install -DskipTests
         
     - name: Deploy to development
       run: |
@@ -201,8 +201,8 @@ jobs:
         
     - name: Build service
       run: |
-        # Build from root to ensure all modules are built in correct order
-        mvn clean package
+        # Build and install all modules to local repository for integration tests
+        mvn clean install -DskipTests
         
     - name: Deploy to staging
       run: |
@@ -265,8 +265,8 @@ jobs:
         
     - name: Build service
       run: |
-        # Build from root to ensure all modules are built in correct order
-        mvn clean package
+        # Build and install all modules to local repository for integration tests
+        mvn clean install -DskipTests
         
     - name: Deploy to production
       run: |
