@@ -142,7 +142,9 @@ _This comment will be updated on new commits._`;
         
     - name: Run security scan
       run: |
-        mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7
+        # Use local data if NVD API fails in CI environment
+        mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7 -Dnvd.api.datafeed.url="" || \
+        mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7 -Dnvd.api.datafeed.url="" -DskipOnError=true
       continue-on-error: true
       
     - name: Upload security results

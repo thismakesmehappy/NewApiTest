@@ -147,6 +147,14 @@
                         <suppressionFiles>
                             <suppressionFile>owasp-suppressions.xml</suppressionFile>
                         </suppressionFiles>
+                        <!-- CI/CD optimizations -->
+                        <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+                        <nvdApiDelay>1000</nvdApiDelay>
+                        <nvdMaxRetryCount>3</nvdMaxRetryCount>
+                        <nvdValidForHours>24</nvdValidForHours>
+                        <!-- Fallback to local data if NVD API fails -->
+                        <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                        <skipOnError>false</skipOnError>
                     </configuration>
                 </plugin>
             </plugins>

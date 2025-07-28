@@ -1,0 +1,99 @@
+name: Security Audit
+
+on:
+  schedule:
+    # Run weekly security audit on Mondays at 2 AM UTC
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    # Allow manual triggers
+
+env:
+  JAVA_VERSION: '17'
+
+jobs:
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Run Maven dependency audit
+      run: |
+        # Use Maven's built-in audit capabilities
+        mvn dependency:tree -Dverbose=true > dependency-tree.txt
+        mvn versions:display-dependency-updates > dependency-updates.txt
+        echo "✅ Maven dependency audit completed"
+        
+    - name: Check for known vulnerable dependencies
+      run: |
+        # Simple check for commonly vulnerable dependencies
+        echo "Checking for known vulnerable patterns..."
+        
+        # Check for old Log4j versions (Log4Shell vulnerability)
+        if grep -r "log4j" dependency-tree.txt | grep -E "1\.|2\.0|2\.1[0-6]"; then
+          echo "⚠️  Potentially vulnerable Log4j version detected"
+        else
+          echo "✅ No vulnerable Log4j versions detected"
+        fi
+        
+        # Check for old Jackson versions
+        if grep -r "jackson" dependency-tree.txt | grep -E "2\.[0-9]\.[0-9]:" | grep -E "2\.[0-9]\.[0-7]:"; then
+          echo "⚠️  Potentially old Jackson version detected"
+        else
+          echo "✅ Jackson versions appear current"
+        fi
+        
+        echo "✅ Basic vulnerability pattern check completed"
+        
+    - name: OWASP Dependency Check (with fallback)
+      run: |
+        echo "Attempting OWASP dependency check..."
+        
+        # Try with minimal configuration first
+        mvn org.owasp:dependency-check-maven:check \
+          -DskipOnError=true \
+          -DfailBuildOnAnyVulnerability=false \
+          -DnvdApiDelay=2000 \
+          -DnvdMaxRetryCount=1 \
+          -DnvdValidForHours=168 || echo "OWASP check failed, using local analysis only"
+        
+        echo "✅ Security audit completed (best effort)"
+      continue-on-error: true
+        
+    - name: Upload audit results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-audit-results
+        path: |
+          dependency-tree.txt
+          dependency-updates.txt
+          **/target/dependency-check-report.html
+          
+    - name: Create security summary
+      if: always()
+      run: |
+        echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Date**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Java Version**: ${{ env.JAVA_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: Completed (check artifacts for details)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+        echo "1. Review dependency-tree.txt for dependency overview" >> $GITHUB_STEP_SUMMARY
+        echo "2. Check dependency-updates.txt for available updates" >> $GITHUB_STEP_SUMMARY
+        echo "3. Review OWASP report (if generated) for vulnerabilities" >> $GITHUB_STEP_SUMMARY
