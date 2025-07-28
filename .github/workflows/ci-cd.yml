@@ -1,10 +1,9 @@
 name: ToyApi CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+    types: [ opened, synchronize, reopened, closed ]
 
 env:
   JAVA_VERSION: '17'
@@ -99,7 +98,7 @@ jobs:
     name: Deploy to Development
     runs-on: ubuntu-latest
     needs: [test, security-scan]
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && contains(github.event.pull_request.labels.*.name, 'deploy-dev')
     environment: development
     
     steps:
@@ -164,7 +163,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [test, security-scan]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     environment: staging
     
     steps:
@@ -228,7 +227,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: deploy-staging
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && contains(github.event.pull_request.labels.*.name, 'deploy-prod')
     environment: production
     
     steps:

@@ -71,52 +71,25 @@ jobs:
           python3 -c "import yaml; yaml.safe_load(open('model/openapi/api-spec.yaml'))" && echo "✅ OpenAPI spec is valid YAML"
         fi
         
-    - name: Comment on PR
-      uses: actions/github-script@v6
+    - name: Validation Summary
       if: always()
-      with:
-        script: |
-          const { data: comments } = await github.rest.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-          });
-          
-          const botComment = comments.find(comment => 
-            comment.user.type === 'Bot' && comment.body.includes('🤖 Pull Request Validation')
-          );
-          
-          const status = '${{ job.status }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
-          const body = `🤖 Pull Request Validation
-          
-**Status**: ${status}
-
-**Checks completed**:
-- ✅ Unit tests
-- ✅ Build validation  
-- ✅ CDK synthesis check
-- ✅ Secret detection
-- ✅ OpenAPI spec validation
-
-${status === '❌ FAILED' ? '**Action required**: Please fix the failing checks before merging.' : '**Ready for review**: All automated checks passed.'}
-
-_This comment will be updated on new commits._`;
-
-          if (botComment) {
-            github.rest.issues.updateComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: botComment.id,
-              body: body
-            });
-          } else {
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            });
-          }
+      run: |
+        status="${{ job.status }}"
+        if [ "$status" = "success" ]; then
+          echo "✅ Pull Request Validation PASSED"
+          echo "All automated checks completed successfully:"
+          echo "- ✅ Unit tests"
+          echo "- ✅ Build validation"
+          echo "- ✅ CDK synthesis check"
+          echo "- ✅ Secret detection"
+          echo "- ✅ OpenAPI spec validation"
+          echo ""
+          echo "Ready for review and merge."
+        else
+          echo "❌ Pull Request Validation FAILED"
+          echo "Action required: Please fix the failing checks before merging."
+          exit 1
+        fi
 
   security-check:
     name: Security Analysis

@@ -1,0 +1,89 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - stage
+        - prod
+      skip_tests:
+        description: 'Skip integration tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18'
+  AWS_REGION: us-east-1
+
+jobs:
+  manual-deploy:
+    name: Deploy to ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment == 'dev' && 'development' || github.event.inputs.environment == 'stage' && 'staging' || 'production' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: Set up Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install AWS CDK
+      run: npm install -g aws-cdk
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Build service
+      run: |
+        # Build and install all modules to local repository for integration tests
+        mvn clean install -DskipTests
+        
+    - name: Deploy to ${{ github.event.inputs.environment }}
+      run: |
+        cd infra
+        chmod +x scripts/deploy-${{ github.event.inputs.environment }}.sh
+        ./scripts/deploy-${{ github.event.inputs.environment }}.sh
+        
+    - name: Run integration tests
+      if: github.event.inputs.skip_tests != 'true'
+      run: |
+        # Run integration tests from project root to ensure dependencies are available
+        mvn test -pl integration-tests -Dtest.environment=${{ github.event.inputs.environment }}
+      continue-on-error: ${{ github.event.inputs.environment == 'dev' }}
+        
+    - name: Upload deployment logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: manual-${{ github.event.inputs.environment }}-deployment-logs
+        path: |
+          infra/cdk.out/
+          integration-tests/target/
