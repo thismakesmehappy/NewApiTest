@@ -21,14 +21,18 @@ STACK_NAME="ToyApiStack-${ENVIRONMENT}"
 echo -e "${BLUE}Environment: ${ENVIRONMENT}${NC}"
 echo -e "${BLUE}Stack Name: ${STACK_NAME}${NC}"
 
-# Staging deployment confirmation
-echo -e "\n${YELLOW}⚠️  You are about to deploy to the STAGING environment!${NC}"
-echo -e "${YELLOW}This will create production-like resources that may incur costs.${NC}"
-read -p "Are you sure you want to continue? (yes/no): " confirmation
+# Staging deployment confirmation (skip in CI/CD)
+if [[ "${CI}" != "true" ]]; then
+    echo -e "\n${YELLOW}⚠️  You are about to deploy to the STAGING environment!${NC}"
+    echo -e "${YELLOW}This will create production-like resources that may incur costs.${NC}"
+    read -p "Are you sure you want to continue? (yes/no): " confirmation
 
-if [[ $confirmation != "yes" ]]; then
-    echo -e "${YELLOW}Deployment cancelled.${NC}"
-    exit 0
+    if [[ $confirmation != "yes" ]]; then
+        echo -e "${YELLOW}Deployment cancelled.${NC}"
+        exit 0
+    fi
+else
+    echo -e "\n${BLUE}Running in CI/CD mode - proceeding with staging deployment${NC}"
 fi
 
 # Check prerequisites
@@ -52,18 +56,18 @@ fi
 
 echo -e "${GREEN}✅ CDK CLI found${NC}"
 
-# Build the service module first
-echo -e "\n${YELLOW}Building service module...${NC}"
-cd ../service
+# Build all modules from root (ensures correct dependency order)
+echo -e "\n${YELLOW}Building all modules...${NC}"
+cd ../..
 mvn clean package -q
 if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Service build failed${NC}"
+    echo -e "${RED}❌ Build failed${NC}"
     exit 1
 fi
-echo -e "${GREEN}✅ Service built successfully${NC}"
+echo -e "${GREEN}✅ All modules built successfully${NC}"
 
 # Return to infra directory
-cd ../infra
+cd infra
 
 # Bootstrap CDK if needed
 echo -e "\n${YELLOW}Checking CDK bootstrap...${NC}"
@@ -81,13 +85,17 @@ echo -e "${GREEN}✅ CDK bootstrap complete${NC}"
 echo -e "\n${YELLOW}Showing infrastructure changes...${NC}"
 cdk diff ${STACK_NAME} --context environment=${ENVIRONMENT}
 
-# Confirm deployment
-echo -e "\n${YELLOW}Ready to deploy to staging environment.${NC}"
-read -p "Proceed with deployment? (yes/no): " final_confirmation
+# Confirm deployment (skip in CI/CD)
+if [[ "${CI}" != "true" ]]; then
+    echo -e "\n${YELLOW}Ready to deploy to staging environment.${NC}"
+    read -p "Proceed with deployment? (yes/no): " final_confirmation
 
-if [[ $final_confirmation != "yes" ]]; then
-    echo -e "${YELLOW}Deployment cancelled.${NC}"
-    exit 0
+    if [[ $final_confirmation != "yes" ]]; then
+        echo -e "${YELLOW}Deployment cancelled.${NC}"
+        exit 0
+    fi
+else
+    echo -e "\n${BLUE}CI/CD mode - proceeding with deployment${NC}"
 fi
 
 # Deploy the stack

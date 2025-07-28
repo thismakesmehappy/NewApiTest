@@ -21,34 +21,39 @@ STACK_NAME="ToyApiStack-${ENVIRONMENT}"
 echo -e "${BLUE}Environment: ${ENVIRONMENT}${NC}"
 echo -e "${BLUE}Stack Name: ${STACK_NAME}${NC}"
 
-# Production deployment warnings
-echo -e "\n${RED}🚨 PRODUCTION DEPLOYMENT WARNING! 🚨${NC}"
-echo -e "${RED}You are about to deploy to the LIVE PRODUCTION environment!${NC}"
-echo -e "${YELLOW}This will create production resources with RETAIN policies.${NC}"
-echo -e "${YELLOW}Resources will NOT be automatically deleted if the stack is destroyed.${NC}"
-echo ""
-echo -e "${YELLOW}Pre-deployment checklist:${NC}"
-echo "1. ✅ Code has been tested in dev and staging environments"
-echo "2. ✅ Integration tests pass successfully"  
-echo "3. ✅ Performance testing completed"
-echo "4. ✅ Security review completed"
-echo "5. ✅ Database migration scripts tested (if applicable)"
-echo "6. ✅ Rollback plan is prepared"
-echo ""
-read -p "Have you completed the pre-deployment checklist? (yes/no): " checklist_confirmation
+# Production deployment warnings (skip in CI/CD)
+if [[ "${CI}" != "true" ]]; then
+    echo -e "\n${RED}🚨 PRODUCTION DEPLOYMENT WARNING! 🚨${NC}"
+    echo -e "${RED}You are about to deploy to the LIVE PRODUCTION environment!${NC}"
+    echo -e "${YELLOW}This will create production resources with RETAIN policies.${NC}"
+    echo -e "${YELLOW}Resources will NOT be automatically deleted if the stack is destroyed.${NC}"
+    echo ""
+    echo -e "${YELLOW}Pre-deployment checklist:${NC}"
+    echo "1. ✅ Code has been tested in dev and staging environments"
+    echo "2. ✅ Integration tests pass successfully"  
+    echo "3. ✅ Performance testing completed"
+    echo "4. ✅ Security review completed"
+    echo "5. ✅ Database migration scripts tested (if applicable)"
+    echo "6. ✅ Rollback plan is prepared"
+    echo ""
+    read -p "Have you completed the pre-deployment checklist? (yes/no): " checklist_confirmation
 
-if [[ $checklist_confirmation != "yes" ]]; then
-    echo -e "${RED}Please complete the pre-deployment checklist before deploying to production.${NC}"
-    exit 1
-fi
+    if [[ $checklist_confirmation != "yes" ]]; then
+        echo -e "${RED}Please complete the pre-deployment checklist before deploying to production.${NC}"
+        exit 1
+    fi
 
-echo -e "\n${YELLOW}⚠️  FINAL CONFIRMATION REQUIRED ⚠️${NC}"
-echo "Type 'DEPLOY-TO-PRODUCTION' to confirm you want to deploy to production:"
-read -p "> " production_confirmation
+    echo -e "\n${YELLOW}⚠️  FINAL CONFIRMATION REQUIRED ⚠️${NC}"
+    echo "Type 'DEPLOY-TO-PRODUCTION' to confirm you want to deploy to production:"
+    read -p "> " production_confirmation
 
-if [[ $production_confirmation != "DEPLOY-TO-PRODUCTION" ]]; then
-    echo -e "${YELLOW}Production deployment cancelled.${NC}"
-    exit 0
+    if [[ $production_confirmation != "DEPLOY-TO-PRODUCTION" ]]; then
+        echo -e "${YELLOW}Production deployment cancelled.${NC}"
+        exit 0
+    fi
+else
+    echo -e "\n${BLUE}Running in CI/CD mode - deploying to production${NC}"
+    echo -e "${BLUE}Pre-deployment checklist assumed completed in automated pipeline${NC}"
 fi
 
 # Check prerequisites
@@ -81,18 +86,18 @@ fi
 
 echo -e "${GREEN}✅ CDK CLI found${NC}"
 
-# Build the service module first
-echo -e "\n${YELLOW}Building service module...${NC}"
-cd ../service
+# Build all modules from root (ensures correct dependency order)
+echo -e "\n${YELLOW}Building all modules...${NC}"
+cd ../..
 mvn clean package -q
 if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Service build failed${NC}"
+    echo -e "${RED}❌ Build failed${NC}"
     exit 1
 fi
-echo -e "${GREEN}✅ Service built successfully${NC}"
+echo -e "${GREEN}✅ All modules built successfully${NC}"
 
 # Return to infra directory
-cd ../infra
+cd infra
 
 # Bootstrap CDK if needed
 echo -e "\n${YELLOW}Checking CDK bootstrap...${NC}"
@@ -110,14 +115,18 @@ echo -e "${GREEN}✅ CDK bootstrap complete${NC}"
 echo -e "\n${YELLOW}Showing infrastructure changes...${NC}"
 cdk diff ${STACK_NAME} --context environment=${ENVIRONMENT}
 
-# Final deployment confirmation
-echo -e "\n${RED}🚨 LAST CHANCE TO CANCEL! 🚨${NC}"
-echo -e "${YELLOW}About to deploy to PRODUCTION with the changes shown above.${NC}"
-read -p "Type 'PROCEED' to continue with production deployment: " final_confirmation
+# Final deployment confirmation (skip in CI/CD)
+if [[ "${CI}" != "true" ]]; then
+    echo -e "\n${RED}🚨 LAST CHANCE TO CANCEL! 🚨${NC}"
+    echo -e "${YELLOW}About to deploy to PRODUCTION with the changes shown above.${NC}"
+    read -p "Type 'PROCEED' to continue with production deployment: " final_confirmation
 
-if [[ $final_confirmation != "PROCEED" ]]; then
-    echo -e "${YELLOW}Production deployment cancelled.${NC}"
-    exit 0
+    if [[ $final_confirmation != "PROCEED" ]]; then
+        echo -e "${YELLOW}Production deployment cancelled.${NC}"
+        exit 0
+    fi
+else
+    echo -e "\n${BLUE}CI/CD mode - proceeding with production deployment${NC}"
 fi
 
 # Deploy the stack

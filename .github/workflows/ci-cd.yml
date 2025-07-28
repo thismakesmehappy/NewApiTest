@@ -49,6 +49,7 @@ jobs:
         path: |
           **/target/surefire-reports/
           **/target/failsafe-reports/
+        if-no-files-found: warn
           
     - name: Upload service JAR
       uses: actions/upload-artifact@v4
@@ -92,6 +93,7 @@ jobs:
         name: security-scan-results
         path: |
           **/target/dependency-check-report.html
+        if-no-files-found: warn
 
   deploy-dev:
     name: Deploy to Development
