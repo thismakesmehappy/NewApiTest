@@ -47,8 +47,8 @@ jobs:
         sudo apt-get install -y nodejs
         npm install -g aws-cdk
         
-        # Build service first (required for CDK)
-        cd service && mvn clean package && cd ..
+        # Build all modules first (required for CDK)
+        mvn clean package
         
         # Validate CDK can synthesize without AWS credentials
         cd infra
