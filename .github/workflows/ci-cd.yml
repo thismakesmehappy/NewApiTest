@@ -147,8 +147,8 @@ jobs:
         
     - name: Run integration tests
       run: |
-        cd integration-tests
-        mvn test -Dtest.environment=dev
+        # Run integration tests from project root to ensure dependencies are available
+        mvn test -pl integration-tests -Dtest.environment=dev
       continue-on-error: true
       
     - name: Upload deployment logs
@@ -212,8 +212,8 @@ jobs:
         
     - name: Run integration tests
       run: |
-        cd integration-tests
-        mvn test -Dtest.environment=stage
+        # Run integration tests from project root to ensure dependencies are available
+        mvn test -pl integration-tests -Dtest.environment=stage
         
     - name: Upload deployment logs
       uses: actions/upload-artifact@v4
@@ -276,8 +276,8 @@ jobs:
         
     - name: Run smoke tests
       run: |
-        cd integration-tests
-        mvn test -Dtest.environment=prod -Dtest.suite=smoke
+        # Run smoke tests from project root to ensure dependencies are available
+        mvn test -pl integration-tests -Dtest.environment=prod -Dtest.suite=smoke
         
     - name: Upload deployment logs
       uses: actions/upload-artifact@v4
