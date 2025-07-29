@@ -65,4 +65,4 @@ echo "Visit: https://github.com/thismakesmehappy/TestAWSAPI2/settings/environmen
 
 ---
 
-**Status**: ✅ Environment created! Approval gate is now active.
+**Status**: ✅ Environment created in correct repository! Testing approval gate...
