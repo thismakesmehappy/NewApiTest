@@ -229,7 +229,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: deploy-staging
-    if: false  # Disabled - use manual deployment for prod
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
     
     steps:
