@@ -13,9 +13,30 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
+  approval-gate:
+    name: Deployment Approval
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: 
+      name: deployment-approval
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+    - name: Request Deployment Approval
+      run: |
+        echo "🚨 Deployment approval requested for:"
+        echo "- Repository: ${{ github.repository }}"
+        echo "- Branch: ${{ github.ref_name }}"
+        echo "- Commit: ${{ github.sha }}"
+        echo "- Author: ${{ github.actor }}"
+        echo ""
+        echo "This will deploy to STAGING and PRODUCTION environments."
+        echo "Review the changes and approve to proceed with the full pipeline."
+
   test:
     name: Build and Test
     runs-on: ubuntu-latest
+    needs: approval-gate
+    if: always() && (needs.approval-gate.result == 'success' || github.event_name == 'pull_request')
     
     steps:
     - name: Checkout code
