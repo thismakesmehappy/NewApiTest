@@ -1,14 +1,17 @@
 # ToyApi - AWS Serverless API Project
 
-## 🎯 Status: PRODUCTION READY + CI/CD ✅
+## 🎯 Status: ENTERPRISE READY + APPROVAL GATES ✅
 
-**Complete serverless API with enterprise-grade CI/CD pipeline**
+**Complete serverless API with enterprise-grade CI/CD and deployment controls**
 
-- **Live API**: `https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/`
-- **CI/CD**: Full GitHub Actions pipeline with automated testing & deployment
-- **Authentication**: Real AWS Cognito JWT tokens
-- **Infrastructure**: Multi-environment CDK stack (dev/stage/prod)
-- **Local Development**: SAM Local with warm containers & mock database
+- **Live APIs**: 
+  - Dev: `https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/`
+  - Staging: `https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/`
+  - Production: `https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/`
+- **CI/CD**: GitHub Actions with approval gates and multi-environment deployment
+- **Authentication**: Real AWS Cognito JWT tokens across all environments
+- **Infrastructure**: Fully isolated multi-environment CDK stacks
+- **Testing**: Comprehensive API testing with detailed reports
 
 ## 🔧 CRITICAL SESSION CONTEXT
 
