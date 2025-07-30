@@ -252,7 +252,7 @@ public class MonitoringStack extends Stack {
                         .statistic("Sum")
                         .period(Duration.minutes(5))
                         .build())
-                    .toArray(Metric[]::new))
+                    .collect(java.util.stream.Collectors.toList()))
                 .width(24)
                 .height(6)
                 .build()
@@ -324,7 +324,7 @@ public class MonitoringStack extends Stack {
         dashboard.addWidgets(
             SingleValueWidget.Builder.create()
                 .title("SLA Compliance")
-                .metrics(slaMetric)
+                .metrics(Arrays.asList(slaMetric))
                 .width(6)
                 .height(6)
                 .build()
