@@ -103,9 +103,9 @@ jobs:
         
     - name: Run dependency check
       run: |
-        # Use local data if NVD API fails in CI environment
-        mvn org.owasp:dependency-check-maven:check -Dnvd.api.datafeed.url="" || \
-        mvn org.owasp:dependency-check-maven:check -Dnvd.api.datafeed.url="" -DskipOnError=true
+        # Try with NVD API first, then fallback to local data only
+        mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7 -DskipTestScope=true || \
+        mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7 -DskipTestScope=true -DcveDataProviderUrl=none
       continue-on-error: true
         
     - name: Upload security scan results

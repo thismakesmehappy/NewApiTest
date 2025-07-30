@@ -152,9 +152,8 @@
                         <nvdApiDelay>1000</nvdApiDelay>
                         <nvdMaxRetryCount>3</nvdMaxRetryCount>
                         <nvdValidForHours>24</nvdValidForHours>
-                        <!-- Fallback to local data if NVD API fails -->
+                        <!-- Use recommended parameter instead of deprecated ones -->
                         <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
-                        <skipOnError>false</skipOnError>
                     </configuration>
                 </plugin>
             </plugins>
