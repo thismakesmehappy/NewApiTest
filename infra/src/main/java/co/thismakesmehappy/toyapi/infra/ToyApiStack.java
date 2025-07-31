@@ -80,14 +80,14 @@ public class ToyApiStack extends Stack {
         // Create API Gateway with API key management
         ApiKeyResources apiKeyResources = createApiKeyInfrastructure();
         
-        // Create API Gateway first with placeholder for developer function
-        RestApi api = createApiGatewayWithoutDeveloper(publicFunction, authFunction, itemsFunction, cognitoResources.userPool, apiKeyResources);
+        // Create developer function without API Gateway references first (to break circular dependency)
+        Function developerFunction = createDeveloperLambdaWithoutReferences(itemsTable);
         
-        // Now create developer function with API Gateway references
-        Function developerFunction = createDeveloperLambdaWithReferences(itemsTable, api, apiKeyResources);
+        // Create complete API Gateway with all endpoints including developer
+        RestApi api = createCompleteApiGateway(publicFunction, authFunction, itemsFunction, developerFunction, cognitoResources.userPool, apiKeyResources);
         
-        // Add developer endpoints to the existing API
-        addDeveloperEndpoints(api, developerFunction);
+        // Add API Gateway environment variables to developer function using CDK escape hatch
+        addApiGatewayReferencesToDeveloperFunction(developerFunction, api, apiKeyResources);
         
         // Create monitoring and budgets
         createBudgetMonitoring();
@@ -224,9 +224,9 @@ public class ToyApiStack extends Stack {
     }
 
     /**
-     * Creates Lambda function for developer key management with API Gateway references.
+     * Creates Lambda function for developer key management without API Gateway references to break circular dependency.
      */
-    private Function createDeveloperLambdaWithReferences(Table itemsTable, RestApi api, ApiKeyResources apiKeyResources) {
+    private Function createDeveloperLambdaWithoutReferences(Table itemsTable) {
         // Create log group for the function
         LogGroup logGroup = LogGroup.Builder.create(this, "DeveloperFunctionLogGroup")
                 .logGroupName("/aws/lambda/" + resourcePrefix + "-developerfunction")
@@ -234,13 +234,11 @@ public class ToyApiStack extends Stack {
                 .removalPolicy(RemovalPolicy.DESTROY)
                 .build();
 
-        // Environment variables with API Gateway references
+        // Environment variables without API Gateway references (will be added later)
         Map<String, String> environment = new HashMap<>();
         environment.put("ENVIRONMENT", this.environment);
         environment.put("TABLE_NAME", itemsTable.getTableName());
         environment.put("REGION", "us-east-1");
-        environment.put("REST_API_ID", api.getRestApiId());
-        environment.put("USAGE_PLAN_ID", apiKeyResources.usagePlan.getUsagePlanId());
 
         Function function = Function.Builder.create(this, "DeveloperFunction")
                 .functionName(resourcePrefix + "-developerfunction")
@@ -410,10 +408,10 @@ public class ToyApiStack extends Stack {
 
 
     /**
-     * Creates API Gateway REST API without developer endpoints to avoid circular dependency.
+     * Creates complete API Gateway REST API with all endpoints including developer endpoints.
      */
-    private RestApi createApiGatewayWithoutDeveloper(Function publicFunction, Function authFunction, 
-                                                   Function itemsFunction, UserPool userPool, ApiKeyResources apiKeyResources) {
+    private RestApi createCompleteApiGateway(Function publicFunction, Function authFunction, 
+                                           Function itemsFunction, Function developerFunction, UserPool userPool, ApiKeyResources apiKeyResources) {
         
         RestApi api = RestApi.Builder.create(this, "ToyApi")
                 .restApiName(resourcePrefix + "-api")
@@ -466,19 +464,6 @@ public class ToyApiStack extends Stack {
         itemResource.addMethod("PUT", new LambdaIntegration(itemsFunction), authMethodOptions);
         itemResource.addMethod("DELETE", new LambdaIntegration(itemsFunction), authMethodOptions);
 
-        // Associate usage plan with API stage
-        apiKeyResources.usagePlan.addApiStage(UsagePlanPerApiStage.builder()
-                .api(api)
-                .stage(api.getDeploymentStage())
-                .build());
-
-        return api;
-    }
-    
-    /**
-     * Adds developer endpoints to the existing API Gateway
-     */
-    private void addDeveloperEndpoints(RestApi api, Function developerFunction) {
         // Developer endpoints (public for registration, no API key required for onboarding)
         Resource developerResource = api.getRoot().addResource("developer");
         
@@ -500,6 +485,27 @@ public class ToyApiStack extends Stack {
         
         apiKeyResource.addResource("{keyId}")
                 .addMethod("DELETE", new LambdaIntegration(developerFunction));
+
+        // Associate usage plan with API stage
+        apiKeyResources.usagePlan.addApiStage(UsagePlanPerApiStage.builder()
+                .api(api)
+                .stage(api.getDeploymentStage())
+                .build());
+
+        return api;
+    }
+    
+    /**
+     * Adds API Gateway references to developer function environment variables using CloudFormation override.
+     */
+    private void addApiGatewayReferencesToDeveloperFunction(Function developerFunction, RestApi api, ApiKeyResources apiKeyResources) {
+        // Use CDK escape hatch to add environment variables to the Lambda function
+        software.amazon.awscdk.services.lambda.CfnFunction cfnFunction = 
+            (software.amazon.awscdk.services.lambda.CfnFunction) developerFunction.getNode().getDefaultChild();
+        
+        // Add additional environment variables for API Gateway references
+        cfnFunction.addPropertyOverride("Environment.Variables.REST_API_ID", api.getRestApiId());
+        cfnFunction.addPropertyOverride("Environment.Variables.USAGE_PLAN_ID", apiKeyResources.usagePlan.getUsagePlanId());
     }
 
     /**
