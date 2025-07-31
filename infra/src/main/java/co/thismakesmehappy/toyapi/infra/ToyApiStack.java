@@ -46,6 +46,19 @@ public class ToyApiStack extends Stack {
             this.userPoolClient = userPoolClient;
         }
     }
+    
+    /**
+     * Container for API Key resources
+     */
+    private static class ApiKeyResources {
+        final UsagePlan usagePlan;
+        final ApiKey defaultApiKey;
+        
+        ApiKeyResources(UsagePlan usagePlan, ApiKey defaultApiKey) {
+            this.usagePlan = usagePlan;
+            this.defaultApiKey = defaultApiKey;
+        }
+    }
     private final String environment;
     private final String resourcePrefix;
 
@@ -64,8 +77,17 @@ public class ToyApiStack extends Stack {
         Function authFunction = createAuthLambda(itemsTable, cognitoResources);
         Function itemsFunction = createItemsLambda(itemsTable, cognitoResources.userPool);
         
-        // Create API Gateway
-        RestApi api = createApiGateway(publicFunction, authFunction, itemsFunction, cognitoResources.userPool);
+        // Create API Gateway with API key management
+        ApiKeyResources apiKeyResources = createApiKeyInfrastructure();
+        
+        // Create API Gateway first with placeholder for developer function
+        RestApi api = createApiGatewayWithoutDeveloper(publicFunction, authFunction, itemsFunction, cognitoResources.userPool, apiKeyResources);
+        
+        // Now create developer function with API Gateway references
+        Function developerFunction = createDeveloperLambdaWithReferences(itemsTable, api, apiKeyResources);
+        
+        // Add developer endpoints to the existing API
+        addDeveloperEndpoints(api, developerFunction);
         
         // Create monitoring and budgets
         createBudgetMonitoring();
@@ -202,6 +224,55 @@ public class ToyApiStack extends Stack {
     }
 
     /**
+     * Creates Lambda function for developer key management with API Gateway references.
+     */
+    private Function createDeveloperLambdaWithReferences(Table itemsTable, RestApi api, ApiKeyResources apiKeyResources) {
+        // Create log group for the function
+        LogGroup logGroup = LogGroup.Builder.create(this, "DeveloperFunctionLogGroup")
+                .logGroupName("/aws/lambda/" + resourcePrefix + "-developerfunction")
+                .retention(RetentionDays.ONE_WEEK)
+                .removalPolicy(RemovalPolicy.DESTROY)
+                .build();
+
+        // Environment variables with API Gateway references
+        Map<String, String> environment = new HashMap<>();
+        environment.put("ENVIRONMENT", this.environment);
+        environment.put("TABLE_NAME", itemsTable.getTableName());
+        environment.put("REGION", "us-east-1");
+        environment.put("REST_API_ID", api.getRestApiId());
+        environment.put("USAGE_PLAN_ID", apiKeyResources.usagePlan.getUsagePlanId());
+
+        Function function = Function.Builder.create(this, "DeveloperFunction")
+                .functionName(resourcePrefix + "-developerfunction")
+                .runtime(Runtime.JAVA_17)
+                .handler("co.thismakesmehappy.toyapi.service.DeveloperHandler")
+                .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
+                .timeout(Duration.seconds(30))
+                .memorySize(512)
+                .description("Handles developer API key management (" + this.environment + ")")
+                .environment(environment)
+                .build();
+
+        // Grant DynamoDB permissions
+        itemsTable.grantReadWriteData(function);
+
+        // Grant API Gateway permissions for API key management
+        function.addToRolePolicy(PolicyStatement.Builder.create()
+                .effect(Effect.ALLOW)
+                .actions(Arrays.asList(
+                        "apigateway:POST",
+                        "apigateway:GET",
+                        "apigateway:DELETE",
+                        "apigateway:PUT"
+                ))
+                .resources(Arrays.asList("arn:aws:apigateway:" + this.getRegion() + "::/apikeys*",
+                                       "arn:aws:apigateway:" + this.getRegion() + "::/usageplans*"))
+                .build());
+
+        return function;
+    }
+
+    /**
      * Helper method to create Lambda functions with common configuration.
      */
     private Function createLambdaFunction(String functionName, String handler, String description, 
@@ -307,10 +378,42 @@ public class ToyApiStack extends Stack {
     }
 
     /**
-     * Creates API Gateway REST API with proper CORS and integration.
+     * Creates API key infrastructure including usage plans and default API key.
      */
-    private RestApi createApiGateway(Function publicFunction, Function authFunction, 
-                                   Function itemsFunction, UserPool userPool) {
+    private ApiKeyResources createApiKeyInfrastructure() {
+        // Create usage plan for API rate limiting and quotas
+        UsagePlan usagePlan = UsagePlan.Builder.create(this, "DeveloperUsagePlan")
+                .name(resourcePrefix + "-developer-plan")
+                .description("Usage plan for developer API keys")
+                .throttle(ThrottleSettings.builder()
+                        .rateLimit(100)  // 100 requests per second
+                        .burstLimit(200) // 200 burst requests
+                        .build())
+                .quota(QuotaSettings.builder()
+                        .limit(10000)    // 10,000 requests per day
+                        .period(Period.DAY)
+                        .build())
+                .build();
+
+        // Create default API key for testing
+        ApiKey defaultApiKey = ApiKey.Builder.create(this, "DefaultApiKey")
+                .apiKeyName(resourcePrefix + "-default-key")
+                .description("Default API key for testing and documentation")
+                .enabled(true)
+                .build();
+
+        // Associate default API key with usage plan
+        usagePlan.addApiKey(defaultApiKey);
+
+        return new ApiKeyResources(usagePlan, defaultApiKey);
+    }
+
+
+    /**
+     * Creates API Gateway REST API without developer endpoints to avoid circular dependency.
+     */
+    private RestApi createApiGatewayWithoutDeveloper(Function publicFunction, Function authFunction, 
+                                                   Function itemsFunction, UserPool userPool, ApiKeyResources apiKeyResources) {
         
         RestApi api = RestApi.Builder.create(this, "ToyApi")
                 .restApiName(resourcePrefix + "-api")
@@ -363,7 +466,40 @@ public class ToyApiStack extends Stack {
         itemResource.addMethod("PUT", new LambdaIntegration(itemsFunction), authMethodOptions);
         itemResource.addMethod("DELETE", new LambdaIntegration(itemsFunction), authMethodOptions);
 
+        // Associate usage plan with API stage
+        apiKeyResources.usagePlan.addApiStage(UsagePlanPerApiStage.builder()
+                .api(api)
+                .stage(api.getDeploymentStage())
+                .build());
+
         return api;
+    }
+    
+    /**
+     * Adds developer endpoints to the existing API Gateway
+     */
+    private void addDeveloperEndpoints(RestApi api, Function developerFunction) {
+        // Developer endpoints (public for registration, no API key required for onboarding)
+        Resource developerResource = api.getRoot().addResource("developer");
+        
+        // Registration endpoint
+        developerResource.addResource("register")
+                .addMethod("POST", new LambdaIntegration(developerFunction));
+        
+        // Profile endpoints
+        Resource profileResource = developerResource.addResource("profile");
+        profileResource.addMethod("GET", new LambdaIntegration(developerFunction));
+        profileResource.addMethod("PUT", new LambdaIntegration(developerFunction));
+        
+        // API key endpoints
+        Resource apiKeyResource = developerResource.addResource("api-key");
+        apiKeyResource.addMethod("POST", new LambdaIntegration(developerFunction));
+        
+        developerResource.addResource("api-keys")
+                .addMethod("GET", new LambdaIntegration(developerFunction));
+        
+        apiKeyResource.addResource("{keyId}")
+                .addMethod("DELETE", new LambdaIntegration(developerFunction));
     }
 
     /**

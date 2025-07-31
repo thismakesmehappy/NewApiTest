@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToyApi Developer Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .api-key-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .api-key-value {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 0.5rem;
+            border-radius: 3px;
+            margin: 0.5rem 0;
+            word-break: break-all;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 2rem;
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .quick-start {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-start h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .code-block {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 ToyApi Developer Portal</h1>
+            <p class="subtitle">Get your API keys and start building amazing applications</p>
+        </header>
+
+        <div class="quick-start">
+            <h3>🎯 Quick Start</h3>
+            <p>1. Register as a developer below</p>
+            <p>2. Create your first API key</p>
+            <p>3. Start making API calls</p>
+            <div class="code-block">
+curl -H "X-API-Key: YOUR_API_KEY" \
+     https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/items
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('register')">👤 Register</div>
+            <div class="tab" onclick="showTab('manage')">🔑 Manage Keys</div>
+            <div class="tab" onclick="showTab('docs')">📖 Documentation</div>
+        </div>
+
+        <!-- Registration Tab -->
+        <div id="register" class="tab-content active">
+            <div class="section">
+                <h2>Developer Registration</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="organization">Organization</label>
+                        <input type="text" id="organization" name="organization">
+                    </div>
+                    <div class="form-group">
+                        <label for="purpose">What will you build with ToyApi?</label>
+                        <textarea id="purpose" name="purpose" rows="3" placeholder="Tell us about your project..."></textarea>
+                    </div>
+                    <button type="submit">Register as Developer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Manage Keys Tab -->
+        <div id="manage" class="tab-content">
+            <div class="section">
+                <h2>API Key Management</h2>
+                <div class="form-group">
+                    <label for="developerEmail">Your Email Address</label>
+                    <input type="email" id="developerEmail" placeholder="Enter your registered email">
+                    <button onclick="loadDeveloperData()" style="margin-top: 0.5rem;">Load My Data</button>
+                </div>
+            </div>
+
+            <div id="developerProfile" class="section" style="display: none;">
+                <h2>Developer Profile</h2>
+                <div id="profileContent"></div>
+                <button onclick="showEditProfile()">Edit Profile</button>
+            </div>
+
+            <div id="editProfile" class="section" style="display: none;">
+                <h2>Edit Profile</h2>
+                <form id="editProfileForm">
+                    <div class="form-group">
+                        <label for="editName">Full Name</label>
+                        <input type="text" id="editName" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="editOrganization">Organization</label>
+                        <input type="text" id="editOrganization" name="organization">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPurpose">Purpose</label>
+                        <textarea id="editPurpose" name="purpose" rows="3"></textarea>
+                    </div>
+                    <button type="submit">Update Profile</button>
+                    <button type="button" onclick="cancelEditProfile()">Cancel</button>
+                </form>
+            </div>
+
+            <div id="apiKeyManagement" class="section" style="display: none;">
+                <h2>Your API Keys</h2>
+                <div class="form-group">
+                    <label for="keyName">API Key Name</label>
+                    <input type="text" id="keyName" placeholder="e.g., Production App, Testing, etc.">
+                    <button onclick="createApiKey()" style="margin-top: 0.5rem;">Create New API Key</button>
+                </div>
+                <div id="apiKeysList"></div>
+            </div>
+        </div>
+
+        <!-- Documentation Tab -->
+        <div id="docs" class="tab-content">
+            <div class="section">
+                <h2>API Documentation</h2>
+                <h3>Base URL</h3>
+                <div class="code-block">https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev</div>
+                
+                <h3>Authentication</h3>
+                <p>Include your API key in the <code>X-API-Key</code> header:</p>
+                <div class="code-block">X-API-Key: your-api-key-here</div>
+                
+                <h3>Available Endpoints</h3>
+                <h4>Public Endpoints (No API Key Required)</h4>
+                <ul>
+                    <li><strong>GET /public/message</strong> - Get a public message</li>
+                    <li><strong>POST /auth/login</strong> - User authentication</li>
+                    <li><strong>POST /developer/register</strong> - Developer registration</li>
+                </ul>
+                
+                <h4>Protected Endpoints (Require Authentication)</h4>
+                <ul>
+                    <li><strong>GET /auth/message</strong> - Get authenticated message</li>
+                    <li><strong>GET /items</strong> - List all items</li>
+                    <li><strong>POST /items</strong> - Create new item</li>
+                    <li><strong>GET /items/{id}</strong> - Get specific item</li>
+                    <li><strong>PUT /items/{id}</strong> - Update item</li>
+                    <li><strong>DELETE /items/{id}</strong> - Delete item</li>
+                </ul>
+                
+                <h3>Rate Limits</h3>
+                <ul>
+                    <li><strong>Rate Limit:</strong> 100 requests per second</li>
+                    <li><strong>Burst Limit:</strong> 200 requests</li>
+                    <li><strong>Daily Quota:</strong> 10,000 requests per day</li>
+                </ul>
+                
+                <h3>Example Usage</h3>
+                <h4>JavaScript/Fetch</h4>
+                <div class="code-block">
+fetch('https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/items', {
+  method: 'GET',
+  headers: {
+    'X-API-Key': 'your-api-key-here',
+    'Authorization': 'Bearer your-jwt-token-here'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));
+                </div>
+                
+                <h4>cURL</h4>
+                <div class="code-block">
+curl -H "X-API-Key: your-api-key-here" \
+     -H "Authorization: Bearer your-jwt-token-here" \
+     https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/items
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages area -->
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev';
+        let currentDeveloperEmail = '';
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Message display
+        function showMessage(message, type = 'success') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Developer registration
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                email: formData.get('email'),
+                name: formData.get('name'),
+                organization: formData.get('organization') || '',
+                purpose: formData.get('purpose') || ''
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/developer/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Developer registered successfully! You can now manage your API keys.', 'success');
+                    this.reset();
+                    // Switch to manage tab
+                    showTab('manage');
+                    document.getElementById('developerEmail').value = data.email;
+                } else {
+                    showMessage(result.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Registration failed: ' + error.message, 'error');
+            }
+        });
+
+        // Load developer data
+        async function loadDeveloperData() {
+            const email = document.getElementById('developerEmail').value;
+            if (!email) {
+                showMessage('Please enter your email address', 'error');
+                return;
+            }
+            
+            currentDeveloperEmail = email;
+            
+            try {
+                // Load profile
+                const profileResponse = await fetch(`${API_BASE_URL}/developer/profile?email=${encodeURIComponent(email)}`);
+                const profileData = await profileResponse.json();
+                
+                if (profileResponse.ok) {
+                    displayProfile(profileData);
+                    await loadApiKeys();
+                } else {
+                    showMessage(profileData.error || 'Developer not found', 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to load developer data: ' + error.message, 'error');
+            }
+        }
+
+        // Display profile
+        function displayProfile(profile) {
+            const profileContent = document.getElementById('profileContent');
+            profileContent.innerHTML = `
+                <p><strong>Email:</strong> ${profile.email}</p>
+                <p><strong>Name:</strong> ${profile.name}</p>
+                <p><strong>Organization:</strong> ${profile.organization || 'Not specified'}</p>
+                <p><strong>Purpose:</strong> ${profile.purpose || 'Not specified'}</p>
+                <p><strong>Status:</strong> ${profile.status}</p>
+                <p><strong>Member Since:</strong> ${new Date(profile.createdAt).toLocaleDateString()}</p>
+            `;
+            
+            document.getElementById('developerProfile').style.display = 'block';
+            document.getElementById('apiKeyManagement').style.display = 'block';
+        }
+
+        // Show edit profile form
+        function showEditProfile() {
+            // Pre-fill form with current data
+            const profile = document.getElementById('profileContent');
+            // This is a simplified version - in a real app, you'd store the profile data
+            document.getElementById('editProfile').style.display = 'block';
+        }
+
+        // Cancel edit profile
+        function cancelEditProfile() {
+            document.getElementById('editProfile').style.display = 'none';
+        }
+
+        // Update profile
+        document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentDeveloperEmail) {
+                showMessage('Please load your profile first', 'error');
+                return;
+            }
+            
+            const formData = new FormData(this);
+            const data = {
+                email: currentDeveloperEmail,
+                name: formData.get('name'),
+                organization: formData.get('organization'),
+                purpose: formData.get('purpose')
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/developer/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Profile updated successfully!', 'success');
+                    displayProfile(result);
+                    cancelEditProfile();
+                } else {
+                    showMessage(result.error || 'Update failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Update failed: ' + error.message, 'error');
+            }
+        });
+
+        // Create API key
+        async function createApiKey() {
+            const keyName = document.getElementById('keyName').value || 'Default Key';
+            
+            if (!currentDeveloperEmail) {
+                showMessage('Please load your profile first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/developer/api-key`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: currentDeveloperEmail,
+                        name: keyName
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('API key created successfully!', 'success');
+                    document.getElementById('keyName').value = '';
+                    await loadApiKeys();
+                } else {
+                    showMessage(result.error || 'Failed to create API key', 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to create API key: ' + error.message, 'error');
+            }
+        }
+
+        // Load API keys
+        async function loadApiKeys() {
+            if (!currentDeveloperEmail) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/developer/api-keys?email=${encodeURIComponent(currentDeveloperEmail)}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayApiKeys(result.apiKeys);
+                } else {
+                    showMessage(result.error || 'Failed to load API keys', 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to load API keys: ' + error.message, 'error');
+            }
+        }
+
+        // Display API keys
+        function displayApiKeys(apiKeys) {
+            const apiKeysList = document.getElementById('apiKeysList');
+            
+            if (apiKeys.length === 0) {
+                apiKeysList.innerHTML = '<p>No API keys found. Create your first API key above.</p>';
+                return;
+            }
+            
+            apiKeysList.innerHTML = apiKeys.map(key => `
+                <div class="api-key-item">
+                    <h4>${key.keyName}</h4>
+                    <p><strong>Key ID:</strong> ${key.apiKeyId}</p>
+                    <p><strong>Status:</strong> ${key.status}</p>
+                    <p><strong>Created:</strong> ${new Date(key.createdAt).toLocaleDateString()}</p>
+                    ${key.lastUsed ? `<p><strong>Last Used:</strong> ${new Date(key.lastUsed).toLocaleDateString()}</p>` : ''}
+                    <button onclick="deleteApiKey('${key.apiKeyId}')" style="background: #dc3545; margin-top: 0.5rem;">Delete Key</button>
+                </div>
+            `).join('');
+        }
+
+        // Delete API key
+        async function deleteApiKey(apiKeyId) {
+            if (!confirm('Are you sure you want to delete this API key? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/developer/api-key/${apiKeyId}?email=${encodeURIComponent(currentDeveloperEmail)}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage('API key deleted successfully!', 'success');
+                    await loadApiKeys();
+                } else {
+                    showMessage(result.error || 'Failed to delete API key', 'error');
+                }
+            } catch (error) {
+                showMessage('Failed to delete API key: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
