@@ -4,17 +4,17 @@
     "id": "App",
     "path": "",
     "children": {
-      "ToyApiStack-prod": {
-        "id": "ToyApiStack-prod",
-        "path": "ToyApiStack-prod",
+      "ToyApiStack-dev": {
+        "id": "ToyApiStack-dev",
+        "path": "ToyApiStack-dev",
         "children": {
           "ItemsTable": {
             "id": "ItemsTable",
-            "path": "ToyApiStack-prod/ItemsTable",
+            "path": "ToyApiStack-dev/ItemsTable",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/ItemsTable/Resource",
+                "path": "ToyApiStack-dev/ItemsTable/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
                   "aws:cdk:cloudformation:props": {
@@ -68,15 +68,15 @@
                     "pointInTimeRecoverySpecification": {
                       "pointInTimeRecoveryEnabled": true
                     },
-                    "tableName": "toyapi-prod-items",
+                    "tableName": "toyapi-dev-items",
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -96,7 +96,7 @@
               },
               "ScalingRole": {
                 "id": "ScalingRole",
-                "path": "ToyApiStack-prod/ItemsTable/ScalingRole",
+                "path": "ToyApiStack-dev/ItemsTable/ScalingRole",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.91.0"
@@ -110,11 +110,11 @@
           },
           "UserPool": {
             "id": "UserPool",
-            "path": "ToyApiStack-prod/UserPool",
+            "path": "ToyApiStack-dev/UserPool",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/UserPool/Resource",
+                "path": "ToyApiStack-dev/UserPool/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Cognito::UserPool",
                   "aws:cdk:cloudformation:props": {
@@ -155,12 +155,12 @@
                     ],
                     "smsVerificationMessage": "The verification code to your new account is {####}",
                     "userPoolTags": {
-                      "CostCenter": "ToyApi-prod",
-                      "Environment": "prod",
+                      "CostCenter": "ToyApi-dev",
+                      "Environment": "dev",
                       "Owner": "thismakesmehappy",
                       "Project": "ToyApi"
                     },
-                    "userPoolName": "toyapi-prod-users",
+                    "userPoolName": "toyapi-dev-users",
                     "verificationMessageTemplate": {
                       "defaultEmailOption": "CONFIRM_WITH_CODE",
                       "emailMessage": "The verification code to your new account is {####}",
@@ -182,11 +182,11 @@
           },
           "UserPoolClient": {
             "id": "UserPoolClient",
-            "path": "ToyApiStack-prod/UserPoolClient",
+            "path": "ToyApiStack-dev/UserPoolClient",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/UserPoolClient/Resource",
+                "path": "ToyApiStack-dev/UserPoolClient/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolClient",
                   "aws:cdk:cloudformation:props": {
@@ -206,7 +206,7 @@
                     "callbackUrLs": [
                       "https://example.com"
                     ],
-                    "clientName": "toyapi-prod-client",
+                    "clientName": "toyapi-dev-client",
                     "explicitAuthFlows": [
                       "ALLOW_USER_PASSWORD_AUTH",
                       "ALLOW_ADMIN_USER_PASSWORD_AUTH",
@@ -242,24 +242,24 @@
           },
           "PublicFunctionLogGroup": {
             "id": "PublicFunctionLogGroup",
-            "path": "ToyApiStack-prod/PublicFunctionLogGroup",
+            "path": "ToyApiStack-dev/PublicFunctionLogGroup",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/PublicFunctionLogGroup/Resource",
+                "path": "ToyApiStack-dev/PublicFunctionLogGroup/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
                   "aws:cdk:cloudformation:props": {
-                    "logGroupName": "/aws/lambda/toyapi-prod-publicfunction",
+                    "logGroupName": "/aws/lambda/toyapi-dev-publicfunction",
                     "retentionInDays": 7,
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -285,15 +285,15 @@
           },
           "PublicFunction": {
             "id": "PublicFunction",
-            "path": "ToyApiStack-prod/PublicFunction",
+            "path": "ToyApiStack-dev/PublicFunction",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "ToyApiStack-prod/PublicFunction/ServiceRole",
+                "path": "ToyApiStack-dev/PublicFunction/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "ToyApiStack-prod/PublicFunction/ServiceRole/ImportServiceRole",
+                    "path": "ToyApiStack-dev/PublicFunction/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.91.0"
@@ -301,7 +301,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "ToyApiStack-prod/PublicFunction/ServiceRole/Resource",
+                    "path": "ToyApiStack-dev/PublicFunction/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -334,11 +334,11 @@
                         "tags": [
                           {
                             "key": "CostCenter",
-                            "value": "ToyApi-prod"
+                            "value": "ToyApi-dev"
                           },
                           {
                             "key": "Environment",
-                            "value": "prod"
+                            "value": "dev"
                           },
                           {
                             "key": "Owner",
@@ -358,11 +358,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "ToyApiStack-prod/PublicFunction/ServiceRole/DefaultPolicy",
+                    "path": "ToyApiStack-dev/PublicFunction/ServiceRole/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "ToyApiStack-prod/PublicFunction/ServiceRole/DefaultPolicy/Resource",
+                        "path": "ToyApiStack-dev/PublicFunction/ServiceRole/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -437,11 +437,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "ToyApiStack-prod/PublicFunction/Code",
+                "path": "ToyApiStack-dev/PublicFunction/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "ToyApiStack-prod/PublicFunction/Code/Stage",
+                    "path": "ToyApiStack-dev/PublicFunction/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.91.0"
@@ -449,7 +449,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "ToyApiStack-prod/PublicFunction/Code/AssetBucket",
+                    "path": "ToyApiStack-dev/PublicFunction/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.91.0"
@@ -463,25 +463,25 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/PublicFunction/Resource",
+                "path": "ToyApiStack-dev/PublicFunction/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
-                      "s3Key": "a2f3d3aa2371a0bc839da66662ba2b56aef7db72bedbbaff491031e7135e7c79.jar"
+                      "s3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
                     },
-                    "description": "Handles public API endpoints (prod)",
+                    "description": "Handles public API endpoints (dev)",
                     "environment": {
                       "variables": {
                         "TABLE_NAME": {
                           "Ref": "ItemsTable5AAC2C46"
                         },
-                        "ENVIRONMENT": "prod",
+                        "ENVIRONMENT": "dev",
                         "REGION": "us-east-1"
                       }
                     },
-                    "functionName": "toyapi-prod-publicfunction",
+                    "functionName": "toyapi-dev-publicfunction",
                     "handler": "co.thismakesmehappy.toyapi.service.PublicHandler",
                     "memorySize": 512,
                     "role": {
@@ -494,11 +494,11 @@
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -525,24 +525,24 @@
           },
           "AuthFunctionLogGroup": {
             "id": "AuthFunctionLogGroup",
-            "path": "ToyApiStack-prod/AuthFunctionLogGroup",
+            "path": "ToyApiStack-dev/AuthFunctionLogGroup",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/AuthFunctionLogGroup/Resource",
+                "path": "ToyApiStack-dev/AuthFunctionLogGroup/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
                   "aws:cdk:cloudformation:props": {
-                    "logGroupName": "/aws/lambda/toyapi-prod-authfunction",
+                    "logGroupName": "/aws/lambda/toyapi-dev-authfunction",
                     "retentionInDays": 7,
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -568,15 +568,15 @@
           },
           "AuthFunction": {
             "id": "AuthFunction",
-            "path": "ToyApiStack-prod/AuthFunction",
+            "path": "ToyApiStack-dev/AuthFunction",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "ToyApiStack-prod/AuthFunction/ServiceRole",
+                "path": "ToyApiStack-dev/AuthFunction/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "ToyApiStack-prod/AuthFunction/ServiceRole/ImportServiceRole",
+                    "path": "ToyApiStack-dev/AuthFunction/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.91.0"
@@ -584,7 +584,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "ToyApiStack-prod/AuthFunction/ServiceRole/Resource",
+                    "path": "ToyApiStack-dev/AuthFunction/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -617,11 +617,11 @@
                         "tags": [
                           {
                             "key": "CostCenter",
-                            "value": "ToyApi-prod"
+                            "value": "ToyApi-dev"
                           },
                           {
                             "key": "Environment",
-                            "value": "prod"
+                            "value": "dev"
                           },
                           {
                             "key": "Owner",
@@ -641,11 +641,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "ToyApiStack-prod/AuthFunction/ServiceRole/DefaultPolicy",
+                    "path": "ToyApiStack-dev/AuthFunction/ServiceRole/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "ToyApiStack-prod/AuthFunction/ServiceRole/DefaultPolicy/Resource",
+                        "path": "ToyApiStack-dev/AuthFunction/ServiceRole/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -735,11 +735,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "ToyApiStack-prod/AuthFunction/Code",
+                "path": "ToyApiStack-dev/AuthFunction/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "ToyApiStack-prod/AuthFunction/Code/Stage",
+                    "path": "ToyApiStack-dev/AuthFunction/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.91.0"
@@ -747,7 +747,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "ToyApiStack-prod/AuthFunction/Code/AssetBucket",
+                    "path": "ToyApiStack-dev/AuthFunction/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.91.0"
@@ -761,21 +761,21 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/AuthFunction/Resource",
+                "path": "ToyApiStack-dev/AuthFunction/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
-                      "s3Key": "a2f3d3aa2371a0bc839da66662ba2b56aef7db72bedbbaff491031e7135e7c79.jar"
+                      "s3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
                     },
-                    "description": "Handles authentication endpoints (prod)",
+                    "description": "Handles authentication endpoints (dev)",
                     "environment": {
                       "variables": {
                         "TABLE_NAME": {
                           "Ref": "ItemsTable5AAC2C46"
                         },
-                        "ENVIRONMENT": "prod",
+                        "ENVIRONMENT": "dev",
                         "USER_POOL_ID": {
                           "Ref": "UserPool6BA7E5F2"
                         },
@@ -785,7 +785,7 @@
                         "REGION": "us-east-1"
                       }
                     },
-                    "functionName": "toyapi-prod-authfunction",
+                    "functionName": "toyapi-dev-authfunction",
                     "handler": "co.thismakesmehappy.toyapi.service.AuthHandler",
                     "memorySize": 512,
                     "role": {
@@ -798,11 +798,11 @@
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -829,24 +829,24 @@
           },
           "ItemsFunctionLogGroup": {
             "id": "ItemsFunctionLogGroup",
-            "path": "ToyApiStack-prod/ItemsFunctionLogGroup",
+            "path": "ToyApiStack-dev/ItemsFunctionLogGroup",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/ItemsFunctionLogGroup/Resource",
+                "path": "ToyApiStack-dev/ItemsFunctionLogGroup/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
                   "aws:cdk:cloudformation:props": {
-                    "logGroupName": "/aws/lambda/toyapi-prod-itemsfunction",
+                    "logGroupName": "/aws/lambda/toyapi-dev-itemsfunction",
                     "retentionInDays": 7,
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -872,15 +872,15 @@
           },
           "ItemsFunction": {
             "id": "ItemsFunction",
-            "path": "ToyApiStack-prod/ItemsFunction",
+            "path": "ToyApiStack-dev/ItemsFunction",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "ToyApiStack-prod/ItemsFunction/ServiceRole",
+                "path": "ToyApiStack-dev/ItemsFunction/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "ToyApiStack-prod/ItemsFunction/ServiceRole/ImportServiceRole",
+                    "path": "ToyApiStack-dev/ItemsFunction/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.91.0"
@@ -888,7 +888,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "ToyApiStack-prod/ItemsFunction/ServiceRole/Resource",
+                    "path": "ToyApiStack-dev/ItemsFunction/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -921,11 +921,11 @@
                         "tags": [
                           {
                             "key": "CostCenter",
-                            "value": "ToyApi-prod"
+                            "value": "ToyApi-dev"
                           },
                           {
                             "key": "Environment",
-                            "value": "prod"
+                            "value": "dev"
                           },
                           {
                             "key": "Owner",
@@ -945,11 +945,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "ToyApiStack-prod/ItemsFunction/ServiceRole/DefaultPolicy",
+                    "path": "ToyApiStack-dev/ItemsFunction/ServiceRole/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "ToyApiStack-prod/ItemsFunction/ServiceRole/DefaultPolicy/Resource",
+                        "path": "ToyApiStack-dev/ItemsFunction/ServiceRole/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -1039,11 +1039,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "ToyApiStack-prod/ItemsFunction/Code",
+                "path": "ToyApiStack-dev/ItemsFunction/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "ToyApiStack-prod/ItemsFunction/Code/Stage",
+                    "path": "ToyApiStack-dev/ItemsFunction/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.91.0"
@@ -1051,7 +1051,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "ToyApiStack-prod/ItemsFunction/Code/AssetBucket",
+                    "path": "ToyApiStack-dev/ItemsFunction/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.91.0"
@@ -1065,28 +1065,28 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/ItemsFunction/Resource",
+                "path": "ToyApiStack-dev/ItemsFunction/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
-                      "s3Key": "a2f3d3aa2371a0bc839da66662ba2b56aef7db72bedbbaff491031e7135e7c79.jar"
+                      "s3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
                     },
-                    "description": "Handles items CRUD operations (prod)",
+                    "description": "Handles items CRUD operations (dev)",
                     "environment": {
                       "variables": {
                         "TABLE_NAME": {
                           "Ref": "ItemsTable5AAC2C46"
                         },
-                        "ENVIRONMENT": "prod",
+                        "ENVIRONMENT": "dev",
                         "USER_POOL_ID": {
                           "Ref": "UserPool6BA7E5F2"
                         },
                         "REGION": "us-east-1"
                       }
                     },
-                    "functionName": "toyapi-prod-itemsfunction",
+                    "functionName": "toyapi-dev-itemsfunction",
                     "handler": "co.thismakesmehappy.toyapi.service.ItemsHandler",
                     "memorySize": 512,
                     "role": {
@@ -1099,11 +1099,310 @@
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
+                      },
+                      {
+                        "key": "Owner",
+                        "value": "thismakesmehappy"
+                      },
+                      {
+                        "key": "Project",
+                        "value": "ToyApi"
+                      }
+                    ],
+                    "timeout": 30
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.91.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda.Function",
+              "version": "2.91.0"
+            }
+          },
+          "DeveloperFunctionLogGroup": {
+            "id": "DeveloperFunctionLogGroup",
+            "path": "ToyApiStack-dev/DeveloperFunctionLogGroup",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "ToyApiStack-dev/DeveloperFunctionLogGroup/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
+                  "aws:cdk:cloudformation:props": {
+                    "logGroupName": "/aws/lambda/toyapi-dev-developerfunction",
+                    "retentionInDays": 7,
+                    "tags": [
+                      {
+                        "key": "CostCenter",
+                        "value": "ToyApi-dev"
+                      },
+                      {
+                        "key": "Environment",
+                        "value": "dev"
+                      },
+                      {
+                        "key": "Owner",
+                        "value": "thismakesmehappy"
+                      },
+                      {
+                        "key": "Project",
+                        "value": "ToyApi"
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_logs.CfnLogGroup",
+                  "version": "2.91.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_logs.LogGroup",
+              "version": "2.91.0"
+            }
+          },
+          "DeveloperFunction": {
+            "id": "DeveloperFunction",
+            "path": "ToyApiStack-dev/DeveloperFunction",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "ToyApiStack-dev/DeveloperFunction/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "ToyApiStack-dev/DeveloperFunction/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.91.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "ToyApiStack-dev/DeveloperFunction/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ],
+                        "tags": [
+                          {
+                            "key": "CostCenter",
+                            "value": "ToyApi-dev"
+                          },
+                          {
+                            "key": "Environment",
+                            "value": "dev"
+                          },
+                          {
+                            "key": "Owner",
+                            "value": "thismakesmehappy"
+                          },
+                          {
+                            "key": "Project",
+                            "value": "ToyApi"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.91.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "ToyApiStack-dev/DeveloperFunction/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "ToyApiStack-dev/DeveloperFunction/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:BatchWriteItem",
+                                    "dynamodb:ConditionCheckItem",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:DescribeTable",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:Query",
+                                    "dynamodb:Scan",
+                                    "dynamodb:UpdateItem"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": [
+                                        "ItemsTable5AAC2C46",
+                                        "Arn"
+                                      ]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": [
+                                              "ItemsTable5AAC2C46",
+                                              "Arn"
+                                            ]
+                                          },
+                                          "/index/*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": [
+                                    "apigateway:DELETE",
+                                    "apigateway:GET",
+                                    "apigateway:POST",
+                                    "apigateway:PUT"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    "arn:aws:apigateway:us-east-1::/apikeys*",
+                                    "arn:aws:apigateway:us-east-1::/restapis*",
+                                    "arn:aws:apigateway:us-east-1::/usageplans*"
+                                  ]
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "DeveloperFunctionServiceRoleDefaultPolicy6FEA04B0",
+                            "roles": [
+                              {
+                                "Ref": "DeveloperFunctionServiceRoleCE53D832"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.91.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.91.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.91.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "ToyApiStack-dev/DeveloperFunction/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "ToyApiStack-dev/DeveloperFunction/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.91.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "ToyApiStack-dev/DeveloperFunction/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.91.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.91.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "ToyApiStack-dev/DeveloperFunction/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
+                      "s3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
+                    },
+                    "description": "Handles developer API key management (dev)",
+                    "environment": {
+                      "variables": {
+                        "API_NAME_PREFIX": "toyapi-dev",
+                        "TABLE_NAME": {
+                          "Ref": "ItemsTable5AAC2C46"
+                        },
+                        "ENVIRONMENT": "dev",
+                        "USAGE_PLAN_PREFIX": "toyapi-dev-developer-plan",
+                        "REGION": "us-east-1"
+                      }
+                    },
+                    "functionName": "toyapi-dev-developerfunction",
+                    "handler": "co.thismakesmehappy.toyapi.service.DeveloperHandler",
+                    "memorySize": 512,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "DeveloperFunctionServiceRoleCE53D832",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "java17",
+                    "tags": [
+                      {
+                        "key": "CostCenter",
+                        "value": "ToyApi-dev"
+                      },
+                      {
+                        "key": "Environment",
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -1130,24 +1429,24 @@
           },
           "ToyApi": {
             "id": "ToyApi",
-            "path": "ToyApiStack-prod/ToyApi",
+            "path": "ToyApiStack-dev/ToyApi",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/ToyApi/Resource",
+                "path": "ToyApiStack-dev/ToyApi/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::RestApi",
                   "aws:cdk:cloudformation:props": {
-                    "description": "ToyApi REST API (prod)",
-                    "name": "toyapi-prod-api",
+                    "description": "ToyApi REST API (dev)",
+                    "name": "toyapi-dev-api",
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -1167,11 +1466,11 @@
               },
               "CloudWatchRole": {
                 "id": "CloudWatchRole",
-                "path": "ToyApiStack-prod/ToyApi/CloudWatchRole",
+                "path": "ToyApiStack-dev/ToyApi/CloudWatchRole",
                 "children": {
                   "ImportCloudWatchRole": {
                     "id": "ImportCloudWatchRole",
-                    "path": "ToyApiStack-prod/ToyApi/CloudWatchRole/ImportCloudWatchRole",
+                    "path": "ToyApiStack-dev/ToyApi/CloudWatchRole/ImportCloudWatchRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.91.0"
@@ -1179,7 +1478,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "ToyApiStack-prod/ToyApi/CloudWatchRole/Resource",
+                    "path": "ToyApiStack-dev/ToyApi/CloudWatchRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -1212,11 +1511,11 @@
                         "tags": [
                           {
                             "key": "CostCenter",
-                            "value": "ToyApi-prod"
+                            "value": "ToyApi-dev"
                           },
                           {
                             "key": "Environment",
-                            "value": "prod"
+                            "value": "dev"
                           },
                           {
                             "key": "Owner",
@@ -1242,7 +1541,7 @@
               },
               "Account": {
                 "id": "Account",
-                "path": "ToyApiStack-prod/ToyApi/Account",
+                "path": "ToyApiStack-dev/ToyApi/Account",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Account",
                   "aws:cdk:cloudformation:props": {
@@ -1261,15 +1560,15 @@
               },
               "Deployment": {
                 "id": "Deployment",
-                "path": "ToyApiStack-prod/ToyApi/Deployment",
+                "path": "ToyApiStack-dev/ToyApi/Deployment",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "ToyApiStack-prod/ToyApi/Deployment/Resource",
+                    "path": "ToyApiStack-dev/ToyApi/Deployment/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Deployment",
                       "aws:cdk:cloudformation:props": {
-                        "description": "ToyApi REST API (prod)",
+                        "description": "ToyApi REST API (dev)",
                         "restApiId": {
                           "Ref": "ToyApi351408CF"
                         }
@@ -1286,31 +1585,31 @@
                   "version": "2.91.0"
                 }
               },
-              "DeploymentStage.prod": {
-                "id": "DeploymentStage.prod",
-                "path": "ToyApiStack-prod/ToyApi/DeploymentStage.prod",
+              "DeploymentStage.dev": {
+                "id": "DeploymentStage.dev",
+                "path": "ToyApiStack-dev/ToyApi/DeploymentStage.dev",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "ToyApiStack-prod/ToyApi/DeploymentStage.prod/Resource",
+                    "path": "ToyApiStack-dev/ToyApi/DeploymentStage.dev/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Stage",
                       "aws:cdk:cloudformation:props": {
                         "deploymentId": {
-                          "Ref": "ToyApiDeployment5DE889CB68ee3055329496826b0e5847685fa8c3"
+                          "Ref": "ToyApiDeployment5DE889CB0e926167eade78062038fc0df4f1b15d"
                         },
                         "restApiId": {
                           "Ref": "ToyApi351408CF"
                         },
-                        "stageName": "prod",
+                        "stageName": "dev",
                         "tags": [
                           {
                             "key": "CostCenter",
-                            "value": "ToyApi-prod"
+                            "value": "ToyApi-dev"
                           },
                           {
                             "key": "Environment",
-                            "value": "prod"
+                            "value": "dev"
                           },
                           {
                             "key": "Owner",
@@ -1336,7 +1635,7 @@
               },
               "Endpoint": {
                 "id": "Endpoint",
-                "path": "ToyApiStack-prod/ToyApi/Endpoint",
+                "path": "ToyApiStack-dev/ToyApi/Endpoint",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnOutput",
                   "version": "2.91.0"
@@ -1344,15 +1643,15 @@
               },
               "Default": {
                 "id": "Default",
-                "path": "ToyApiStack-prod/ToyApi/Default",
+                "path": "ToyApiStack-dev/ToyApi/Default",
                 "children": {
                   "OPTIONS": {
                     "id": "OPTIONS",
-                    "path": "ToyApiStack-prod/ToyApi/Default/OPTIONS",
+                    "path": "ToyApiStack-dev/ToyApi/Default/OPTIONS",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "ToyApiStack-prod/ToyApi/Default/OPTIONS/Resource",
+                        "path": "ToyApiStack-dev/ToyApi/Default/OPTIONS/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                           "aws:cdk:cloudformation:props": {
@@ -1409,11 +1708,11 @@
                   },
                   "public": {
                     "id": "public",
-                    "path": "ToyApiStack-prod/ToyApi/Default/public",
+                    "path": "ToyApiStack-dev/ToyApi/Default/public",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "ToyApiStack-prod/ToyApi/Default/public/Resource",
+                        "path": "ToyApiStack-dev/ToyApi/Default/public/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
@@ -1436,11 +1735,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "ToyApiStack-prod/ToyApi/Default/public/OPTIONS",
+                        "path": "ToyApiStack-dev/ToyApi/Default/public/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/public/OPTIONS/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/public/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -1494,11 +1793,11 @@
                       },
                       "message": {
                         "id": "message",
-                        "path": "ToyApiStack-prod/ToyApi/Default/public/message",
+                        "path": "ToyApiStack-dev/ToyApi/Default/public/message",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/public/message/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/public/message/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                               "aws:cdk:cloudformation:props": {
@@ -1518,11 +1817,11 @@
                           },
                           "OPTIONS": {
                             "id": "OPTIONS",
-                            "path": "ToyApiStack-prod/ToyApi/Default/public/message/OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/public/message/OPTIONS",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/public/message/OPTIONS/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/public/message/OPTIONS/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -1576,11 +1875,11 @@
                           },
                           "GET": {
                             "id": "GET",
-                            "path": "ToyApiStack-prod/ToyApi/Default/public/message/GET",
+                            "path": "ToyApiStack-dev/ToyApi/Default/public/message/GET",
                             "children": {
-                              "ApiPermission.ToyApiStackprodToyApi6573112C.GET..public.message": {
-                                "id": "ApiPermission.ToyApiStackprodToyApi6573112C.GET..public.message",
-                                "path": "ToyApiStack-prod/ToyApi/Default/public/message/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..public.message",
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..public.message": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..public.message",
+                                "path": "ToyApiStack-dev/ToyApi/Default/public/message/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..public.message",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -1602,7 +1901,7 @@
                                           },
                                           "/",
                                           {
-                                            "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                           },
                                           "/GET/public/message"
                                         ]
@@ -1615,9 +1914,9 @@
                                   "version": "2.91.0"
                                 }
                               },
-                              "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..public.message": {
-                                "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..public.message",
-                                "path": "ToyApiStack-prod/ToyApi/Default/public/message/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..public.message",
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..public.message": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..public.message",
+                                "path": "ToyApiStack-dev/ToyApi/Default/public/message/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..public.message",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -1650,7 +1949,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/public/message/GET/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/public/message/GET/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -1708,11 +2007,11 @@
                   },
                   "auth": {
                     "id": "auth",
-                    "path": "ToyApiStack-prod/ToyApi/Default/auth",
+                    "path": "ToyApiStack-dev/ToyApi/Default/auth",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "ToyApiStack-prod/ToyApi/Default/auth/Resource",
+                        "path": "ToyApiStack-dev/ToyApi/Default/auth/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
@@ -1735,11 +2034,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "ToyApiStack-prod/ToyApi/Default/auth/OPTIONS",
+                        "path": "ToyApiStack-dev/ToyApi/Default/auth/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/OPTIONS/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -1793,11 +2092,11 @@
                       },
                       "login": {
                         "id": "login",
-                        "path": "ToyApiStack-prod/ToyApi/Default/auth/login",
+                        "path": "ToyApiStack-dev/ToyApi/Default/auth/login",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/login/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/login/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                               "aws:cdk:cloudformation:props": {
@@ -1817,11 +2116,11 @@
                           },
                           "OPTIONS": {
                             "id": "OPTIONS",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/login/OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/login/OPTIONS",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/login/OPTIONS/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/login/OPTIONS/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -1875,11 +2174,11 @@
                           },
                           "POST": {
                             "id": "POST",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/login/POST",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/login/POST",
                             "children": {
-                              "ApiPermission.ToyApiStackprodToyApi6573112C.POST..auth.login": {
-                                "id": "ApiPermission.ToyApiStackprodToyApi6573112C.POST..auth.login",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/login/POST/ApiPermission.ToyApiStackprodToyApi6573112C.POST..auth.login",
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..auth.login": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..auth.login",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/login/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..auth.login",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -1901,7 +2200,7 @@
                                           },
                                           "/",
                                           {
-                                            "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                           },
                                           "/POST/auth/login"
                                         ]
@@ -1914,9 +2213,9 @@
                                   "version": "2.91.0"
                                 }
                               },
-                              "ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..auth.login": {
-                                "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..auth.login",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/login/POST/ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..auth.login",
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..auth.login": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..auth.login",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/login/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..auth.login",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -1949,7 +2248,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/login/POST/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/login/POST/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -2001,11 +2300,11 @@
                       },
                       "message": {
                         "id": "message",
-                        "path": "ToyApiStack-prod/ToyApi/Default/auth/message",
+                        "path": "ToyApiStack-dev/ToyApi/Default/auth/message",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/message/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/message/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                               "aws:cdk:cloudformation:props": {
@@ -2025,11 +2324,11 @@
                           },
                           "OPTIONS": {
                             "id": "OPTIONS",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/message/OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/message/OPTIONS",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/message/OPTIONS/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/message/OPTIONS/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -2083,11 +2382,11 @@
                           },
                           "GET": {
                             "id": "GET",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/message/GET",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/message/GET",
                             "children": {
-                              "ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.message": {
-                                "id": "ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.message",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/message/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.message",
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.message": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.message",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/message/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.message",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -2109,7 +2408,7 @@
                                           },
                                           "/",
                                           {
-                                            "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                           },
                                           "/GET/auth/message"
                                         ]
@@ -2122,9 +2421,9 @@
                                   "version": "2.91.0"
                                 }
                               },
-                              "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.message": {
-                                "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.message",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/message/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.message",
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.message": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.message",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/message/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.message",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -2157,7 +2456,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/message/GET/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/message/GET/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -2212,11 +2511,11 @@
                       },
                       "user": {
                         "id": "user",
-                        "path": "ToyApiStack-prod/ToyApi/Default/auth/user",
+                        "path": "ToyApiStack-dev/ToyApi/Default/auth/user",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/user/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/user/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                               "aws:cdk:cloudformation:props": {
@@ -2236,11 +2535,11 @@
                           },
                           "OPTIONS": {
                             "id": "OPTIONS",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/user/OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/user/OPTIONS",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/user/OPTIONS/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/user/OPTIONS/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -2294,11 +2593,11 @@
                           },
                           "{userId}": {
                             "id": "{userId}",
-                            "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}",
+                            "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                                   "aws:cdk:cloudformation:props": {
@@ -2318,11 +2617,11 @@
                               },
                               "OPTIONS": {
                                 "id": "OPTIONS",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/OPTIONS",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/OPTIONS",
                                 "children": {
                                   "Resource": {
                                     "id": "Resource",
-                                    "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/OPTIONS/Resource",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/OPTIONS/Resource",
                                     "attributes": {
                                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                       "aws:cdk:cloudformation:props": {
@@ -2376,11 +2675,11 @@
                               },
                               "message": {
                                 "id": "message",
-                                "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message",
+                                "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message",
                                 "children": {
                                   "Resource": {
                                     "id": "Resource",
-                                    "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/Resource",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/Resource",
                                     "attributes": {
                                       "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                                       "aws:cdk:cloudformation:props": {
@@ -2400,11 +2699,11 @@
                                   },
                                   "OPTIONS": {
                                     "id": "OPTIONS",
-                                    "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/OPTIONS",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/OPTIONS",
                                     "children": {
                                       "Resource": {
                                         "id": "Resource",
-                                        "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/OPTIONS/Resource",
+                                        "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/OPTIONS/Resource",
                                         "attributes": {
                                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                           "aws:cdk:cloudformation:props": {
@@ -2458,11 +2757,11 @@
                                   },
                                   "GET": {
                                     "id": "GET",
-                                    "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/GET",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/GET",
                                     "children": {
-                                      "ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message": {
-                                        "id": "ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message",
-                                        "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message",
+                                      "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message": {
+                                        "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message",
+                                        "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message",
                                         "attributes": {
                                           "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                           "aws:cdk:cloudformation:props": {
@@ -2484,7 +2783,7 @@
                                                   },
                                                   "/",
                                                   {
-                                                    "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                                    "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                                   },
                                                   "/GET/auth/user/*/message"
                                                 ]
@@ -2497,9 +2796,9 @@
                                           "version": "2.91.0"
                                         }
                                       },
-                                      "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message": {
-                                        "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message",
-                                        "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message",
+                                      "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message": {
+                                        "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message",
+                                        "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message",
                                         "attributes": {
                                           "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                           "aws:cdk:cloudformation:props": {
@@ -2532,7 +2831,7 @@
                                       },
                                       "Resource": {
                                         "id": "Resource",
-                                        "path": "ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/GET/Resource",
+                                        "path": "ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/GET/Resource",
                                         "attributes": {
                                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                           "aws:cdk:cloudformation:props": {
@@ -2605,11 +2904,11 @@
                   },
                   "items": {
                     "id": "items",
-                    "path": "ToyApiStack-prod/ToyApi/Default/items",
+                    "path": "ToyApiStack-dev/ToyApi/Default/items",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "ToyApiStack-prod/ToyApi/Default/items/Resource",
+                        "path": "ToyApiStack-dev/ToyApi/Default/items/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                           "aws:cdk:cloudformation:props": {
@@ -2632,11 +2931,11 @@
                       },
                       "OPTIONS": {
                         "id": "OPTIONS",
-                        "path": "ToyApiStack-prod/ToyApi/Default/items/OPTIONS",
+                        "path": "ToyApiStack-dev/ToyApi/Default/items/OPTIONS",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/OPTIONS/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/OPTIONS/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2690,11 +2989,11 @@
                       },
                       "GET": {
                         "id": "GET",
-                        "path": "ToyApiStack-prod/ToyApi/Default/items/GET",
+                        "path": "ToyApiStack-dev/ToyApi/Default/items/GET",
                         "children": {
-                          "ApiPermission.ToyApiStackprodToyApi6573112C.GET..items": {
-                            "id": "ApiPermission.ToyApiStackprodToyApi6573112C.GET..items",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..items",
+                          "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items": {
+                            "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
@@ -2716,7 +3015,7 @@
                                       },
                                       "/",
                                       {
-                                        "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                        "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                       },
                                       "/GET/items"
                                     ]
@@ -2729,9 +3028,9 @@
                               "version": "2.91.0"
                             }
                           },
-                          "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items": {
-                            "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items",
+                          "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items": {
+                            "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
@@ -2764,7 +3063,7 @@
                           },
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/GET/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/GET/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2813,11 +3112,11 @@
                       },
                       "POST": {
                         "id": "POST",
-                        "path": "ToyApiStack-prod/ToyApi/Default/items/POST",
+                        "path": "ToyApiStack-dev/ToyApi/Default/items/POST",
                         "children": {
-                          "ApiPermission.ToyApiStackprodToyApi6573112C.POST..items": {
-                            "id": "ApiPermission.ToyApiStackprodToyApi6573112C.POST..items",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/POST/ApiPermission.ToyApiStackprodToyApi6573112C.POST..items",
+                          "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..items": {
+                            "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..items",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..items",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
@@ -2839,7 +3138,7 @@
                                       },
                                       "/",
                                       {
-                                        "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                        "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                       },
                                       "/POST/items"
                                     ]
@@ -2852,9 +3151,9 @@
                               "version": "2.91.0"
                             }
                           },
-                          "ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..items": {
-                            "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..items",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/POST/ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..items",
+                          "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..items": {
+                            "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..items",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..items",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                               "aws:cdk:cloudformation:props": {
@@ -2887,7 +3186,7 @@
                           },
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/POST/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/POST/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                               "aws:cdk:cloudformation:props": {
@@ -2936,11 +3235,11 @@
                       },
                       "{id}": {
                         "id": "{id}",
-                        "path": "ToyApiStack-prod/ToyApi/Default/items/{id}",
+                        "path": "ToyApiStack-dev/ToyApi/Default/items/{id}",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
                               "aws:cdk:cloudformation:props": {
@@ -2960,11 +3259,11 @@
                           },
                           "OPTIONS": {
                             "id": "OPTIONS",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/OPTIONS",
                             "children": {
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/OPTIONS/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/OPTIONS/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -3018,11 +3317,11 @@
                           },
                           "GET": {
                             "id": "GET",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/GET",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/GET",
                             "children": {
-                              "ApiPermission.ToyApiStackprodToyApi6573112C.GET..items.{id}": {
-                                "id": "ApiPermission.ToyApiStackprodToyApi6573112C.GET..items.{id}",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..items.{id}",
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3044,7 +3343,7 @@
                                           },
                                           "/",
                                           {
-                                            "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                           },
                                           "/GET/items/*"
                                         ]
@@ -3057,9 +3356,9 @@
                                   "version": "2.91.0"
                                 }
                               },
-                              "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items.{id}": {
-                                "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items.{id}",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items.{id}",
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3092,7 +3391,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/GET/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/GET/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -3141,11 +3440,11 @@
                           },
                           "PUT": {
                             "id": "PUT",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/PUT",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/PUT",
                             "children": {
-                              "ApiPermission.ToyApiStackprodToyApi6573112C.PUT..items.{id}": {
-                                "id": "ApiPermission.ToyApiStackprodToyApi6573112C.PUT..items.{id}",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/PUT/ApiPermission.ToyApiStackprodToyApi6573112C.PUT..items.{id}",
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/PUT/ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3167,7 +3466,7 @@
                                           },
                                           "/",
                                           {
-                                            "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                           },
                                           "/PUT/items/*"
                                         ]
@@ -3180,9 +3479,9 @@
                                   "version": "2.91.0"
                                 }
                               },
-                              "ApiPermission.Test.ToyApiStackprodToyApi6573112C.PUT..items.{id}": {
-                                "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.PUT..items.{id}",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/PUT/ApiPermission.Test.ToyApiStackprodToyApi6573112C.PUT..items.{id}",
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/PUT/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3215,7 +3514,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/PUT/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/PUT/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -3264,11 +3563,11 @@
                           },
                           "DELETE": {
                             "id": "DELETE",
-                            "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/DELETE",
+                            "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE",
                             "children": {
-                              "ApiPermission.ToyApiStackprodToyApi6573112C.DELETE..items.{id}": {
-                                "id": "ApiPermission.ToyApiStackprodToyApi6573112C.DELETE..items.{id}",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/DELETE/ApiPermission.ToyApiStackprodToyApi6573112C.DELETE..items.{id}",
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE/ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3290,7 +3589,7 @@
                                           },
                                           "/",
                                           {
-                                            "Ref": "ToyApiDeploymentStageprod0CF8B7F6"
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
                                           },
                                           "/DELETE/items/*"
                                         ]
@@ -3303,9 +3602,9 @@
                                   "version": "2.91.0"
                                 }
                               },
-                              "ApiPermission.Test.ToyApiStackprodToyApi6573112C.DELETE..items.{id}": {
-                                "id": "ApiPermission.Test.ToyApiStackprodToyApi6573112C.DELETE..items.{id}",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/DELETE/ApiPermission.Test.ToyApiStackprodToyApi6573112C.DELETE..items.{id}",
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                                   "aws:cdk:cloudformation:props": {
@@ -3338,7 +3637,7 @@
                               },
                               "Resource": {
                                 "id": "Resource",
-                                "path": "ToyApiStack-prod/ToyApi/Default/items/{id}/DELETE/Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE/Resource",
                                 "attributes": {
                                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
                                   "aws:cdk:cloudformation:props": {
@@ -3396,6 +3695,1257 @@
                       "fqn": "aws-cdk-lib.aws_apigateway.Resource",
                       "version": "2.91.0"
                     }
+                  },
+                  "developer": {
+                    "id": "developer",
+                    "path": "ToyApiStack-dev/ToyApi/Default/developer",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "ToyApiStack-dev/ToyApi/Default/developer/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                          "aws:cdk:cloudformation:props": {
+                            "parentId": {
+                              "Fn::GetAtt": [
+                                "ToyApi351408CF",
+                                "RootResourceId"
+                              ]
+                            },
+                            "pathPart": "developer",
+                            "restApiId": {
+                              "Ref": "ToyApi351408CF"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                          "version": "2.91.0"
+                        }
+                      },
+                      "OPTIONS": {
+                        "id": "OPTIONS",
+                        "path": "ToyApiStack-dev/ToyApi/Default/developer/OPTIONS",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/OPTIONS/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                              "aws:cdk:cloudformation:props": {
+                                "apiKeyRequired": false,
+                                "authorizationType": "NONE",
+                                "httpMethod": "OPTIONS",
+                                "integration": {
+                                  "type": "MOCK",
+                                  "requestTemplates": {
+                                    "application/json": "{ statusCode: 200 }"
+                                  },
+                                  "integrationResponses": [
+                                    {
+                                      "statusCode": "204",
+                                      "responseParameters": {
+                                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "methodResponses": [
+                                  {
+                                    "statusCode": "204",
+                                    "responseParameters": {
+                                      "method.response.header.Access-Control-Allow-Headers": true,
+                                      "method.response.header.Access-Control-Allow-Origin": true,
+                                      "method.response.header.Access-Control-Allow-Methods": true
+                                    }
+                                  }
+                                ],
+                                "resourceId": {
+                                  "Ref": "ToyApideveloperAAE543C0"
+                                },
+                                "restApiId": {
+                                  "Ref": "ToyApi351408CF"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                              "version": "2.91.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                          "version": "2.91.0"
+                        }
+                      },
+                      "register": {
+                        "id": "register",
+                        "path": "ToyApiStack-dev/ToyApi/Default/developer/register",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/register/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Ref": "ToyApideveloperAAE543C0"
+                                },
+                                "pathPart": "register",
+                                "restApiId": {
+                                  "Ref": "ToyApi351408CF"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/register/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/register/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperregister1BA6DBAE"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "POST": {
+                            "id": "POST",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/register/POST",
+                            "children": {
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.register": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.register",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/register/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.register",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
+                                          },
+                                          "/POST/developer/register"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.register": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.register",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/register/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.register",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/test-invoke-stage/POST/developer/register"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/register/POST/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "POST",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "DeveloperFunction4CFB9C2E",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperregister1BA6DBAE"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.91.0"
+                        }
+                      },
+                      "profile": {
+                        "id": "profile",
+                        "path": "ToyApiStack-dev/ToyApi/Default/developer/profile",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Ref": "ToyApideveloperAAE543C0"
+                                },
+                                "pathPart": "profile",
+                                "restApiId": {
+                                  "Ref": "ToyApi351408CF"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperprofileFCE01605"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "GET": {
+                            "id": "GET",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/GET",
+                            "children": {
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
+                                          },
+                                          "/GET/developer/profile"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/test-invoke-stage/GET/developer/profile"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/GET/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "GET",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "DeveloperFunction4CFB9C2E",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperprofileFCE01605"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "PUT": {
+                            "id": "PUT",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/PUT",
+                            "children": {
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
+                                          },
+                                          "/PUT/developer/profile"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/test-invoke-stage/PUT/developer/profile"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "PUT",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "DeveloperFunction4CFB9C2E",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperprofileFCE01605"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.91.0"
+                        }
+                      },
+                      "api-key": {
+                        "id": "api-key",
+                        "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Ref": "ToyApideveloperAAE543C0"
+                                },
+                                "pathPart": "api-key",
+                                "restApiId": {
+                                  "Ref": "ToyApi351408CF"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperapikey80E6A461"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "POST": {
+                            "id": "POST",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/POST",
+                            "children": {
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
+                                          },
+                                          "/POST/developer/api-key"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/test-invoke-stage/POST/developer/api-key"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "POST",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "DeveloperFunction4CFB9C2E",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperapikey80E6A461"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "{keyId}": {
+                            "id": "{keyId}",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                                  "aws:cdk:cloudformation:props": {
+                                    "parentId": {
+                                      "Ref": "ToyApideveloperapikey80E6A461"
+                                    },
+                                    "pathPart": "{keyId}",
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "OPTIONS": {
+                                "id": "OPTIONS",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/OPTIONS",
+                                "children": {
+                                  "Resource": {
+                                    "id": "Resource",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/OPTIONS/Resource",
+                                    "attributes": {
+                                      "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                      "aws:cdk:cloudformation:props": {
+                                        "apiKeyRequired": false,
+                                        "authorizationType": "NONE",
+                                        "httpMethod": "OPTIONS",
+                                        "integration": {
+                                          "type": "MOCK",
+                                          "requestTemplates": {
+                                            "application/json": "{ statusCode: 200 }"
+                                          },
+                                          "integrationResponses": [
+                                            {
+                                              "statusCode": "204",
+                                              "responseParameters": {
+                                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        "methodResponses": [
+                                          {
+                                            "statusCode": "204",
+                                            "responseParameters": {
+                                              "method.response.header.Access-Control-Allow-Headers": true,
+                                              "method.response.header.Access-Control-Allow-Origin": true,
+                                              "method.response.header.Access-Control-Allow-Methods": true
+                                            }
+                                          }
+                                        ],
+                                        "resourceId": {
+                                          "Ref": "ToyApideveloperapikeykeyId6DF3660F"
+                                        },
+                                        "restApiId": {
+                                          "Ref": "ToyApi351408CF"
+                                        }
+                                      }
+                                    },
+                                    "constructInfo": {
+                                      "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                      "version": "2.91.0"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "DELETE": {
+                                "id": "DELETE",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE",
+                                "children": {
+                                  "ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}": {
+                                    "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}",
+                                    "attributes": {
+                                      "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                      "aws:cdk:cloudformation:props": {
+                                        "action": "lambda:InvokeFunction",
+                                        "functionName": {
+                                          "Fn::GetAtt": [
+                                            "DeveloperFunction4CFB9C2E",
+                                            "Arn"
+                                          ]
+                                        },
+                                        "principal": "apigateway.amazonaws.com",
+                                        "sourceArn": {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              "arn:aws:execute-api:us-east-1:375004071203:",
+                                              {
+                                                "Ref": "ToyApi351408CF"
+                                              },
+                                              "/",
+                                              {
+                                                "Ref": "ToyApiDeploymentStagedevCCBD374C"
+                                              },
+                                              "/DELETE/developer/api-key/*"
+                                            ]
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "constructInfo": {
+                                      "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                      "version": "2.91.0"
+                                    }
+                                  },
+                                  "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}": {
+                                    "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}",
+                                    "attributes": {
+                                      "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                      "aws:cdk:cloudformation:props": {
+                                        "action": "lambda:InvokeFunction",
+                                        "functionName": {
+                                          "Fn::GetAtt": [
+                                            "DeveloperFunction4CFB9C2E",
+                                            "Arn"
+                                          ]
+                                        },
+                                        "principal": "apigateway.amazonaws.com",
+                                        "sourceArn": {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              "arn:aws:execute-api:us-east-1:375004071203:",
+                                              {
+                                                "Ref": "ToyApi351408CF"
+                                              },
+                                              "/test-invoke-stage/DELETE/developer/api-key/*"
+                                            ]
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "constructInfo": {
+                                      "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                      "version": "2.91.0"
+                                    }
+                                  },
+                                  "Resource": {
+                                    "id": "Resource",
+                                    "path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/Resource",
+                                    "attributes": {
+                                      "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                      "aws:cdk:cloudformation:props": {
+                                        "authorizationType": "NONE",
+                                        "httpMethod": "DELETE",
+                                        "integration": {
+                                          "type": "AWS_PROXY",
+                                          "uri": {
+                                            "Fn::Join": [
+                                              "",
+                                              [
+                                                "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                                {
+                                                  "Fn::GetAtt": [
+                                                    "DeveloperFunction4CFB9C2E",
+                                                    "Arn"
+                                                  ]
+                                                },
+                                                "/invocations"
+                                              ]
+                                            ]
+                                          },
+                                          "integrationHttpMethod": "POST"
+                                        },
+                                        "resourceId": {
+                                          "Ref": "ToyApideveloperapikeykeyId6DF3660F"
+                                        },
+                                        "restApiId": {
+                                          "Ref": "ToyApi351408CF"
+                                        }
+                                      }
+                                    },
+                                    "constructInfo": {
+                                      "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                      "version": "2.91.0"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                              "version": "2.91.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.91.0"
+                        }
+                      },
+                      "api-keys": {
+                        "id": "api-keys",
+                        "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::ApiGateway::Resource",
+                              "aws:cdk:cloudformation:props": {
+                                "parentId": {
+                                  "Ref": "ToyApideveloperAAE543C0"
+                                },
+                                "pathPart": "api-keys",
+                                "restApiId": {
+                                  "Ref": "ToyApi351408CF"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.CfnResource",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "OPTIONS": {
+                            "id": "OPTIONS",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/OPTIONS",
+                            "children": {
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/OPTIONS/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "apiKeyRequired": false,
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "OPTIONS",
+                                    "integration": {
+                                      "type": "MOCK",
+                                      "requestTemplates": {
+                                        "application/json": "{ statusCode: 200 }"
+                                      },
+                                      "integrationResponses": [
+                                        {
+                                          "statusCode": "204",
+                                          "responseParameters": {
+                                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                                            "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                            "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "methodResponses": [
+                                      {
+                                        "statusCode": "204",
+                                        "responseParameters": {
+                                          "method.response.header.Access-Control-Allow-Headers": true,
+                                          "method.response.header.Access-Control-Allow-Origin": true,
+                                          "method.response.header.Access-Control-Allow-Methods": true
+                                        }
+                                      }
+                                    ],
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperapikeys9588C797"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          },
+                          "GET": {
+                            "id": "GET",
+                            "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET",
+                            "children": {
+                              "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys": {
+                                "id": "ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/",
+                                          {
+                                            "Ref": "ToyApiDeploymentStagedevCCBD374C"
+                                          },
+                                          "/GET/developer/api-keys"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys": {
+                                "id": "ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                                  "aws:cdk:cloudformation:props": {
+                                    "action": "lambda:InvokeFunction",
+                                    "functionName": {
+                                      "Fn::GetAtt": [
+                                        "DeveloperFunction4CFB9C2E",
+                                        "Arn"
+                                      ]
+                                    },
+                                    "principal": "apigateway.amazonaws.com",
+                                    "sourceArn": {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          "arn:aws:execute-api:us-east-1:375004071203:",
+                                          {
+                                            "Ref": "ToyApi351408CF"
+                                          },
+                                          "/test-invoke-stage/GET/developer/api-keys"
+                                        ]
+                                      ]
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                                  "version": "2.91.0"
+                                }
+                              },
+                              "Resource": {
+                                "id": "Resource",
+                                "path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/Resource",
+                                "attributes": {
+                                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::Method",
+                                  "aws:cdk:cloudformation:props": {
+                                    "authorizationType": "NONE",
+                                    "httpMethod": "GET",
+                                    "integration": {
+                                      "type": "AWS_PROXY",
+                                      "uri": {
+                                        "Fn::Join": [
+                                          "",
+                                          [
+                                            "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+                                            {
+                                              "Fn::GetAtt": [
+                                                "DeveloperFunction4CFB9C2E",
+                                                "Arn"
+                                              ]
+                                            },
+                                            "/invocations"
+                                          ]
+                                        ]
+                                      },
+                                      "integrationHttpMethod": "POST"
+                                    },
+                                    "resourceId": {
+                                      "Ref": "ToyApideveloperapikeys9588C797"
+                                    },
+                                    "restApiId": {
+                                      "Ref": "ToyApi351408CF"
+                                    }
+                                  }
+                                },
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.aws_apigateway.CfnMethod",
+                                  "version": "2.91.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_apigateway.Method",
+                              "version": "2.91.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                          "version": "2.91.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigateway.Resource",
+                      "version": "2.91.0"
+                    }
                   }
                 },
                 "constructInfo": {
@@ -3411,16 +4961,16 @@
           },
           "CognitoAuthorizer": {
             "id": "CognitoAuthorizer",
-            "path": "ToyApiStack-prod/CognitoAuthorizer",
+            "path": "ToyApiStack-dev/CognitoAuthorizer",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/CognitoAuthorizer/Resource",
+                "path": "ToyApiStack-dev/CognitoAuthorizer/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::ApiGateway::Authorizer",
                   "aws:cdk:cloudformation:props": {
                     "identitySource": "method.request.header.Authorization",
-                    "name": "toyapi-prod-authorizer",
+                    "name": "toyapi-dev-authorizer",
                     "providerArns": [
                       {
                         "Fn::GetAtt": [
@@ -3446,25 +4996,40 @@
               "version": "2.91.0"
             }
           },
-          "BudgetAlerts": {
-            "id": "BudgetAlerts",
-            "path": "ToyApiStack-prod/BudgetAlerts",
+          "DeveloperUsagePlan": {
+            "id": "DeveloperUsagePlan",
+            "path": "ToyApiStack-dev/DeveloperUsagePlan",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "ToyApiStack-prod/BudgetAlerts/Resource",
+                "path": "ToyApiStack-dev/DeveloperUsagePlan/Resource",
                 "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::SNS::Topic",
+                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::UsagePlan",
                   "aws:cdk:cloudformation:props": {
-                    "displayName": "ToyApi Budget Alerts (prod)",
+                    "apiStages": [
+                      {
+                        "apiId": {
+                          "Ref": "ToyApi351408CF"
+                        },
+                        "stage": {
+                          "Ref": "ToyApiDeploymentStagedevCCBD374C"
+                        },
+                        "throttle": {}
+                      }
+                    ],
+                    "description": "Usage plan for developer API keys",
+                    "quota": {
+                      "limit": 10000,
+                      "period": "DAY"
+                    },
                     "tags": [
                       {
                         "key": "CostCenter",
-                        "value": "ToyApi-prod"
+                        "value": "ToyApi-dev"
                       },
                       {
                         "key": "Environment",
-                        "value": "prod"
+                        "value": "dev"
                       },
                       {
                         "key": "Owner",
@@ -3475,7 +5040,118 @@
                         "value": "ToyApi"
                       }
                     ],
-                    "topicName": "toyapi-prod-budget-alerts"
+                    "throttle": {
+                      "burstLimit": 200,
+                      "rateLimit": 100
+                    },
+                    "usagePlanName": "toyapi-dev-developer-plan"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.CfnUsagePlan",
+                  "version": "2.91.0"
+                }
+              },
+              "UsagePlanKeyResource:ToyApiStackdevDefaultApiKey9E14AB6E": {
+                "id": "UsagePlanKeyResource:ToyApiStackdevDefaultApiKey9E14AB6E",
+                "path": "ToyApiStack-dev/DeveloperUsagePlan/UsagePlanKeyResource:ToyApiStackdevDefaultApiKey9E14AB6E",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::UsagePlanKey",
+                  "aws:cdk:cloudformation:props": {
+                    "keyId": {
+                      "Ref": "DefaultApiKey2400BB48"
+                    },
+                    "keyType": "API_KEY",
+                    "usagePlanId": {
+                      "Ref": "DeveloperUsagePlanBF10B320"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.CfnUsagePlanKey",
+                  "version": "2.91.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_apigateway.UsagePlan",
+              "version": "2.91.0"
+            }
+          },
+          "DefaultApiKey": {
+            "id": "DefaultApiKey",
+            "path": "ToyApiStack-dev/DefaultApiKey",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "ToyApiStack-dev/DefaultApiKey/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ApiGateway::ApiKey",
+                  "aws:cdk:cloudformation:props": {
+                    "description": "Default API key for testing and documentation",
+                    "enabled": true,
+                    "name": "toyapi-dev-default-key",
+                    "tags": [
+                      {
+                        "key": "CostCenter",
+                        "value": "ToyApi-dev"
+                      },
+                      {
+                        "key": "Environment",
+                        "value": "dev"
+                      },
+                      {
+                        "key": "Owner",
+                        "value": "thismakesmehappy"
+                      },
+                      {
+                        "key": "Project",
+                        "value": "ToyApi"
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigateway.CfnApiKey",
+                  "version": "2.91.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_apigateway.ApiKey",
+              "version": "2.91.0"
+            }
+          },
+          "BudgetAlerts": {
+            "id": "BudgetAlerts",
+            "path": "ToyApiStack-dev/BudgetAlerts",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "ToyApiStack-dev/BudgetAlerts/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SNS::Topic",
+                  "aws:cdk:cloudformation:props": {
+                    "displayName": "ToyApi Budget Alerts (dev)",
+                    "tags": [
+                      {
+                        "key": "CostCenter",
+                        "value": "ToyApi-dev"
+                      },
+                      {
+                        "key": "Environment",
+                        "value": "dev"
+                      },
+                      {
+                        "key": "Owner",
+                        "value": "thismakesmehappy"
+                      },
+                      {
+                        "key": "Project",
+                        "value": "ToyApi"
+                      }
+                    ],
+                    "topicName": "toyapi-dev-budget-alerts"
                   }
                 },
                 "constructInfo": {
@@ -3485,11 +5161,11 @@
               },
               "bernardo+toyAPI@thismakesmehappy.co": {
                 "id": "bernardo+toyAPI@thismakesmehappy.co",
-                "path": "ToyApiStack-prod/BudgetAlerts/bernardo+toyAPI@thismakesmehappy.co",
+                "path": "ToyApiStack-dev/BudgetAlerts/bernardo+toyAPI@thismakesmehappy.co",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "ToyApiStack-prod/BudgetAlerts/bernardo+toyAPI@thismakesmehappy.co/Resource",
+                    "path": "ToyApiStack-dev/BudgetAlerts/bernardo+toyAPI@thismakesmehappy.co/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::SNS::Subscription",
                       "aws:cdk:cloudformation:props": {
@@ -3519,7 +5195,7 @@
           },
           "ApiUrl": {
             "id": "ApiUrl",
-            "path": "ToyApiStack-prod/ApiUrl",
+            "path": "ToyApiStack-dev/ApiUrl",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.91.0"
@@ -3527,7 +5203,7 @@
           },
           "UserPoolId": {
             "id": "UserPoolId",
-            "path": "ToyApiStack-prod/UserPoolId",
+            "path": "ToyApiStack-dev/UserPoolId",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.91.0"
@@ -3535,7 +5211,7 @@
           },
           "UserPoolClientId": {
             "id": "UserPoolClientId",
-            "path": "ToyApiStack-prod/UserPoolClientId",
+            "path": "ToyApiStack-dev/UserPoolClientId",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.91.0"
@@ -3543,7 +5219,7 @@
           },
           "TableName": {
             "id": "TableName",
-            "path": "ToyApiStack-prod/TableName",
+            "path": "ToyApiStack-dev/TableName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.91.0"
@@ -3551,7 +5227,7 @@
           },
           "Environment": {
             "id": "Environment",
-            "path": "ToyApiStack-prod/Environment",
+            "path": "ToyApiStack-dev/Environment",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.91.0"
@@ -3559,11 +5235,11 @@
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "ToyApiStack-prod/CDKMetadata",
+            "path": "ToyApiStack-dev/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "ToyApiStack-prod/CDKMetadata/Default",
+                "path": "ToyApiStack-dev/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.91.0"
@@ -3577,7 +5253,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "ToyApiStack-prod/BootstrapVersion",
+            "path": "ToyApiStack-dev/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.91.0"
@@ -3585,7 +5261,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "ToyApiStack-prod/CheckBootstrapVersion",
+            "path": "ToyApiStack-dev/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.91.0"

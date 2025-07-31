@@ -1,33 +1,33 @@
 {
   "version": "33.0.0",
   "artifacts": {
-    "ToyApiStack-prod.assets": {
+    "ToyApiStack-dev.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "ToyApiStack-prod.assets.json",
+        "file": "ToyApiStack-dev.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "ToyApiStack-prod": {
+    "ToyApiStack-dev": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://375004071203/us-east-1",
       "properties": {
-        "templateFile": "ToyApiStack-prod.template.json",
+        "templateFile": "ToyApiStack-dev.template.json",
         "tags": {
-          "CostCenter": "ToyApi-prod",
-          "Environment": "prod",
+          "CostCenter": "ToyApi-dev",
+          "Environment": "dev",
           "Owner": "thismakesmehappy",
           "Project": "ToyApi"
         },
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::375004071203:role/cdk-hnb659fds-deploy-role-375004071203-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::375004071203:role/cdk-hnb659fds-cfn-exec-role-375004071203-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-375004071203-us-east-1/fb33f19ff8257c51a35d82aa3e32db6dcb858b4198457018d2df543b2fb7b722.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-375004071203-us-east-1/69482372b230eb03ec7a07990db6b2feac6219e7de83472ca312a6326fe799a9.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "ToyApiStack-prod.assets"
+          "ToyApiStack-dev.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::375004071203:role/cdk-hnb659fds-lookup-role-375004071203-us-east-1",
@@ -36,20 +36,20 @@
         }
       },
       "dependencies": [
-        "ToyApiStack-prod.assets"
+        "ToyApiStack-dev.assets"
       ],
       "metadata": {
-        "/ToyApiStack-prod": [
+        "/ToyApiStack-dev": [
           {
             "type": "aws:cdk:stack-tags",
             "data": [
               {
                 "Key": "CostCenter",
-                "Value": "ToyApi-prod"
+                "Value": "ToyApi-dev"
               },
               {
                 "Key": "Environment",
-                "Value": "prod"
+                "Value": "dev"
               },
               {
                 "Key": "Owner",
@@ -62,7 +62,7 @@
             ]
           }
         ],
-        "/ToyApiStack-prod/ItemsTable": [
+        "/ToyApiStack-dev/ItemsTable": [
           {
             "type": "aws:cdk:hasPhysicalName",
             "data": {
@@ -70,488 +70,710 @@
             }
           }
         ],
-        "/ToyApiStack-prod/ItemsTable/Resource": [
+        "/ToyApiStack-dev/ItemsTable/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ItemsTable5AAC2C46"
           }
         ],
-        "/ToyApiStack-prod/UserPool/Resource": [
+        "/ToyApiStack-dev/UserPool/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "UserPool6BA7E5F2"
           }
         ],
-        "/ToyApiStack-prod/UserPoolClient/Resource": [
+        "/ToyApiStack-dev/UserPoolClient/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "UserPoolClient2F5918F7"
           }
         ],
-        "/ToyApiStack-prod/PublicFunctionLogGroup/Resource": [
+        "/ToyApiStack-dev/PublicFunctionLogGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "PublicFunctionLogGroup0D02ACFE"
           }
         ],
-        "/ToyApiStack-prod/PublicFunction/ServiceRole/Resource": [
+        "/ToyApiStack-dev/PublicFunction/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "PublicFunctionServiceRole3180614D"
           }
         ],
-        "/ToyApiStack-prod/PublicFunction/ServiceRole/DefaultPolicy/Resource": [
+        "/ToyApiStack-dev/PublicFunction/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "PublicFunctionServiceRoleDefaultPolicyA5AE747D"
           }
         ],
-        "/ToyApiStack-prod/PublicFunction/Resource": [
+        "/ToyApiStack-dev/PublicFunction/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "PublicFunction8C206ECA"
           }
         ],
-        "/ToyApiStack-prod/AuthFunctionLogGroup/Resource": [
+        "/ToyApiStack-dev/AuthFunctionLogGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "AuthFunctionLogGroupE9642A58"
           }
         ],
-        "/ToyApiStack-prod/AuthFunction/ServiceRole/Resource": [
+        "/ToyApiStack-dev/AuthFunction/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "AuthFunctionServiceRole87A7A68C"
           }
         ],
-        "/ToyApiStack-prod/AuthFunction/ServiceRole/DefaultPolicy/Resource": [
+        "/ToyApiStack-dev/AuthFunction/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "AuthFunctionServiceRoleDefaultPolicy4198AD5B"
           }
         ],
-        "/ToyApiStack-prod/AuthFunction/Resource": [
+        "/ToyApiStack-dev/AuthFunction/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "AuthFunctionA1CD5E0F"
           }
         ],
-        "/ToyApiStack-prod/ItemsFunctionLogGroup/Resource": [
+        "/ToyApiStack-dev/ItemsFunctionLogGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ItemsFunctionLogGroup8321C469"
           }
         ],
-        "/ToyApiStack-prod/ItemsFunction/ServiceRole/Resource": [
+        "/ToyApiStack-dev/ItemsFunction/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ItemsFunctionServiceRoleC323889C"
           }
         ],
-        "/ToyApiStack-prod/ItemsFunction/ServiceRole/DefaultPolicy/Resource": [
+        "/ToyApiStack-dev/ItemsFunction/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ItemsFunctionServiceRoleDefaultPolicy72D40A1B"
           }
         ],
-        "/ToyApiStack-prod/ItemsFunction/Resource": [
+        "/ToyApiStack-dev/ItemsFunction/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ItemsFunction736859B1"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Resource": [
+        "/ToyApiStack-dev/DeveloperFunctionLogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeveloperFunctionLogGroup9CAE19C1"
+          }
+        ],
+        "/ToyApiStack-dev/DeveloperFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeveloperFunctionServiceRoleCE53D832"
+          }
+        ],
+        "/ToyApiStack-dev/DeveloperFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeveloperFunctionServiceRoleDefaultPolicy6FEA04B0"
+          }
+        ],
+        "/ToyApiStack-dev/DeveloperFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeveloperFunction4CFB9C2E"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApi351408CF"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/CloudWatchRole/Resource": [
+        "/ToyApiStack-dev/ToyApi/CloudWatchRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiCloudWatchRole7CDBF9E7"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Account": [
+        "/ToyApiStack-dev/ToyApi/Account": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiAccountBDCDD152"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Deployment/Resource": [
+        "/ToyApiStack-dev/ToyApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiDeployment5DE889CB68ee3055329496826b0e5847685fa8c3"
+            "data": "ToyApiDeployment5DE889CB0e926167eade78062038fc0df4f1b15d"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/DeploymentStage.prod/Resource": [
+        "/ToyApiStack-dev/ToyApi/DeploymentStage.dev/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiDeploymentStageprod0CF8B7F6"
+            "data": "ToyApiDeploymentStagedevCCBD374C"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Endpoint": [
+        "/ToyApiStack-dev/ToyApi/Endpoint": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiEndpointE4265390"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiOPTIONSF3984785"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/public/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/public/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApipublicB3E4EAE9"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/public/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/public/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApipublicOPTIONS4F773EFF"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/public/message/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/public/message/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApipublicmessage950797E4"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/public/message/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/public/message/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApipublicmessageOPTIONS419F5A4F"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/public/message/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..public.message": [
+        "/ToyApiStack-dev/ToyApi/Default/public/message/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..public.message": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApipublicmessageGETApiPermissionToyApiStackprodToyApi6573112CGETpublicmessage27DEC760"
+            "data": "ToyApipublicmessageGETApiPermissionToyApiStackdevToyApi10ED4AE5GETpublicmessage7A5E5BE4"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/public/message/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..public.message": [
+        "/ToyApiStack-dev/ToyApi/Default/public/message/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..public.message": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApipublicmessageGETApiPermissionTestToyApiStackprodToyApi6573112CGETpublicmessage44E72C4D"
+            "data": "ToyApipublicmessageGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETpublicmessageFEB34F66"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/public/message/GET/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/public/message/GET/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApipublicmessageGETE013191F"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthB57830EF"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthOPTIONSC0468BF4"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/login/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/login/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthlogin0A588AB9"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/login/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/login/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthloginOPTIONS8AA0E46F"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/login/POST/ApiPermission.ToyApiStackprodToyApi6573112C.POST..auth.login": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/login/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..auth.login": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiauthloginPOSTApiPermissionToyApiStackprodToyApi6573112CPOSTauthlogin642FF57F"
+            "data": "ToyApiauthloginPOSTApiPermissionToyApiStackdevToyApi10ED4AE5POSTauthlogin663E39E5"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/login/POST/ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..auth.login": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/login/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..auth.login": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiauthloginPOSTApiPermissionTestToyApiStackprodToyApi6573112CPOSTauthlogin89BC164F"
+            "data": "ToyApiauthloginPOSTApiPermissionTestToyApiStackdevToyApi10ED4AE5POSTauthloginBDA87315"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/login/POST/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/login/POST/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthloginPOST4FB0565A"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/message/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/message/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthmessageA7CC39BD"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/message/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/message/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthmessageOPTIONS974D23A1"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/message/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.message": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/message/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.message": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiauthmessageGETApiPermissionToyApiStackprodToyApi6573112CGETauthmessageFAAE95B6"
+            "data": "ToyApiauthmessageGETApiPermissionToyApiStackdevToyApi10ED4AE5GETauthmessageC7E87FA0"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/message/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.message": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/message/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.message": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiauthmessageGETApiPermissionTestToyApiStackprodToyApi6573112CGETauthmessageD6C9F790"
+            "data": "ToyApiauthmessageGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETauthmessageC15FD6BE"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/message/GET/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/message/GET/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthmessageGET855425A0"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthuserF2BC53E1"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthuserOPTIONSA0FB34C1"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthuseruserIdF80AAD91"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthuseruserIdOPTIONS8B1D102C"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthuseruserIdmessage9EC415FC"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthuseruserIdmessageOPTIONSFFAC31FF"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiauthuseruserIdmessageGETApiPermissionToyApiStackprodToyApi6573112CGETauthuseruserIdmessageB0E0DC18"
+            "data": "ToyApiauthuseruserIdmessageGETApiPermissionToyApiStackdevToyApi10ED4AE5GETauthuseruserIdmessage58B47D64"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..auth.user.{userId}.message": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..auth.user.{userId}.message": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiauthuseruserIdmessageGETApiPermissionTestToyApiStackprodToyApi6573112CGETauthuseruserIdmessage40B3155D"
+            "data": "ToyApiauthuseruserIdmessageGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETauthuseruserIdmessage67E3EECA"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/auth/user/{userId}/message/GET/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/auth/user/{userId}/message/GET/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiauthuseruserIdmessageGETA4953C09"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitems30D054A6"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsOPTIONSDCB2E79A"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..items": [
+        "/ToyApiStack-dev/ToyApi/Default/items/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsGETApiPermissionToyApiStackprodToyApi6573112CGETitems0671F1C6"
+            "data": "ToyApiitemsGETApiPermissionToyApiStackdevToyApi10ED4AE5GETitems00C0E552"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items": [
+        "/ToyApiStack-dev/ToyApi/Default/items/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsGETApiPermissionTestToyApiStackprodToyApi6573112CGETitems0B4469D1"
+            "data": "ToyApiitemsGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETitems334075DD"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/GET/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/GET/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsGET497B2C8E"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/POST/ApiPermission.ToyApiStackprodToyApi6573112C.POST..items": [
+        "/ToyApiStack-dev/ToyApi/Default/items/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..items": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsPOSTApiPermissionToyApiStackprodToyApi6573112CPOSTitems5BD5090D"
+            "data": "ToyApiitemsPOSTApiPermissionToyApiStackdevToyApi10ED4AE5POSTitems997BDF04"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/POST/ApiPermission.Test.ToyApiStackprodToyApi6573112C.POST..items": [
+        "/ToyApiStack-dev/ToyApi/Default/items/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..items": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsPOSTApiPermissionTestToyApiStackprodToyApi6573112CPOSTitems3D997D06"
+            "data": "ToyApiitemsPOSTApiPermissionTestToyApiStackdevToyApi10ED4AE5POSTitems54C965F1"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/POST/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/POST/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsPOSTB7E73816"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsid0E11AEFB"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/OPTIONS/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsidOPTIONSECDC8BA4"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/GET/ApiPermission.ToyApiStackprodToyApi6573112C.GET..items.{id}": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsidGETApiPermissionToyApiStackprodToyApi6573112CGETitemsidFA257733"
+            "data": "ToyApiitemsidGETApiPermissionToyApiStackdevToyApi10ED4AE5GETitemsid275A1D21"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/GET/ApiPermission.Test.ToyApiStackprodToyApi6573112C.GET..items.{id}": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..items.{id}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsidGETApiPermissionTestToyApiStackprodToyApi6573112CGETitemsid8824BCE9"
+            "data": "ToyApiitemsidGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETitemsid7EAF306D"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/GET/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/GET/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsidGET90AAD390"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/PUT/ApiPermission.ToyApiStackprodToyApi6573112C.PUT..items.{id}": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/PUT/ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsidPUTApiPermissionToyApiStackprodToyApi6573112CPUTitemsid14D45807"
+            "data": "ToyApiitemsidPUTApiPermissionToyApiStackdevToyApi10ED4AE5PUTitemsid47891FD2"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/PUT/ApiPermission.Test.ToyApiStackprodToyApi6573112C.PUT..items.{id}": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/PUT/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..items.{id}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsidPUTApiPermissionTestToyApiStackprodToyApi6573112CPUTitemsid30C382B0"
+            "data": "ToyApiitemsidPUTApiPermissionTestToyApiStackdevToyApi10ED4AE5PUTitemsidCE552CD2"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/PUT/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/PUT/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsidPUT66D755A2"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/DELETE/ApiPermission.ToyApiStackprodToyApi6573112C.DELETE..items.{id}": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE/ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsidDELETEApiPermissionToyApiStackprodToyApi6573112CDELETEitemsid01350610"
+            "data": "ToyApiitemsidDELETEApiPermissionToyApiStackdevToyApi10ED4AE5DELETEitemsid8D09F5D1"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/DELETE/ApiPermission.Test.ToyApiStackprodToyApi6573112C.DELETE..items.{id}": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..items.{id}": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ToyApiitemsidDELETEApiPermissionTestToyApiStackprodToyApi6573112CDELETEitemsid61B01289"
+            "data": "ToyApiitemsidDELETEApiPermissionTestToyApiStackdevToyApi10ED4AE5DELETEitemsid10EEC2B7"
           }
         ],
-        "/ToyApiStack-prod/ToyApi/Default/items/{id}/DELETE/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ToyApiitemsidDELETE0A96FBB4"
           }
         ],
-        "/ToyApiStack-prod/CognitoAuthorizer/Resource": [
+        "/ToyApiStack-dev/ToyApi/Default/developer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperAAE543C0"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperOPTIONSB3D5F947"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/register/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperregister1BA6DBAE"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/register/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperregisterOPTIONSAA83300A"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/register/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.register": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperregisterPOSTApiPermissionToyApiStackdevToyApi10ED4AE5POSTdeveloperregister5C1313BE"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/register/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.register": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperregisterPOSTApiPermissionTestToyApiStackdevToyApi10ED4AE5POSTdeveloperregisterEE8E33C6"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/register/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperregisterPOSTF7E67475"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofileFCE01605"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofileOPTIONSD80306DB"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofileGETApiPermissionToyApiStackdevToyApi10ED4AE5GETdeveloperprofileAF5F991A"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofileGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETdeveloperprofile08FE0326"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofileGETC7805BA7"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofilePUTApiPermissionToyApiStackdevToyApi10ED4AE5PUTdeveloperprofileDE6F8D00"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofilePUTApiPermissionTestToyApiStackdevToyApi10ED4AE5PUTdeveloperprofile0E750AFA"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperprofilePUT7C84DE84"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikey80E6A461"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeyOPTIONSE17F6EC8"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeyPOSTApiPermissionToyApiStackdevToyApi10ED4AE5POSTdeveloperapikeyD873A818"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeyPOSTApiPermissionTestToyApiStackdevToyApi10ED4AE5POSTdeveloperapikeyBFA26F73"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeyPOSTA6B30817"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeykeyId6DF3660F"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeykeyIdOPTIONSF52CD252"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeykeyIdDELETEApiPermissionToyApiStackdevToyApi10ED4AE5DELETEdeveloperapikeykeyIdCCD1D1AA"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeykeyIdDELETEApiPermissionTestToyApiStackdevToyApi10ED4AE5DELETEdeveloperapikeykeyId9F31162E"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeykeyIdDELETEE52CC075"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-keys/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeys9588C797"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-keys/OPTIONS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeysOPTIONSFB794566"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeysGETApiPermissionToyApiStackdevToyApi10ED4AE5GETdeveloperapikeysC8FA76C0"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeysGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETdeveloperapikeysA004D54C"
+          }
+        ],
+        "/ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ToyApideveloperapikeysGET5550ABF6"
+          }
+        ],
+        "/ToyApiStack-dev/CognitoAuthorizer/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CognitoAuthorizerF3215DBC"
           }
         ],
-        "/ToyApiStack-prod/BudgetAlerts/Resource": [
+        "/ToyApiStack-dev/DeveloperUsagePlan/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeveloperUsagePlanBF10B320"
+          }
+        ],
+        "/ToyApiStack-dev/DeveloperUsagePlan/UsagePlanKeyResource:ToyApiStackdevDefaultApiKey9E14AB6E": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeveloperUsagePlanUsagePlanKeyResourceToyApiStackdevDefaultApiKey9E14AB6EE20919A6"
+          }
+        ],
+        "/ToyApiStack-dev/DefaultApiKey/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DefaultApiKey2400BB48"
+          }
+        ],
+        "/ToyApiStack-dev/BudgetAlerts/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BudgetAlertsB25CE4A8"
           }
         ],
-        "/ToyApiStack-prod/BudgetAlerts/bernardo+toyAPI@thismakesmehappy.co/Resource": [
+        "/ToyApiStack-dev/BudgetAlerts/bernardo+toyAPI@thismakesmehappy.co/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BudgetAlertsbernardotoyAPIthismakesmehappyco2B4D3E22"
           }
         ],
-        "/ToyApiStack-prod/ApiUrl": [
+        "/ToyApiStack-dev/ApiUrl": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiUrl"
           }
         ],
-        "/ToyApiStack-prod/UserPoolId": [
+        "/ToyApiStack-dev/UserPoolId": [
           {
             "type": "aws:cdk:logicalId",
             "data": "UserPoolId"
           }
         ],
-        "/ToyApiStack-prod/UserPoolClientId": [
+        "/ToyApiStack-dev/UserPoolClientId": [
           {
             "type": "aws:cdk:logicalId",
             "data": "UserPoolClientId"
           }
         ],
-        "/ToyApiStack-prod/TableName": [
+        "/ToyApiStack-dev/TableName": [
           {
             "type": "aws:cdk:logicalId",
             "data": "TableName"
           }
         ],
-        "/ToyApiStack-prod/Environment": [
+        "/ToyApiStack-dev/Environment": [
           {
             "type": "aws:cdk:logicalId",
             "data": "Environment"
           }
         ],
-        "/ToyApiStack-prod/CDKMetadata/Default": [
+        "/ToyApiStack-dev/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/ToyApiStack-prod/BootstrapVersion": [
+        "/ToyApiStack-dev/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/ToyApiStack-prod/CheckBootstrapVersion": [
+        "/ToyApiStack-dev/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "ToyApiStack-prod"
+      "displayName": "ToyApiStack-dev"
     },
     "Tree": {
       "type": "cdk:tree",

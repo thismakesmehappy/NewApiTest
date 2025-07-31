@@ -329,7 +329,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
-     "S3Key": "e98fecf05bb579fa62c13ca5390594ff78533ae2d1e9bf155fae6125227b94e6.jar"
+     "S3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
     },
     "Description": "Handles public API endpoints (dev)",
     "Environment": {
@@ -377,7 +377,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "ToyApiStack-dev/PublicFunction/Resource",
-    "aws:asset:path": "asset.e98fecf05bb579fa62c13ca5390594ff78533ae2d1e9bf155fae6125227b94e6.jar",
+    "aws:asset:path": "asset.0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -542,7 +542,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
-     "S3Key": "e98fecf05bb579fa62c13ca5390594ff78533ae2d1e9bf155fae6125227b94e6.jar"
+     "S3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
     },
     "Description": "Handles authentication endpoints (dev)",
     "Environment": {
@@ -596,7 +596,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "ToyApiStack-dev/AuthFunction/Resource",
-    "aws:asset:path": "asset.e98fecf05bb579fa62c13ca5390594ff78533ae2d1e9bf155fae6125227b94e6.jar",
+    "aws:asset:path": "asset.0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -761,7 +761,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
-     "S3Key": "e98fecf05bb579fa62c13ca5390594ff78533ae2d1e9bf155fae6125227b94e6.jar"
+     "S3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
     },
     "Description": "Handles items CRUD operations (dev)",
     "Environment": {
@@ -812,7 +812,221 @@
    ],
    "Metadata": {
     "aws:cdk:path": "ToyApiStack-dev/ItemsFunction/Resource",
-    "aws:asset:path": "asset.e98fecf05bb579fa62c13ca5390594ff78533ae2d1e9bf155fae6125227b94e6.jar",
+    "aws:asset:path": "asset.0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "DeveloperFunctionLogGroup9CAE19C1": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/aws/lambda/toyapi-dev-developerfunction",
+    "RetentionInDays": 7,
+    "Tags": [
+     {
+      "Key": "CostCenter",
+      "Value": "ToyApi-dev"
+     },
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "Owner",
+      "Value": "thismakesmehappy"
+     },
+     {
+      "Key": "Project",
+      "Value": "ToyApi"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/DeveloperFunctionLogGroup/Resource"
+   }
+  },
+  "DeveloperFunctionServiceRoleCE53D832": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "CostCenter",
+      "Value": "ToyApi-dev"
+     },
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "Owner",
+      "Value": "thismakesmehappy"
+     },
+     {
+      "Key": "Project",
+      "Value": "ToyApi"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/DeveloperFunction/ServiceRole/Resource"
+   }
+  },
+  "DeveloperFunctionServiceRoleDefaultPolicy6FEA04B0": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ItemsTable5AAC2C46",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ItemsTable5AAC2C46",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "apigateway:DELETE",
+        "apigateway:GET",
+        "apigateway:POST",
+        "apigateway:PUT"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:apigateway:us-east-1::/apikeys*",
+        "arn:aws:apigateway:us-east-1::/restapis*",
+        "arn:aws:apigateway:us-east-1::/usageplans*"
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "DeveloperFunctionServiceRoleDefaultPolicy6FEA04B0",
+    "Roles": [
+     {
+      "Ref": "DeveloperFunctionServiceRoleCE53D832"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/DeveloperFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "DeveloperFunction4CFB9C2E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-375004071203-us-east-1",
+     "S3Key": "0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar"
+    },
+    "Description": "Handles developer API key management (dev)",
+    "Environment": {
+     "Variables": {
+      "API_NAME_PREFIX": "toyapi-dev",
+      "TABLE_NAME": {
+       "Ref": "ItemsTable5AAC2C46"
+      },
+      "ENVIRONMENT": "dev",
+      "USAGE_PLAN_PREFIX": "toyapi-dev-developer-plan",
+      "REGION": "us-east-1"
+     }
+    },
+    "FunctionName": "toyapi-dev-developerfunction",
+    "Handler": "co.thismakesmehappy.toyapi.service.DeveloperHandler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "DeveloperFunctionServiceRoleCE53D832",
+      "Arn"
+     ]
+    },
+    "Runtime": "java17",
+    "Tags": [
+     {
+      "Key": "CostCenter",
+      "Value": "ToyApi-dev"
+     },
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "Owner",
+      "Value": "thismakesmehappy"
+     },
+     {
+      "Key": "Project",
+      "Value": "ToyApi"
+     }
+    ],
+    "Timeout": 30
+   },
+   "DependsOn": [
+    "DeveloperFunctionServiceRoleDefaultPolicy6FEA04B0",
+    "DeveloperFunctionServiceRoleCE53D832"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/DeveloperFunction/Resource",
+    "aws:asset:path": "asset.0199867977d7e4fbb7e05bfd76dd5e6d3138f60eb2e0462924cc812937dc81d3.jar",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -918,7 +1132,7 @@
     "aws:cdk:path": "ToyApiStack-dev/ToyApi/Account"
    }
   },
-  "ToyApiDeployment5DE889CB9a2f3769fea38d6f71d38111be6792fc": {
+  "ToyApiDeployment5DE889CB0e926167eade78062038fc0df4f1b15d": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "ToyApi REST API (dev)",
@@ -943,6 +1157,24 @@
     "ToyApiauthuseruserIdF80AAD91",
     "ToyApiauthuserOPTIONSA0FB34C1",
     "ToyApiauthuserF2BC53E1",
+    "ToyApideveloperapikeykeyIdDELETEE52CC075",
+    "ToyApideveloperapikeykeyIdOPTIONSF52CD252",
+    "ToyApideveloperapikeykeyId6DF3660F",
+    "ToyApideveloperapikeyOPTIONSE17F6EC8",
+    "ToyApideveloperapikeyPOSTA6B30817",
+    "ToyApideveloperapikey80E6A461",
+    "ToyApideveloperapikeysGET5550ABF6",
+    "ToyApideveloperapikeysOPTIONSFB794566",
+    "ToyApideveloperapikeys9588C797",
+    "ToyApideveloperOPTIONSB3D5F947",
+    "ToyApideveloperprofileGETC7805BA7",
+    "ToyApideveloperprofileOPTIONSD80306DB",
+    "ToyApideveloperprofilePUT7C84DE84",
+    "ToyApideveloperprofileFCE01605",
+    "ToyApideveloperregisterOPTIONSAA83300A",
+    "ToyApideveloperregisterPOSTF7E67475",
+    "ToyApideveloperregister1BA6DBAE",
+    "ToyApideveloperAAE543C0",
     "ToyApiitemsidDELETE0A96FBB4",
     "ToyApiitemsidGET90AAD390",
     "ToyApiitemsidOPTIONSECDC8BA4",
@@ -967,7 +1199,7 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "ToyApiDeployment5DE889CB9a2f3769fea38d6f71d38111be6792fc"
+     "Ref": "ToyApiDeployment5DE889CB0e926167eade78062038fc0df4f1b15d"
     },
     "RestApiId": {
      "Ref": "ToyApi351408CF"
@@ -2510,6 +2742,927 @@
     "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/items/{id}/DELETE/Resource"
    }
   },
+  "ToyApideveloperAAE543C0": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "ToyApi351408CF",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "developer",
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/Resource"
+   }
+  },
+  "ToyApideveloperOPTIONSB3D5F947": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ToyApideveloperAAE543C0"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/OPTIONS/Resource"
+   }
+  },
+  "ToyApideveloperregister1BA6DBAE": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ToyApideveloperAAE543C0"
+    },
+    "PathPart": "register",
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/register/Resource"
+   }
+  },
+  "ToyApideveloperregisterOPTIONSAA83300A": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ToyApideveloperregister1BA6DBAE"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/register/OPTIONS/Resource"
+   }
+  },
+  "ToyApideveloperregisterPOSTApiPermissionToyApiStackdevToyApi10ED4AE5POSTdeveloperregister5C1313BE": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/",
+       {
+        "Ref": "ToyApiDeploymentStagedevCCBD374C"
+       },
+       "/POST/developer/register"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/register/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.register"
+   }
+  },
+  "ToyApideveloperregisterPOSTApiPermissionTestToyApiStackdevToyApi10ED4AE5POSTdeveloperregisterEE8E33C6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/test-invoke-stage/POST/developer/register"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/register/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.register"
+   }
+  },
+  "ToyApideveloperregisterPOSTF7E67475": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DeveloperFunction4CFB9C2E",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ToyApideveloperregister1BA6DBAE"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/register/POST/Resource"
+   }
+  },
+  "ToyApideveloperprofileFCE01605": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ToyApideveloperAAE543C0"
+    },
+    "PathPart": "profile",
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/Resource"
+   }
+  },
+  "ToyApideveloperprofileOPTIONSD80306DB": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ToyApideveloperprofileFCE01605"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/OPTIONS/Resource"
+   }
+  },
+  "ToyApideveloperprofileGETApiPermissionToyApiStackdevToyApi10ED4AE5GETdeveloperprofileAF5F991A": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/",
+       {
+        "Ref": "ToyApiDeploymentStagedevCCBD374C"
+       },
+       "/GET/developer/profile"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile"
+   }
+  },
+  "ToyApideveloperprofileGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETdeveloperprofile08FE0326": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/test-invoke-stage/GET/developer/profile"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.profile"
+   }
+  },
+  "ToyApideveloperprofileGETC7805BA7": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DeveloperFunction4CFB9C2E",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ToyApideveloperprofileFCE01605"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/GET/Resource"
+   }
+  },
+  "ToyApideveloperprofilePUTApiPermissionToyApiStackdevToyApi10ED4AE5PUTdeveloperprofileDE6F8D00": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/",
+       {
+        "Ref": "ToyApiDeploymentStagedevCCBD374C"
+       },
+       "/PUT/developer/profile"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/ApiPermission.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile"
+   }
+  },
+  "ToyApideveloperprofilePUTApiPermissionTestToyApiStackdevToyApi10ED4AE5PUTdeveloperprofile0E750AFA": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/test-invoke-stage/PUT/developer/profile"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.PUT..developer.profile"
+   }
+  },
+  "ToyApideveloperprofilePUT7C84DE84": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "PUT",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DeveloperFunction4CFB9C2E",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ToyApideveloperprofileFCE01605"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/profile/PUT/Resource"
+   }
+  },
+  "ToyApideveloperapikey80E6A461": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ToyApideveloperAAE543C0"
+    },
+    "PathPart": "api-key",
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/Resource"
+   }
+  },
+  "ToyApideveloperapikeyOPTIONSE17F6EC8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ToyApideveloperapikey80E6A461"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/OPTIONS/Resource"
+   }
+  },
+  "ToyApideveloperapikeyPOSTApiPermissionToyApiStackdevToyApi10ED4AE5POSTdeveloperapikeyD873A818": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/",
+       {
+        "Ref": "ToyApiDeploymentStagedevCCBD374C"
+       },
+       "/POST/developer/api-key"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/ApiPermission.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key"
+   }
+  },
+  "ToyApideveloperapikeyPOSTApiPermissionTestToyApiStackdevToyApi10ED4AE5POSTdeveloperapikeyBFA26F73": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/test-invoke-stage/POST/developer/api-key"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.POST..developer.api-key"
+   }
+  },
+  "ToyApideveloperapikeyPOSTA6B30817": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DeveloperFunction4CFB9C2E",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ToyApideveloperapikey80E6A461"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/POST/Resource"
+   }
+  },
+  "ToyApideveloperapikeykeyId6DF3660F": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ToyApideveloperapikey80E6A461"
+    },
+    "PathPart": "{keyId}",
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/Resource"
+   }
+  },
+  "ToyApideveloperapikeykeyIdOPTIONSF52CD252": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ToyApideveloperapikeykeyId6DF3660F"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/OPTIONS/Resource"
+   }
+  },
+  "ToyApideveloperapikeykeyIdDELETEApiPermissionToyApiStackdevToyApi10ED4AE5DELETEdeveloperapikeykeyIdCCD1D1AA": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/",
+       {
+        "Ref": "ToyApiDeploymentStagedevCCBD374C"
+       },
+       "/DELETE/developer/api-key/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/ApiPermission.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}"
+   }
+  },
+  "ToyApideveloperapikeykeyIdDELETEApiPermissionTestToyApiStackdevToyApi10ED4AE5DELETEdeveloperapikeykeyId9F31162E": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/test-invoke-stage/DELETE/developer/api-key/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.DELETE..developer.api-key.{keyId}"
+   }
+  },
+  "ToyApideveloperapikeykeyIdDELETEE52CC075": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "DELETE",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DeveloperFunction4CFB9C2E",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ToyApideveloperapikeykeyId6DF3660F"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-key/{keyId}/DELETE/Resource"
+   }
+  },
+  "ToyApideveloperapikeys9588C797": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ToyApideveloperAAE543C0"
+    },
+    "PathPart": "api-keys",
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/Resource"
+   }
+  },
+  "ToyApideveloperapikeysOPTIONSFB794566": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ToyApideveloperapikeys9588C797"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/OPTIONS/Resource"
+   }
+  },
+  "ToyApideveloperapikeysGETApiPermissionToyApiStackdevToyApi10ED4AE5GETdeveloperapikeysC8FA76C0": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/",
+       {
+        "Ref": "ToyApiDeploymentStagedevCCBD374C"
+       },
+       "/GET/developer/api-keys"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/ApiPermission.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys"
+   }
+  },
+  "ToyApideveloperapikeysGETApiPermissionTestToyApiStackdevToyApi10ED4AE5GETdeveloperapikeysA004D54C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "DeveloperFunction4CFB9C2E",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:375004071203:",
+       {
+        "Ref": "ToyApi351408CF"
+       },
+       "/test-invoke-stage/GET/developer/api-keys"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/ApiPermission.Test.ToyApiStackdevToyApi10ED4AE5.GET..developer.api-keys"
+   }
+  },
+  "ToyApideveloperapikeysGET5550ABF6": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "DeveloperFunction4CFB9C2E",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ToyApideveloperapikeys9588C797"
+    },
+    "RestApiId": {
+     "Ref": "ToyApi351408CF"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/ToyApi/Default/developer/api-keys/GET/Resource"
+   }
+  },
   "CognitoAuthorizerF3215DBC": {
    "Type": "AWS::ApiGateway::Authorizer",
    "Properties": {
@@ -2530,6 +3683,97 @@
    },
    "Metadata": {
     "aws:cdk:path": "ToyApiStack-dev/CognitoAuthorizer/Resource"
+   }
+  },
+  "DeveloperUsagePlanBF10B320": {
+   "Type": "AWS::ApiGateway::UsagePlan",
+   "Properties": {
+    "ApiStages": [
+     {
+      "ApiId": {
+       "Ref": "ToyApi351408CF"
+      },
+      "Stage": {
+       "Ref": "ToyApiDeploymentStagedevCCBD374C"
+      },
+      "Throttle": {}
+     }
+    ],
+    "Description": "Usage plan for developer API keys",
+    "Quota": {
+     "Limit": 10000,
+     "Period": "DAY"
+    },
+    "Tags": [
+     {
+      "Key": "CostCenter",
+      "Value": "ToyApi-dev"
+     },
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "Owner",
+      "Value": "thismakesmehappy"
+     },
+     {
+      "Key": "Project",
+      "Value": "ToyApi"
+     }
+    ],
+    "Throttle": {
+     "BurstLimit": 200,
+     "RateLimit": 100
+    },
+    "UsagePlanName": "toyapi-dev-developer-plan"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/DeveloperUsagePlan/Resource"
+   }
+  },
+  "DeveloperUsagePlanUsagePlanKeyResourceToyApiStackdevDefaultApiKey9E14AB6EE20919A6": {
+   "Type": "AWS::ApiGateway::UsagePlanKey",
+   "Properties": {
+    "KeyId": {
+     "Ref": "DefaultApiKey2400BB48"
+    },
+    "KeyType": "API_KEY",
+    "UsagePlanId": {
+     "Ref": "DeveloperUsagePlanBF10B320"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/DeveloperUsagePlan/UsagePlanKeyResource:ToyApiStackdevDefaultApiKey9E14AB6E"
+   }
+  },
+  "DefaultApiKey2400BB48": {
+   "Type": "AWS::ApiGateway::ApiKey",
+   "Properties": {
+    "Description": "Default API key for testing and documentation",
+    "Enabled": true,
+    "Name": "toyapi-dev-default-key",
+    "Tags": [
+     {
+      "Key": "CostCenter",
+      "Value": "ToyApi-dev"
+     },
+     {
+      "Key": "Environment",
+      "Value": "dev"
+     },
+     {
+      "Key": "Owner",
+      "Value": "thismakesmehappy"
+     },
+     {
+      "Key": "Project",
+      "Value": "ToyApi"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ToyApiStack-dev/DefaultApiKey/Resource"
    }
   },
   "BudgetAlertsB25CE4A8": {
@@ -2576,7 +3820,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/02RTU/DMAyGf8vuWdgGF47dEEgIxLSN85SmoZimcZQPplLlv5Ok7daTH/t1Hfvthj6u6WrBLnbJq2YpoaT90THekFg691WnWItVLJ5YKQXZfakMgXCsFTik/acVZo8ok3blCXYShHJzaagEIrG2tH/D+sWg16lj4qixtqwY7Z+94g5QJXXOe2FasDZmgQBraX/AYbcc9yiBd7kvUyD2/sysFc7SIoWY063njXBbZgVhGmrmxIV1cZCwrtCQZ92w4Bx9PONJaIldO140y6JjdV5ggPgpesNFHv8u3DdWSRxpUsdHRh7snFyyhY+9Bv6EyQtcs3iMir6dUAPPfyPD0ZeWG9CTQfM8hNuL+fy0I6g69X14p72bLxLIK/tld5sHuqLrxY8FWJp4OrSCHob4D7QhwkQyAgAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/22RTU/DMAyGf8vuWdgGF47dEEh8iGof5ylLQzFL4yofTKXqf8dJW9YDJz9v7Dj2mxW/X/LFTFzcXBbnuYYTb3deyDOjo2NbNEZUWNDhXpy0YpsPk6BjEksDHnl7cMrmiDrm/niEjQZl/DTVn3RMY+l4+4rlk8VQx4qRKSeqUyF4+xiM9IAmZqecK1uBc6Q6BqLi7Rb72VLMUYNsUl2ijrnbo3BOecezGEjzdZBn5dfCKSZqKIVXF9FQI+V8VkPqdcVMSgy0xoOqNTbVsNFEkWNlGqAHuorBSpXavyn/iUVMDjRmh0cG7u0cXXJZoFoLP8qmAa7q4OiFXAvTm/qfeFENo8ljiHcTkQmG/N5jDTL9YoJdODlpoR6Nnequu06abIu7gSlj3XvwdfDTBTr2LL7FzeqOL/hy9uUA5pYsg0rxbR9/AWMCV2FqAgAA"
    },
    "Metadata": {
     "aws:cdk:path": "ToyApiStack-dev/CDKMetadata/Default"
