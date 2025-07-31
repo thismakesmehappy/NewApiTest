@@ -77,14 +77,14 @@ public class ToyApiStack extends Stack {
         Function authFunction = createAuthLambda(itemsTable, cognitoResources);
         Function itemsFunction = createItemsLambda(itemsTable, cognitoResources.userPool);
         
-        // Create API Gateway with API key management
-        ApiKeyResources apiKeyResources = createApiKeyInfrastructure();
-        
         // Create developer function without API Gateway references first (to break circular dependency)
         Function developerFunction = createDeveloperLambdaWithoutReferences(itemsTable);
         
-        // Create complete API Gateway with all endpoints including developer
-        RestApi api = createCompleteApiGateway(publicFunction, authFunction, itemsFunction, developerFunction, cognitoResources.userPool, apiKeyResources);
+        // Create API Gateway with all functions including developer
+        RestApi api = createApiGateway(publicFunction, authFunction, itemsFunction, developerFunction, cognitoResources.userPool);
+        
+        // Create API key infrastructure after API Gateway is created
+        ApiKeyResources apiKeyResources = createApiKeyInfrastructureAndAssociate(api);
         
         // Add API Gateway environment variables to developer function using CDK escape hatch
         addApiGatewayReferencesToDeveloperFunction(developerFunction, api, apiKeyResources);
@@ -376,9 +376,9 @@ public class ToyApiStack extends Stack {
     }
 
     /**
-     * Creates API key infrastructure including usage plans and default API key.
+     * Creates API key infrastructure after API Gateway exists and associates it with the API.
      */
-    private ApiKeyResources createApiKeyInfrastructure() {
+    private ApiKeyResources createApiKeyInfrastructureAndAssociate(RestApi api) {
         // Create usage plan for API rate limiting and quotas
         UsagePlan usagePlan = UsagePlan.Builder.create(this, "DeveloperUsagePlan")
                 .name(resourcePrefix + "-developer-plan")
@@ -402,16 +402,22 @@ public class ToyApiStack extends Stack {
 
         // Associate default API key with usage plan
         usagePlan.addApiKey(defaultApiKey);
+        
+        // Associate usage plan with API stage (after API is fully created)
+        usagePlan.addApiStage(UsagePlanPerApiStage.builder()
+                .api(api)
+                .stage(api.getDeploymentStage())
+                .build());
 
         return new ApiKeyResources(usagePlan, defaultApiKey);
     }
 
 
     /**
-     * Creates complete API Gateway REST API with all endpoints including developer endpoints.
+     * Creates API Gateway REST API with all endpoints including developer endpoints.
      */
-    private RestApi createCompleteApiGateway(Function publicFunction, Function authFunction, 
-                                           Function itemsFunction, Function developerFunction, UserPool userPool, ApiKeyResources apiKeyResources) {
+    private RestApi createApiGateway(Function publicFunction, Function authFunction, 
+                                           Function itemsFunction, Function developerFunction, UserPool userPool) {
         
         RestApi api = RestApi.Builder.create(this, "ToyApi")
                 .restApiName(resourcePrefix + "-api")
@@ -486,11 +492,7 @@ public class ToyApiStack extends Stack {
         apiKeyResource.addResource("{keyId}")
                 .addMethod("DELETE", new LambdaIntegration(developerFunction));
 
-        // Associate usage plan with API stage
-        apiKeyResources.usagePlan.addApiStage(UsagePlanPerApiStage.builder()
-                .api(api)
-                .stage(api.getDeploymentStage())
-                .build());
+        // Usage plan will be associated separately after creation
 
         return api;
     }
