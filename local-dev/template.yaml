@@ -131,6 +131,61 @@ Resources:
             Path: /items/{id}
             Method: delete
 
+  # Developer Function
+  DeveloperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../service/target/toyapi-service-1.0-SNAPSHOT.jar
+      Handler: co.thismakesmehappy.toyapi.service.DeveloperHandler
+      Description: "Handles developer API key management (local development)"
+      Environment:
+        Variables:
+          ENVIRONMENT: local
+          DYNAMODB_ENDPOINT: http://host.docker.internal:8000
+          TABLE_NAME: toyapi-local-items
+          REST_API_ID: local-api-gateway
+          USAGE_PLAN_ID: local-usage-plan
+          MOCK_API_GATEWAY: "true"
+          DEBUG: "true"
+          LOG_LEVEL: DEBUG
+      Events:
+        DeveloperRegister:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /developer/register
+            Method: post
+        DeveloperProfileGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /developer/profile
+            Method: get
+        DeveloperProfileUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /developer/profile
+            Method: put
+        DeveloperCreateApiKey:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /developer/api-key
+            Method: post
+        DeveloperListApiKeys:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /developer/api-keys
+            Method: get
+        DeveloperDeleteApiKey:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToyApiLocalGateway
+            Path: /developer/api-key/{keyId}
+            Method: delete
+
 Outputs:
   ToyApiLocalUrl:
     Description: "API Gateway endpoint URL for local development"
