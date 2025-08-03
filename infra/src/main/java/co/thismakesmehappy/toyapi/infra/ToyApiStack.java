@@ -27,7 +27,7 @@ import software.amazon.awscdk.services.lambda.eventsources.KinesisEventSource;
 import software.amazon.awscdk.services.logs.*;
 import software.amazon.awscdk.services.rds.*;
 import software.amazon.awscdk.services.route53.*;
-import software.amazon.awscdk.services.route53.targets.ApiGateway;
+import software.amazon.awscdk.services.route53.targets.ApiGatewayDomain;
 import software.amazon.awscdk.services.s3.*;
 import software.amazon.awscdk.services.secretsmanager.*;
 import software.amazon.awscdk.services.ssm.*;
@@ -2356,14 +2356,14 @@ public class ToyApiStack extends Stack {
         ARecord.Builder.create(this, "ApiAliasRecord")
                 .zone(hostedZone)
                 .recordName(domainName.replace(".thismakesmehappy.co", ""))  // Remove root domain
-                .target(RecordTarget.fromAlias(new ApiGateway(api)))
+                .target(RecordTarget.fromAlias(new ApiGatewayDomain(customDomain)))
                 .build();
         
         // Create Route53 AAAA record for IPv6 support
         AaaaRecord.Builder.create(this, "ApiAliasRecordIPv6")
                 .zone(hostedZone)
                 .recordName(domainName.replace(".thismakesmehappy.co", ""))  // Remove root domain
-                .target(RecordTarget.fromAlias(new ApiGateway(api)))
+                .target(RecordTarget.fromAlias(new ApiGatewayDomain(customDomain)))
                 .build();
         
         // Output the custom domain URL

@@ -280,13 +280,4 @@ public class AnalyticsHandler implements RequestHandler<KinesisEvent, String> {
         return userAgent;
     }
 
-    // Legacy methods for backward compatibility
-    private String getStringValue(JsonNode node, String fieldName, String defaultValue) {
-        return getValidatedStringValue(node, fieldName, defaultValue);
-    }
-
-    private int getIntValue(JsonNode node, String fieldName, int defaultValue) {
-        JsonNode field = node.get(fieldName);
-        return (field != null && !field.isNull()) ? field.asInt() : defaultValue;
-    }
 }

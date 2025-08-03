@@ -67,3 +67,7 @@ buildNumber.properties
 local-dev/*.log
 local-dev/dynamodb-data/
 service/*.log
+
+### CDK Generated Files ###
+infra/cdk.out/
+infra/cdk.context.json
