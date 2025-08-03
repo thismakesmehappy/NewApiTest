@@ -3187,6 +3187,7 @@ public class ToyApiStack extends Stack {
         
         // Create custom authorizer for advanced rate limiting (optional)
         RequestAuthorizer rateLimitAuthorizer = RequestAuthorizer.Builder.create(this, "ToyApiAuthorizerRateLimit")
+                .restApi(api)
                 .handler(rateLimitingFunction)
                 .identitySources(Arrays.asList(
                         IdentitySource.header("x-api-key"),
