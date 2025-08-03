@@ -24,7 +24,6 @@ import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.lambda.eventsources.KinesisEventSource;
-import software.amazon.awscdk.services.lambda.eventsources.KinesisEventSourceProps;
 import software.amazon.awscdk.services.lambda.StartingPosition;
 import software.amazon.awscdk.services.logs.*;
 import software.amazon.awscdk.services.rds.*;
@@ -2830,12 +2829,11 @@ public class ToyApiStack extends Stack {
         
         // Create Kinesis trigger for analytics processor
         analyticsProcessorFunction.addEventSource(
-                new KinesisEventSource(analyticsStream, 
-                        KinesisEventSourceProps.builder()
-                                .startingPosition(StartingPosition.LATEST)
-                                .batchSize(100)
-                                .maxBatchingWindow(Duration.seconds(30))
-                                .build())
+                KinesisEventSource.Builder.create(analyticsStream)
+                        .startingPosition(StartingPosition.LATEST)
+                        .batchSize(100)
+                        .maxBatchingWindow(Duration.seconds(30))
+                        .build()
         );
         
         // Create Lambda function for generating analytics reports
