@@ -108,7 +108,14 @@ public class ToyApiStack extends Stack {
         createWafProtection(api);
         
         // Create custom domain and Route53 records (only for production and staging)
-        if (environment.equals("prod") || environment.equals("stage")) {
+        // TODO: Enable custom domains after setting up hosted zone for thismakesmehappy.co
+        // See: https://docs.aws.amazon.com/route53/latest/developerguide/CreatingHostedZone.html
+        boolean enableCustomDomains = Boolean.parseBoolean(
+            this.getNode().tryGetContext("enableCustomDomains") != null ? 
+            this.getNode().tryGetContext("enableCustomDomains").toString() : "false"
+        );
+        
+        if (enableCustomDomains && (environment.equals("prod") || environment.equals("stage"))) {
             createCustomDomain(api);
         }
         
