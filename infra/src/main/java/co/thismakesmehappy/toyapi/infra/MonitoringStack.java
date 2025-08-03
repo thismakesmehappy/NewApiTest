@@ -6,7 +6,7 @@ import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.cloudwatch.*;
 import software.amazon.awscdk.services.cloudwatch.actions.SnsAction;
 import software.amazon.awscdk.services.lambda.Function;
-import software.amazon.awscdk.services.logs.LogGroup;
+import software.amazon.awscdk.services.logs.*;
 import software.amazon.awscdk.services.sns.Topic;
 import software.amazon.awscdk.services.sns.subscriptions.EmailSubscription;
 import software.constructs.Construct;
@@ -53,6 +53,7 @@ public class MonitoringStack extends Stack {
         setupErrorMonitoring();
         setupPerformanceMonitoring();
         setupCostMonitoring();
+        setupLogAggregationAndAnalysis();
         
         // Create outputs
         createOutputs();
@@ -147,8 +148,8 @@ public class MonitoringStack extends Stack {
         );
         
         // High latency alarm
-        Alarm highLatencyAlarm = Alarm.Builder.create(this, "HighLatencyAlarm")
-                .alarmName(resourcePrefix + "-high-latency")
+        Alarm highLatencyAlarm = Alarm.Builder.create(this, "ApiHighLatencyAlarm")
+                .alarmName(resourcePrefix + "-api-high-latency")
                 .alarmDescription("API Gateway latency is too high")
                 .metric(apiLatencyMetric)
                 .threshold(2000) // 2 seconds
@@ -159,8 +160,8 @@ public class MonitoringStack extends Stack {
         highLatencyAlarm.addAlarmAction(new SnsAction(alertTopic));
         
         // High error rate alarm
-        Alarm highErrorRateAlarm = Alarm.Builder.create(this, "HighErrorRateAlarm")
-                .alarmName(resourcePrefix + "-high-error-rate")
+        Alarm highErrorRateAlarm = Alarm.Builder.create(this, "ApiHighErrorRateAlarm")
+                .alarmName(resourcePrefix + "-api-high-error-rate")
                 .alarmDescription("API Gateway error rate is too high")
                 .metric(apiErrorsMetric)
                 .threshold(10) // 10 errors in 5 minutes
@@ -361,6 +362,191 @@ public class MonitoringStack extends Stack {
             GraphWidget.Builder.create()
                 .title("Estimated Monthly Charges")
                 .left(Arrays.asList(estimatedChargesMetric))
+                .width(12)
+                .height(6)
+                .build()
+        );
+    }
+    
+    /**
+     * Sets up comprehensive log aggregation and analysis
+     */
+    private void setupLogAggregationAndAnalysis() {
+        // Create central log group for aggregated API logs
+        LogGroup centralLogGroup = LogGroup.Builder.create(this, "CentralLogGroup")
+                .logGroupName("/aws/apigateway/" + resourcePrefix + "-aggregated")
+                .retention(RetentionDays.ONE_MONTH)  // 30 days retention
+                .removalPolicy(software.amazon.awscdk.RemovalPolicy.DESTROY)
+                .build();
+        
+        // Set up log metric filters for different log patterns
+        setupLogMetricFilters(centralLogGroup);
+        
+        // Create log insights queries
+        setupLogInsightQueries();
+        
+        // Set up log-based alarms
+        setupLogBasedAlarms();
+        
+        // Add log analysis widgets to dashboard
+        addLogAnalyticsToDashboard();
+    }
+    
+    /**
+     * Creates metric filters for common log patterns
+     */
+    private void setupLogMetricFilters(LogGroup logGroup) {
+        // Error rate metric filter (for 4xx and 5xx responses)
+        MetricFilter errorFilter = MetricFilter.Builder.create(this, "ErrorMetricFilter")
+                .logGroup(logGroup)
+                .filterPattern(FilterPattern.anyTerm("ERROR", "4[0-9][0-9]", "5[0-9][0-9]", "Exception", "Failed"))
+                .metricNamespace("ToyApi/" + environment)
+                .metricName("ErrorCount")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // API key usage metric filter
+        MetricFilter apiKeyUsageFilter = MetricFilter.Builder.create(this, "ApiKeyUsageFilter")
+                .logGroup(logGroup)
+                .filterPattern(FilterPattern.exists("$.apiKeyId"))
+                .metricNamespace("ToyApi/" + environment)
+                .metricName("ApiKeyRequests")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // Slow request metric filter (>1 second response time)
+        MetricFilter slowRequestFilter = MetricFilter.Builder.create(this, "SlowRequestFilter")  
+                .logGroup(logGroup)
+                .filterPattern(FilterPattern.literal("[timestamp, requestId, responseTime > 1000]"))
+                .metricNamespace("ToyApi/" + environment)
+                .metricName("SlowRequests")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // Developer registration metric filter
+        MetricFilter devRegistrationFilter = MetricFilter.Builder.create(this, "DeveloperRegistrationFilter")
+                .logGroup(logGroup)
+                .filterPattern(FilterPattern.literal("[timestamp, requestId, \"Developer registered successfully\"]"))
+                .metricNamespace("ToyApi/" + environment)
+                .metricName("DeveloperRegistrations")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+    }
+    
+    /**
+     * Sets up CloudWatch Logs Insights queries for analysis
+     */
+    private void setupLogInsightQueries() {
+        // Note: CloudWatch Logs Insights queries are created manually in console
+        // or via AWS CLI. CDK doesn't have direct support for saved queries yet.
+        // Common queries would include:
+        
+        // 1. Top error messages by frequency
+        // 2. API endpoint usage patterns  
+        // 3. Developer API key usage analysis
+        // 4. Performance bottlenecks identification
+        // 5. Security anomaly detection
+    }
+    
+    /**
+     * Creates alarms based on log metrics
+     */
+    private void setupLogBasedAlarms() {
+        // High error rate alarm
+        Metric errorRateMetric = Metric.Builder.create()
+                .namespace("ToyApi/" + environment)
+                .metricName("ErrorCount")
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+                
+        Alarm errorRateAlarm = Alarm.Builder.create(this, "LogErrorRateAlarm")
+                .alarmName(resourcePrefix + "-log-error-rate")
+                .alarmDescription("High error rate detected in API logs")
+                .metric(errorRateMetric)
+                .threshold(10) // More than 10 errors in 5 minutes
+                .evaluationPeriods(2)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .treatMissingData(TreatMissingData.NOT_BREACHING)
+                .build();
+                
+        errorRateAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // Too many slow requests alarm
+        Metric slowRequestMetric = Metric.Builder.create()
+                .namespace("ToyApi/" + environment)
+                .metricName("SlowRequests")
+                .statistic("Sum")
+                .period(Duration.minutes(10))
+                .build();
+                
+        Alarm slowRequestAlarm = Alarm.Builder.create(this, "SlowRequestAlarm")
+                .alarmName(resourcePrefix + "-slow-requests")
+                .alarmDescription("High number of slow requests detected")
+                .metric(slowRequestMetric)
+                .threshold(5) // More than 5 slow requests in 10 minutes
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .treatMissingData(TreatMissingData.NOT_BREACHING)
+                .build();
+                
+        slowRequestAlarm.addAlarmAction(new SnsAction(alertTopic));
+    }
+    
+    /**
+     * Adds log analytics widgets to the main dashboard
+     */
+    private void addLogAnalyticsToDashboard() {
+        // Error rate over time
+        Metric errorRateMetric = Metric.Builder.create()
+                .namespace("ToyApi/" + environment)
+                .metricName("ErrorCount")
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        // API key usage over time
+        Metric apiKeyUsageMetric = Metric.Builder.create()
+                .namespace("ToyApi/" + environment)
+                .metricName("ApiKeyRequests")
+                .statistic("Sum")
+                .period(Duration.hours(1))
+                .build();
+        
+        // Developer registrations over time
+        Metric devRegistrationMetric = Metric.Builder.create()
+                .namespace("ToyApi/" + environment)
+                .metricName("DeveloperRegistrations")
+                .statistic("Sum")
+                .period(Duration.hours(6))
+                .build();
+        
+        // Add widgets to dashboard
+        dashboard.addWidgets(
+            // Error rate graph
+            GraphWidget.Builder.create()
+                .title("Error Rate (5min intervals)")
+                .left(Arrays.asList(errorRateMetric))
+                .width(12)
+                .height(6)
+                .build(),
+                
+            // API key usage graph
+            GraphWidget.Builder.create()
+                .title("API Key Usage (hourly)")
+                .left(Arrays.asList(apiKeyUsageMetric))
+                .width(12)
+                .height(6)
+                .build(),
+                
+            // Developer registrations
+            GraphWidget.Builder.create()
+                .title("Developer Registrations (6hr intervals)")
+                .left(Arrays.asList(devRegistrationMetric))
                 .width(12)
                 .height(6)
                 .build()

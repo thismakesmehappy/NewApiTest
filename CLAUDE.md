@@ -25,13 +25,13 @@
 ### Key Implementation Notes:
 - **Items use `message` field** (not name/description per OpenAPI)
 - **Use `idToken`** for API requests (not accessToken)
-- **Test user**: `testuser` / `TestPassword123`
+- **Test user**: See `dev-credentials.md` (local file)
 - **GitHub repo**: `https://github.com/thismakesmehappy/NewApiTest`
 
 ### Quick Commands:
 ```bash
-# Test API
-curl -X POST "https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/auth/login" -d '{"username":"testuser","password":"TestPassword123"}'
+# Test API (credentials in dev-credentials.md)
+curl -X POST "https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/auth/login" -d '{"username":"[see dev-credentials.md]","password":"[see dev-credentials.md]"}'
 
 # Local development
 cd local-dev && ./scripts/start-local-dev.sh
@@ -101,7 +101,7 @@ git push origin main  # → staging → production
 - **User Pool ID**: `us-east-1_rtm5EgiL1`
 - **Client ID**: `e7tntsf3vrde93qcakghlibfo`  
 - **DynamoDB Table**: `toyapi-dev-items`
-- **Test User**: username: `testuser`, password: `TestPassword123`
+- **Test User**: See `dev-credentials.md` (local file, git-ignored)
 
 ## 📋 Current State Summary
 
@@ -116,7 +116,7 @@ git push origin main  # → staging → production
 - Items API uses `message` field (not OpenAPI spec)
 - Always use `idToken` (not `accessToken`) 
 - GitHub Actions: `https://github.com/thismakesmehappy/NewApiTest/actions`
-- Test user: `testuser` / `TestPassword123`
+- Test user: See `dev-credentials.md` (local file)
 
 **📚 Documentation:**
 - `API_TESTING_GUIDE.md` - Complete API docs

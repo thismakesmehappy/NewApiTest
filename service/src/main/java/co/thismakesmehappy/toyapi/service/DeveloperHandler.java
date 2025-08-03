@@ -25,16 +25,64 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
     private final ApiGatewayClient apiGatewayClient;
     private final ObjectMapper objectMapper;
     private final String tableName;
-    private final String restApiId;
-    private final String usagePlanId;
+    private final String apiNamePrefix;
+    private final String usagePlanPrefix;
+    
+    // Cached values discovered at runtime
+    private String restApiId;
+    private String usagePlanId;
 
     public DeveloperHandler() {
         this.dynamoDbClient = DynamoDbClient.builder().build();
         this.apiGatewayClient = ApiGatewayClient.builder().build();
         this.objectMapper = new ObjectMapper();
         this.tableName = System.getenv("TABLE_NAME");
-        this.restApiId = System.getenv("REST_API_ID");
-        this.usagePlanId = System.getenv("USAGE_PLAN_ID");
+        this.apiNamePrefix = System.getenv("API_NAME_PREFIX");
+        this.usagePlanPrefix = System.getenv("USAGE_PLAN_PREFIX");
+    }
+    
+    /**
+     * Discovers and caches the REST API ID by searching for APIs with the configured name prefix
+     */
+    private String getRestApiId() {
+        if (restApiId != null) {
+            return restApiId;
+        }
+        
+        try {
+            GetRestApisResponse response = apiGatewayClient.getRestApis();
+            for (RestApi api : response.items()) {
+                if (api.name().startsWith(apiNamePrefix)) {
+                    restApiId = api.id();
+                    return restApiId;
+                }
+            }
+            throw new RuntimeException("Could not find REST API with name prefix: " + apiNamePrefix);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to discover REST API ID", e);
+        }
+    }
+    
+    /**
+     * Discovers and caches the Usage Plan ID by searching for usage plans with the configured name prefix
+     */
+    private String getUsagePlanId() {
+        if (usagePlanId != null) {
+            return usagePlanId;
+        }
+        
+        try {
+            GetUsagePlansResponse response = apiGatewayClient.getUsagePlans();
+            for (UsagePlan plan : response.items()) {
+                if (plan.name().startsWith(usagePlanPrefix)) {
+                    usagePlanId = plan.id();
+                    return usagePlanId;
+                }
+            }
+            throw new RuntimeException("Could not find Usage Plan with name prefix: " + usagePlanPrefix);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to discover Usage Plan ID", e);
+        }
     }
 
     @Override
@@ -175,7 +223,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
 
             // Associate API key with usage plan
             CreateUsagePlanKeyRequest usagePlanKeyRequest = CreateUsagePlanKeyRequest.builder()
-                    .usagePlanId(usagePlanId)
+                    .usagePlanId(getUsagePlanId())
                     .keyId(apiKeyId)
                     .keyType("API_KEY")
                     .build();

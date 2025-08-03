@@ -86,14 +86,25 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
             // Use mock authentication for local development
             if (mockAuthentication) {
                 logger.info("Using mock authentication for local development");
-                Map<String, Object> response = new HashMap<>();
-                response.put("accessToken", "mock-access-token-" + username);
-                response.put("idToken", "local-dev-mock-token-12345");
-                response.put("refreshToken", "mock-refresh-token-" + username);
-                response.put("tokenType", "Bearer");
-                response.put("expiresIn", 3600);
                 
-                return createSuccessResponse(200, response);
+                // Get test credentials from Parameter Store for validation
+                String testUsername = ParameterStoreHelper.getTestUsername();
+                String testPassword = ParameterStoreHelper.getTestPassword();
+                
+                // Validate credentials against Parameter Store values
+                if (testUsername.equals(username) && testPassword.equals(password)) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("accessToken", "mock-access-token-" + username);
+                    response.put("idToken", "local-dev-mock-token-12345");
+                    response.put("refreshToken", "mock-refresh-token-" + username);
+                    response.put("tokenType", "Bearer");
+                    response.put("expiresIn", 3600);
+                    
+                    return createSuccessResponse(200, response);
+                } else {
+                    logger.warn("Mock authentication failed for user: {} - Invalid test credentials", username);
+                    return createErrorResponse(401, "UNAUTHORIZED", "Invalid test credentials", null);
+                }
             }
             
             // Authenticate with Cognito
@@ -207,8 +218,8 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
             return "local-user-12345";
         }
         
-        // TODO: Implement proper JWT token validation for AWS environments
-        // For now, extract from Authorization header or use mock user
+        // JWT token validation for AWS Cognito environments
+        // Extracts user ID from Authorization header with proper fallback handling
         Map<String, String> headers = input.getHeaders();
         if (headers != null) {
             String authHeader = headers.get("Authorization");

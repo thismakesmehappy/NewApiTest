@@ -28,7 +28,7 @@ public class ToyApiApp {
                 .region("us-east-1")      // All environments in us-east-1
                 .build();
 
-        // Create stack with environment-specific naming
+        // Create main application stack with environment-specific naming
         String stackName = "ToyApiStack-" + environment;
         
         ToyApiStack stack = new ToyApiStack(app, stackName, StackProps.builder()
@@ -36,11 +36,24 @@ public class ToyApiApp {
                 .description("ToyApi serverless infrastructure for " + environment + " environment")
                 .build(), environment);
 
+        // Create monitoring stack for comprehensive observability
+        String monitoringStackName = "ToyApiMonitoring-" + environment;
+        
+        MonitoringStack monitoringStack = new MonitoringStack(app, monitoringStackName, StackProps.builder()
+                .env(awsEnvironment)
+                .description("ToyApi monitoring and observability for " + environment + " environment")
+                .build(), environment);
+
         // Add tags to all resources
         software.amazon.awscdk.Tags.of(stack).add("Project", "ToyApi");
         software.amazon.awscdk.Tags.of(stack).add("Environment", environment);
         software.amazon.awscdk.Tags.of(stack).add("Owner", "thismakesmehappy");
         software.amazon.awscdk.Tags.of(stack).add("CostCenter", "ToyApi-" + environment);
+        
+        software.amazon.awscdk.Tags.of(monitoringStack).add("Project", "ToyApi");
+        software.amazon.awscdk.Tags.of(monitoringStack).add("Environment", environment);
+        software.amazon.awscdk.Tags.of(monitoringStack).add("Owner", "thismakesmehappy");
+        software.amazon.awscdk.Tags.of(monitoringStack).add("CostCenter", "ToyApi-" + environment);
 
         app.synth();
     }
