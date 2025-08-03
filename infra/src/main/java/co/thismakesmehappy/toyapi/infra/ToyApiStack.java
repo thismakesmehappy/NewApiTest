@@ -3185,16 +3185,9 @@ public class ToyApiStack extends Stack {
                 .metricName("RateLimitingDecisions")
                 .build();
         
-        // Create custom authorizer for advanced rate limiting (optional)
-        RequestAuthorizer rateLimitAuthorizer = RequestAuthorizer.Builder.create(this, "ToyApiAuthorizerRateLimit")
-                .handler(rateLimitingFunction)
-                .identitySources(Arrays.asList(
-                        IdentitySource.header("x-api-key"),
-                        IdentitySource.context("identity.sourceIp")
-                ))
-                .resultsCacheTtl(Duration.minutes(1))
-                .authorizerName(resourcePrefix + "-rate-limit-authorizer")
-                .build();
+        // Note: Custom RequestAuthorizer removed as it was unused
+        // If rate limiting is needed, implement it within existing Lambda functions
+        // or use API Gateway request validators and usage plans
         
         // Log rate limiting configuration
         software.amazon.awscdk.CfnOutput.Builder.create(this, "RateLimitingConfiguration")
