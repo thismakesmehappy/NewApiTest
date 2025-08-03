@@ -25,6 +25,7 @@ import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Runtime;
 import software.amazon.awscdk.services.lambda.eventsources.KinesisEventSource;
 import software.amazon.awscdk.services.lambda.eventsources.KinesisEventSourceProps;
+import software.amazon.awscdk.services.lambda.StartingPosition;
 import software.amazon.awscdk.services.logs.*;
 import software.amazon.awscdk.services.rds.*;
 import software.amazon.awscdk.services.route53.*;
@@ -2831,6 +2832,7 @@ public class ToyApiStack extends Stack {
         analyticsProcessorFunction.addEventSource(
                 new KinesisEventSource(analyticsStream, 
                         KinesisEventSourceProps.builder()
+                                .startingPosition(StartingPosition.LATEST)
                                 .batchSize(100)
                                 .maxBatchingWindow(Duration.seconds(30))
                                 .build())
