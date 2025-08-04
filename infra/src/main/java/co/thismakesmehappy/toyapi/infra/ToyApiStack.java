@@ -1784,14 +1784,7 @@ public class ToyApiStack extends Stack {
                         "method.request.header.Accept", false,
                         "method.request.header.Content-Type", false))
                 .methodResponses(Arrays.asList(
-                        // V1 response
-                        MethodResponse.builder()
-                                .statusCode("200")
-                                .responseParameters(Map.of(
-                                        "method.response.header.Content-Type", true,
-                                        "method.response.header.X-API-Version", true))
-                                .build(),
-                        // V2 response  
+                        // Standard response with version header support
                         MethodResponse.builder()
                                 .statusCode("200")
                                 .responseParameters(Map.of(
