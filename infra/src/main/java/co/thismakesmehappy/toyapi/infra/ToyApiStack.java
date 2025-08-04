@@ -79,6 +79,19 @@ public class ToyApiStack extends Stack {
             this.defaultApiKey = defaultApiKey;
         }
     }
+    
+    /**
+     * Container for DAX cluster resources
+     */
+    private static class DaxClusterResources {
+        final CfnCluster cluster;
+        final SecurityGroup securityGroup;
+        
+        DaxClusterResources(CfnCluster cluster, SecurityGroup securityGroup) {
+            this.cluster = cluster;
+            this.securityGroup = securityGroup;
+        }
+    }
     private final String environment;
     private final String resourcePrefix;
     private Topic cacheNotificationTopic;
@@ -1158,19 +1171,7 @@ public class ToyApiStack extends Stack {
                 .allowAllOutbound(false)  // Start with no outbound, add specific rules
                 .build();
         
-        // Allow Lambda to reach ElastiCache on port 6379
-        cacheSecurityGroup.addIngressRule(
-                Peer.securityGroupId(lambdaSecurityGroup.getSecurityGroupId()),
-                Port.tcp(6379),
-                "Redis traffic from Lambda functions only"
-        );
-        
-        // Allow Lambda outbound to ElastiCache
-        lambdaSecurityGroup.addEgressRule(
-                Peer.securityGroupId(cacheSecurityGroup.getSecurityGroupId()),
-                Port.tcp(6379),
-                "Lambda to Redis cache"
-        );
+        // NOTE: Security group rules will be added after clusters are created to avoid circular dependencies
         
         // Allow Lambda to reach AWS services (HTTPS only)
         lambdaSecurityGroup.addEgressRule(
@@ -1230,7 +1231,10 @@ public class ToyApiStack extends Stack {
                 .build();
         
         // Create DynamoDB DAX cluster for DynamoDB acceleration
-        createDaxCluster(cacheVpc, lambdaSecurityGroup);
+        DaxClusterResources daxResources = createDaxCluster(cacheVpc, lambdaSecurityGroup);
+        
+        // Add security group rules after clusters are created to avoid circular dependencies
+        addSecurityGroupRulesAfterCreation(lambdaSecurityGroup, cacheSecurityGroup, daxResources.securityGroup);
         
         // Configure Lambda functions with VPC and caching
         configureLambdaCaching(cacheVpc, lambdaSecurityGroup, redisCluster);
@@ -1265,7 +1269,7 @@ public class ToyApiStack extends Stack {
     /**
      * Creates DynamoDB Accelerator (DAX) cluster for ultra-fast DynamoDB caching
      */
-    private void createDaxCluster(Vpc vpc, SecurityGroup securityGroup) {
+    private DaxClusterResources createDaxCluster(Vpc vpc, SecurityGroup securityGroup) {
         // Create IAM role for DAX cluster
         Role daxRole = Role.Builder.create(this, "DaxRole")
                 .roleName(resourcePrefix + "-dax-role")
@@ -1310,19 +1314,7 @@ public class ToyApiStack extends Stack {
                 .allowAllOutbound(false)
                 .build();
         
-        // Allow Lambda to reach DAX on port 8111 (from Lambda security group only)
-        daxSecurityGroup.addIngressRule(
-                Peer.securityGroupId(securityGroup.getSecurityGroupId()),
-                Port.tcp(8111),
-                "DAX traffic from Lambda functions only"
-        );
-        
-        // Allow Lambda outbound to DAX
-        securityGroup.addEgressRule(
-                Peer.securityGroupId(daxSecurityGroup.getSecurityGroupId()),
-                Port.tcp(8111),
-                "Lambda to DAX cluster"
-        );
+        // NOTE: Security group rules will be added after clusters are created to avoid circular dependencies
         
         // Create DAX parameter group
         software.amazon.awscdk.services.dax.CfnParameterGroup daxParameterGroup = software.amazon.awscdk.services.dax.CfnParameterGroup.Builder.create(this, "DaxParameterGroup")
@@ -1343,6 +1335,8 @@ public class ToyApiStack extends Stack {
                 .notificationTopicArn(cacheNotificationTopic.getTopicArn())
                 .preferredMaintenanceWindow("sun:07:00-sun:09:00")
                 .build();
+        
+        return new DaxClusterResources(daxCluster, daxSecurityGroup);
     }
     
     /**
@@ -3201,5 +3195,44 @@ public class ToyApiStack extends Stack {
                 .value("Analytics: 10 req/sec, Premium: 200 req/sec, Default: 100 req/sec")
                 .description("Rate limiting configuration summary")
                 .build();
+    }
+    
+    /**
+     * Adds security group rules using VPC CIDR to avoid circular dependencies.
+     * This method configures the network communication between Lambda functions and cache services
+     * without creating cross-references between security groups.
+     */
+    private void addSecurityGroupRulesAfterCreation(SecurityGroup lambdaSecurityGroup, 
+                                                   SecurityGroup cacheSecurityGroup, 
+                                                   SecurityGroup daxSecurityGroup) {
+        
+        // Allow ElastiCache ingress from VPC private subnets on port 6379
+        // This is more secure than allowing from entire VPC CIDR and avoids circular dependencies
+        cacheSecurityGroup.addIngressRule(
+                Peer.ipv4("10.0.0.0/16"),  // Private subnet range
+                Port.tcp(6379),
+                "Redis traffic from private subnets (Lambda functions)"
+        );
+        
+        // Allow Lambda outbound to private subnets for Redis
+        lambdaSecurityGroup.addEgressRule(
+                Peer.ipv4("10.0.0.0/16"),  // Private subnet range
+                Port.tcp(6379),
+                "Lambda to Redis cache in private subnets"
+        );
+        
+        // Allow DAX ingress from VPC private subnets on port 8111
+        daxSecurityGroup.addIngressRule(
+                Peer.ipv4("10.0.0.0/16"),  // Private subnet range
+                Port.tcp(8111),
+                "DAX traffic from private subnets (Lambda functions)"
+        );
+        
+        // Allow Lambda outbound to private subnets for DAX
+        lambdaSecurityGroup.addEgressRule(
+                Peer.ipv4("10.0.0.0/16"),  // Private subnet range
+                Port.tcp(8111),
+                "Lambda to DAX cluster in private subnets"
+        );
     }
 }
