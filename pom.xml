@@ -21,7 +21,7 @@
         <!-- Dependency versions -->
         <aws.sdk.version>2.32.13</aws.sdk.version>
         <aws.lambda.version>1.3.0</aws.lambda.version>
-        <jackson.version>2.19.1</jackson.version>
+        <jackson.version>2.19.2</jackson.version>
         <junit.version>5.13.0</junit.version>
         <openapi.generator.version>7.11.0</openapi.generator.version>
         <rest.assured.version>5.5.5</rest.assured.version>
