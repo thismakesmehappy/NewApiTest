@@ -66,7 +66,9 @@ toyapi/
 ### GitHub Actions Workflows:
 - ✅ **Build & Test** - Maven multi-module builds with caching
 - ✅ **Security Scan** - OWASP dependency check with NVD resilience
-- ✅ **Multi-env Deploy** - Automated dev→staging→production pipeline
+- ✅ **Multi-env Deploy** - Complete dev→staging→production pipeline with monitoring stacks
+- ✅ **Development Deploy** - On-demand development deployments (use `[deploy-dev]` in commit message)
+- ✅ **Infrastructure Visibility** - CDK diff shown before all deployments
 - ✅ **PR Validation** - Code quality, security, CDK synthesis checks
 - ✅ **Dependabot** - Weekly dependency updates with grouping
 
@@ -107,8 +109,9 @@ git push origin main  # → staging → production
 
 **✅ Enterprise-Ready Serverless API**
 - **9 endpoints** with Cognito JWT auth
-- **CI/CD pipeline** with GitHub Actions  
-- **Multi-environment** (dev/stage/prod)
+- **Complete CI/CD pipeline** deploying both application and monitoring stacks
+- **Multi-environment** (dev/stage/prod) with full observability
+- **CloudWatch monitoring** with dashboards, alarms, and SNS alerts
 - **Local development** with 40x faster warm containers
 - **Security scanning** with automated dependency updates
 

@@ -113,7 +113,7 @@ jobs:
     name: Deploy to Development
     runs-on: ubuntu-latest
     needs: [test, security-scan]
-    if: false  # Disabled - use manual deployment for dev
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[deploy-dev]')
     
     steps:
     - name: Checkout code
@@ -152,11 +152,30 @@ jobs:
         # Build and install all modules to local repository for integration tests
         mvn clean install -DskipTests
         
-    - name: Deploy to development
+    - name: Bootstrap CDK (if needed)
       run: |
         cd infra
-        chmod +x scripts/deploy-dev.sh
-        ./scripts/deploy-dev.sh
+        export ENVIRONMENT=dev
+        cdk bootstrap --context environment=${ENVIRONMENT}
+        
+    - name: Show infrastructure changes
+      run: |
+        cd infra
+        export ENVIRONMENT=dev
+        cdk diff ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        cdk diff ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        
+    - name: Deploy main infrastructure
+      run: |
+        cd infra
+        export ENVIRONMENT=dev
+        cdk deploy ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
+        
+    - name: Deploy monitoring stack
+      run: |
+        cd infra
+        export ENVIRONMENT=dev
+        cdk deploy ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
         
     - name: Run integration tests
       run: |
@@ -216,11 +235,30 @@ jobs:
         # Build and install all modules to local repository for integration tests
         mvn clean install -DskipTests
         
-    - name: Deploy to staging
+    - name: Bootstrap CDK (if needed)
       run: |
         cd infra
-        chmod +x scripts/deploy-stage.sh
-        ./scripts/deploy-stage.sh
+        export ENVIRONMENT=stage
+        cdk bootstrap --context environment=${ENVIRONMENT}
+        
+    - name: Show infrastructure changes
+      run: |
+        cd infra
+        export ENVIRONMENT=stage
+        cdk diff ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        cdk diff ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        
+    - name: Deploy main infrastructure
+      run: |
+        cd infra
+        export ENVIRONMENT=stage
+        cdk deploy ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
+        
+    - name: Deploy monitoring stack
+      run: |
+        cd infra
+        export ENVIRONMENT=stage
+        cdk deploy ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
         
     - name: Run integration tests
       run: |
@@ -279,11 +317,30 @@ jobs:
         # Build and install all modules to local repository for integration tests
         mvn clean install -DskipTests
         
-    - name: Deploy to production
+    - name: Bootstrap CDK (if needed)
       run: |
         cd infra
-        chmod +x scripts/deploy-prod.sh
-        ./scripts/deploy-prod.sh
+        export ENVIRONMENT=prod
+        cdk bootstrap --context environment=${ENVIRONMENT}
+        
+    - name: Show infrastructure changes
+      run: |
+        cd infra
+        export ENVIRONMENT=prod
+        cdk diff ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        cdk diff ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        
+    - name: Deploy main infrastructure
+      run: |
+        cd infra
+        export ENVIRONMENT=prod
+        cdk deploy ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
+        
+    - name: Deploy monitoring stack
+      run: |
+        cd infra
+        export ENVIRONMENT=prod
+        cdk deploy ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
         
     - name: Run smoke tests
       run: |
