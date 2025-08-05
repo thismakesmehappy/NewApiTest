@@ -67,7 +67,7 @@ toyapi/
 - ✅ **Build & Test** - Maven multi-module builds with caching
 - ✅ **Security Scan** - OWASP dependency check with NVD resilience
 - ✅ **Multi-env Deploy** - Complete dev→staging→production pipeline with monitoring stacks
-- ✅ **Development Deploy** - On-demand development deployments (use `[deploy-dev]` in commit message)
+- ✅ **Development Deploy** - On-demand from feature branches (use `[deploy-dev]` in commit message)
 - ✅ **Infrastructure Visibility** - CDK diff shown before all deployments
 - ✅ **PR Validation** - Code quality, security, CDK synthesis checks
 - ✅ **Dependabot** - Weekly dependency updates with grouping
@@ -81,8 +81,10 @@ toyapi/
 ## 🎯 Available Actions
 
 ```bash
-# CI/CD (automated via GitHub)
-git push origin main  # → staging → production
+# CI/CD Pipeline Flow:
+git push origin main                    # → staging → production (after approval)
+git push origin feature-branch         # → runs tests only
+git commit -m "fix: something [deploy-dev]" && git push  # → deploys to dev environment
 
 # Local development  
 ./local-dev/scripts/start-local-dev.sh
