@@ -56,7 +56,10 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
         
     - name: Run unit tests only (no AWS dependencies)
-      run: mvn clean test -pl service
+      run: |
+        # Run tests but exclude AWS-dependent tests that require credentials
+        cd service
+        mvn clean test -Dtest='!co.thismakesmehappy.toyapi.service.AnalyticsHandlerTest,!co.thismakesmehappy.toyapi.service.AnalyticsReportHandlerTest' -Dsurefire.failIfNoSpecifiedTests=false
       env:
         # Disable AWS credentials to test fallback behavior
         AWS_ACCESS_KEY_ID: ""
