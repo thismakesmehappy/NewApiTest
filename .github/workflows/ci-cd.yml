@@ -55,8 +55,8 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
         
-    - name: Run tests
-      run: mvn clean test
+    - name: Run unit tests only (no AWS dependencies)
+      run: mvn clean test -pl service
       
     - name: Build service
       run: |
