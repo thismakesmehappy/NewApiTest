@@ -13,6 +13,7 @@ import software.amazon.awscdk.services.cloudfront.origins.*;
 import software.amazon.awscdk.services.cloudwatch.*;
 import software.amazon.awscdk.services.cognito.*;
 import software.amazon.awscdk.services.dynamodb.*;
+import software.amazon.awscdk.services.dynamodb.CfnTable;
 import software.amazon.awscdk.services.dax.*;
 import software.amazon.awscdk.services.ec2.*;
 import software.amazon.awscdk.services.elasticache.*;
@@ -117,8 +118,8 @@ public class ToyApiStack extends Stack {
         // Create API Gateway with all functions including developer
         RestApi api = createApiGateway(publicFunction, authFunction, itemsFunction, developerFunction, cognitoResources.userPool);
         
-        // Create WAF protection for API Gateway
-        createWafProtection(api);
+        // TEMPORARILY DISABLED: WAF protection (causing deployment issues)
+        // createWafProtection(api);
         
         // Create custom domain and Route53 records (only for production and staging)
         // TODO: Enable custom domains after setting up hosted zone for thismakesmehappy.co
@@ -138,20 +139,16 @@ public class ToyApiStack extends Stack {
         // Create API key rotation infrastructure
         createApiKeyRotationInfrastructure(api, apiKeyResources);
         
-        // Create request signing infrastructure for enhanced security
-        createRequestSigningInfrastructure(api);
+        // TEMPORARILY DISABLED: Request signing (reducing complexity)
+        // createRequestSigningInfrastructure(api);
         
-        // Create cache notification topic (shared by multiple cache resources)
-        cacheNotificationTopic = createCacheNotificationTopic();
+        // TEMPORARILY DISABLED: Cache components (causing resource limit issues)
+        // cacheNotificationTopic = createCacheNotificationTopic();
+        // createPerformanceOptimizationInfrastructure(api);
         
-        // Create connection pooling and caching layers for performance optimization
-        createPerformanceOptimizationInfrastructure(api);
-        
-        // Create CloudFront CDN for global distribution
-        Distribution cloudFrontDistribution = createCloudFrontDistribution(api);
-        
-        // Create usage analytics and developer insights tracking
-        createUsageAnalyticsInfrastructure(api, cloudFrontDistribution);
+        // TEMPORARILY DISABLED: CloudFront and analytics (reducing complexity)
+        // Distribution cloudFrontDistribution = createCloudFrontDistribution(api);
+        // createUsageAnalyticsInfrastructure(api, cloudFrontDistribution);
         
         // Set up AWS Systems Manager Parameter Store for test credentials
         createParameterStoreInfrastructure();
@@ -167,7 +164,7 @@ public class ToyApiStack extends Stack {
      * Creates DynamoDB table for storing items with proper configuration for the environment.
      */
     private Table createDynamoDBTable() {
-        Table.Builder tableBuilder = Table.Builder.create(this, "ToyApiDynamoItems")
+        Table.Builder tableBuilder = Table.Builder.create(this, "ItemsTable5AAC2C46")
                 .tableName(resourcePrefix + "-items")
                 .partitionKey(Attribute.builder()
                         .name("PK")
@@ -188,6 +185,10 @@ public class ToyApiStack extends Stack {
         }
 
         Table table = tableBuilder.build();
+        
+        // Override logical ID to match existing CloudFormation state
+        CfnTable cfnTable = (CfnTable) table.getNode().getDefaultChild();
+        cfnTable.overrideLogicalId("ItemsTable5AAC2C46");
 
         // Add GSI for user-based queries
         table.addGlobalSecondaryIndex(GlobalSecondaryIndexProps.builder()
@@ -1199,12 +1200,12 @@ public class ToyApiStack extends Stack {
         // Create Redis parameter group for optimized settings
         software.amazon.awscdk.services.elasticache.CfnParameterGroup redisParameterGroup = software.amazon.awscdk.services.elasticache.CfnParameterGroup.Builder.create(this, "RedisParameterGroup")
                 .description("Parameter group for Redis cluster optimization")
-                .cacheParameterGroupFamily("redis7.x")
+                .cacheParameterGroupFamily("redis7")
                 .properties(Map.of(
                         "maxmemory-policy", "allkeys-lru",  // LRU eviction when memory is full
                         "timeout", "300",                   // Client timeout
-                        "tcp-keepalive", "60",             // Keep-alive interval
-                        "maxclients", "10000"              // Maximum client connections
+                        "tcp-keepalive", "60"              // Keep-alive interval
+                        // Note: maxclients cannot be modified in Redis parameter groups
                 ))
                 .build();
         
@@ -1274,9 +1275,6 @@ public class ToyApiStack extends Stack {
         Role daxRole = Role.Builder.create(this, "DaxRole")
                 .roleName(resourcePrefix + "-dax-role")
                 .assumedBy(new ServicePrincipal("dax.amazonaws.com"))
-                .managedPolicies(Arrays.asList(
-                        ManagedPolicy.fromAwsManagedPolicyName("AmazonDaxFullAccess")
-                ))
                 .build();
         
         // Allow DAX to access DynamoDB
@@ -1603,14 +1601,16 @@ public class ToyApiStack extends Stack {
                 .authorizerName(resourcePrefix + "-authorizer")
                 .build();
 
+        // TEMPORARILY DISABLED: Versioned API endpoints (causing Lambda policy size limit exceeded)
         // Create versioned API structure - supports both URL path and media type versioning
-        createVersionedEndpoints(api, publicFunction, authFunction, itemsFunction, authorizer);
+        // createVersionedEndpoints(api, publicFunction, authFunction, itemsFunction, authorizer);
         
         // Create legacy (unversioned) endpoints for backward compatibility
         createLegacyEndpoints(api, publicFunction, authFunction, itemsFunction, authorizer);
         
+        // TEMPORARILY DISABLED: Media-type versioned endpoints (causing Lambda policy size limit exceeded)
         // Create media-type versioned endpoints (same URLs, different Accept headers)
-        createMediaTypeVersionedEndpoints(api, publicFunction, authFunction, itemsFunction, authorizer);
+        // createMediaTypeVersionedEndpoints(api, publicFunction, authFunction, itemsFunction, authorizer);
 
         // Developer endpoints (public for registration, no API key required for onboarding)
         Resource developerResource = api.getRoot().addResource("developer");
@@ -1870,45 +1870,9 @@ public class ToyApiStack extends Stack {
      * Creates Lambda integration with media type header mapping for content negotiation
      */
     private LambdaIntegration createMediaTypeIntegration(Function function, String method, String path) {
+        // Use simple proxy integration for media type versioning
         return LambdaIntegration.Builder.create(function)
-                .proxy(true)
-                .requestTemplates(Map.of(
-                        "application/json", "{\n" +
-                                "  \"httpMethod\": \"" + method + "\",\n" +
-                                "  \"path\": \"" + path + "\",\n" +
-                                "  \"headers\": {\n" +
-                                "    #foreach($param in $input.params().header.keySet())\n" +
-                                "    \"$param\": \"$util.escapeJavaScript($input.params().header.get($param))\"\n" +
-                                "    #if($foreach.hasNext),#end\n" +
-                                "    #end\n" +
-                                "  },\n" +
-                                "  \"queryStringParameters\": {\n" +
-                                "    #foreach($param in $input.params().querystring.keySet())\n" +
-                                "    \"$param\": \"$util.escapeJavaScript($input.params().querystring.get($param))\"\n" +
-                                "    #if($foreach.hasNext),#end\n" +
-                                "    #end\n" +
-                                "  },\n" +
-                                "  \"pathParameters\": {\n" +
-                                "    #foreach($param in $input.params().path.keySet())\n" +
-                                "    \"$param\": \"$util.escapeJavaScript($input.params().path.get($param))\"\n" +
-                                "    #if($foreach.hasNext),#end\n" +
-                                "    #end\n" +
-                                "  },\n" +
-                                "  \"body\": $input.json('$'),\n" +
-                                "  \"requestContext\": {\n" +
-                                "    \"apiVersion\": \"$util.escapeJavaScript($input.params().header.get('Accept'))\",\n" +
-                                "    \"contentNegotiation\": true\n" +
-                                "  }\n" +
-                                "}"
-                ))
-                .integrationResponses(Arrays.asList(
-                        // Success response with version header
-                        IntegrationResponse.builder()
-                                .statusCode("200")
-                                .responseParameters(Map.of(
-                                        "method.response.header.Content-Type", "'application/json'",
-                                        "method.response.header.X-API-Version", "integration.response.header.X-API-Version"))
-                                .build()))
+                .proxy(true)  // Lambda proxy integration handles responses automatically
                 .build();
     }
     
@@ -2198,7 +2162,7 @@ public class ToyApiStack extends Stack {
         // Create the main WAF Web ACL
         CfnWebACL webAcl = CfnWebACL.Builder.create(this, "ToyApiWafWebAcl")
                 .name(resourcePrefix + "-web-acl")
-                .description("Comprehensive WAF protection for ToyApi (" + environment + ")")
+                .description("Comprehensive WAF protection for ToyApi " + environment + " environment")
                 .scope("REGIONAL")  // For API Gateway
                 .defaultAction(CfnWebACL.DefaultActionProperty.builder()
                         .allow(CfnWebACL.AllowActionProperty.builder().build())  // Allow by default, block specific threats
@@ -2679,7 +2643,7 @@ public class ToyApiStack extends Stack {
                         software.amazon.awscdk.services.s3.LifecycleRule.builder()
                                 .id("DeleteOldLogs")
                                 .enabled(true)
-                                .expiration(Duration.days(environment.equals("prod") ? 365 : 90))  // Keep logs longer in prod
+                                .expiration(Duration.days(environment.equals("prod") ? 365 : 180))  // Keep logs longer in prod, must be > 90 days
                                 .transitions(Arrays.asList(
                                         software.amazon.awscdk.services.s3.Transition.builder()
                                                 .storageClass(software.amazon.awscdk.services.s3.StorageClass.INFREQUENT_ACCESS)

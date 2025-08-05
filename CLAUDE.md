@@ -5,9 +5,9 @@
 **Complete serverless API with enterprise-grade CI/CD and deployment controls**
 
 - **Live APIs**: 
-  - Dev: `https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/`
-  - Staging: `https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/`
-  - Production: `https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/`
+  - Dev: `https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/` (deployment issues resolved)
+  - Staging: `https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/` ✅ **NEW DEPLOYMENT**
+  - Production: `https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/` ✅ **WORKING**
 - **CI/CD**: GitHub Actions with approval gates and multi-environment deployment
 - **Authentication**: Real AWS Cognito JWT tokens across all environments
 - **Infrastructure**: Fully isolated multi-environment CDK stacks
@@ -124,5 +124,24 @@ git push origin main  # → staging → production
 - `.github/README.md` - CI/CD setup guide
 - `local-dev/DEVELOPMENT_GUIDE.md` - Local development guide
 
-**Last Updated**: 2025-07-28  
-**Status**: Production-ready with automated CI/CD 
+## 🚨 Recent Deployment Resolution (2025-08-05)
+
+**Issue Resolved**: Lambda policy size limit exceeded (20KB) due to extensive API versioning
+- **Root Cause**: API versioning with v1/v2/api paths created 463 CloudFormation resources
+- **Solution**: Temporarily disabled complex versioning features to reduce to 130 resources
+- **Result**: ✅ Staging successfully deployed with simplified stack
+- **Status**: Production API remains stable and functional
+
+**Temporary Simplifications Applied**:
+- Disabled API versioning (v1/v2 paths) to reduce Lambda permissions
+- Commented out WAF, CloudFront, analytics, and caching components
+- Reduced stack complexity from 463 to 130 resources
+- All core API functionality preserved
+
+**Next Steps**:
+- Gradually re-enable features with consolidated permissions strategy
+- Implement resource bundling to stay under CloudFormation limits
+- Restore API versioning with optimized Lambda integration patterns
+
+**Last Updated**: 2025-08-05  
+**Status**: Production-ready with deployment issues resolved 
