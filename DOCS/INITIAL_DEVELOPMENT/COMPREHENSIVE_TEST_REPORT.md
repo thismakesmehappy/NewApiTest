@@ -8,7 +8,7 @@
 
 ### Environments Tested
 - ✅ **Development**: `https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/`
-- ✅ **Staging**: `https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/`  
+- ✅ **Staging**: `https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/`  
 - ✅ **Production**: `https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/`
 
 ### Test Coverage

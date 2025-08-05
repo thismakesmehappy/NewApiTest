@@ -31,7 +31,7 @@ public class ApiIntegrationTest {
                 break;
             case "stage":
             case "staging":
-                baseUrl = "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage";
+                baseUrl = "https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage";
                 break;
             case "dev":
             case "development":
