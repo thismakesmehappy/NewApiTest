@@ -416,20 +416,20 @@ public class MonitoringStack extends Stack {
                 .defaultValue(0)
                 .build();
         
-        // Slow request metric filter (>1 second response time)
+        // Slow request metric filter - using simple text matching
         MetricFilter slowRequestFilter = MetricFilter.Builder.create(this, "SlowRequestFilter")  
                 .logGroup(logGroup)
-                .filterPattern(FilterPattern.literal("[timestamp, requestId, responseTime > 1000]"))
+                .filterPattern(FilterPattern.anyTerm("SLOW", "timeout", "performance"))
                 .metricNamespace("ToyApi/" + environment)
                 .metricName("SlowRequests")
                 .metricValue("1")
                 .defaultValue(0)
                 .build();
         
-        // Developer registration metric filter
+        // Developer registration metric filter - using simple text matching
         MetricFilter devRegistrationFilter = MetricFilter.Builder.create(this, "DeveloperRegistrationFilter")
                 .logGroup(logGroup)
-                .filterPattern(FilterPattern.literal("[timestamp, requestId, \"Developer registered successfully\"]"))
+                .filterPattern(FilterPattern.anyTerm("registered", "signup", "new_user"))
                 .metricNamespace("ToyApi/" + environment)
                 .metricName("DeveloperRegistrations")
                 .metricValue("1")
