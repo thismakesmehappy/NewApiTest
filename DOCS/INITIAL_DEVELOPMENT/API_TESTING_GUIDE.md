@@ -13,7 +13,7 @@
 - **DynamoDB Table**: `toyapi-dev-items`
 
 ### **Staging Environment**
-- **Base URL**: `https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/`
+- **Base URL**: `https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/`
 - **User Pool ID**: `us-east-1_[staging-specific]`
 - **DynamoDB Table**: `toyapi-stage-items`
 
@@ -924,14 +924,14 @@ curl -s "https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/items" -H "A
 **Staging Environment:**
 ```bash
 # Get token
-STAGE_TOKEN=$(curl -s -X POST "https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/auth/login" \
+STAGE_TOKEN=$(curl -s -X POST "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","password":"TestPassword123"}' | jq -r '.idToken')
 
 # Test endpoints
-curl -s "https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/public/message" | jq .
-curl -s "https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/auth/message" -H "Authorization: Bearer $STAGE_TOKEN" | jq .
-curl -s "https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/items" -H "Authorization: Bearer $STAGE_TOKEN" | jq .
+curl -s "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/public/message" | jq .
+curl -s "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/auth/message" -H "Authorization: Bearer $STAGE_TOKEN" | jq .
+curl -s "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/items" -H "Authorization: Bearer $STAGE_TOKEN" | jq .
 ```
 
 **Production Environment:**

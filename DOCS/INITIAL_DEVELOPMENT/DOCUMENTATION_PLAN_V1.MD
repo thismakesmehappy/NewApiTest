@@ -56,9 +56,6 @@ Let's figure out a way to document everything. The plan should include considera
     - Expected inputs and outputs
     - Error models
   - Custom URL routing
-    - How the feature flag works
-    - How to enable
-    - How to setup and make it work
   - Best practices
   - feature flags
   - versioning (include maintanance and best pracrices)
@@ -112,7 +109,6 @@ Let's figure out a way to document everything. The plan should include considera
     - architecture
     - each individual element (compute, api, deployment, lambdas)
     - Monitoring stack
-    - Cloudformation, build, etc
   - Security
     - What is the level of security
     - What are the layers of data security
@@ -125,7 +121,6 @@ Let's figure out a way to document everything. The plan should include considera
     - How to create and manage accounts
     - The diffrent technlogies and why you use the, (lambdas, compute, routing, database, IAM, AI, mointoring, etc); include which are free and paid, and add references to online documentation (give me enough info to understand the tech and start using it, but reference online docs for deep dive)
   - Make it a deep explanation, but with language that is easy to understand; should be a good balance of technical and layman
-  - I should be able to setup a new AWS account, create a new CDK and launch a new lambda with other services manually with the knowledge I gain from this part of the guide
 
 ## AI Guide
 - Context: You are Claude.AI and understand the entire codebase and how to create documetntion to reproduce this project, adapting to new requirements

@@ -321,7 +321,7 @@
       "created": 1690403550000,
       "name": "Staging Environment",
       "data": {
-        "base_url": "https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage",
+        "base_url": "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage",
         "user_pool_id": "us-east-1_yRwNoYGhr",
         "user_pool_client_id": "79nh1n2rg3u63upokam38p9i0n",
         "dynamodb_table": "toyapi-stage-items",
