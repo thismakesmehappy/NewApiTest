@@ -24,20 +24,20 @@ public class ApiIntegrationTest {
         // Get environment from system property, default to dev
         environment = System.getProperty("test.environment", "dev");
         
-        // Set base URL based on environment
+        // Set base URL based on environment - using stable custom domains
         switch (environment.toLowerCase()) {
             case "prod":
             case "production":
-                baseUrl = "https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod";
+                baseUrl = "https://toyapi.thismakesmehappy.co";
                 break;
             case "stage":
             case "staging":
-                baseUrl = "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage";
+                baseUrl = "https://stage.toyapi.thismakesmehappy.co";
                 break;
             case "dev":
             case "development":
             default:
-                baseUrl = "https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev";
+                baseUrl = "https://dev.toyapi.thismakesmehappy.co";
                 break;
         }
         
