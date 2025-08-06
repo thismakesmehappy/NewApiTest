@@ -32,12 +32,12 @@ public class ApiIntegrationTest {
                 break;
             case "stage":
             case "staging":
-                baseUrl = "https://stage.toyapi.thismakesmehappy.co";
+                baseUrl = "https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage";
                 break;
             case "dev":
             case "development":
             default:
-                baseUrl = "https://dev.toyapi.thismakesmehappy.co";
+                baseUrl = "https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev";
                 break;
         }
         

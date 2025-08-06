@@ -56,6 +56,6 @@
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
     "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
     "@aws-cdk/aws-codepipeline-actions:useNewDefaultBranchForSourceAction": true,
-    "enableCustomDomains": "true"
+    "enableCustomDomains": "false"
   }
 }
