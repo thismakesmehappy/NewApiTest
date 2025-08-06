@@ -22,6 +22,13 @@
             <version>${project.version}</version>
         </dependency>
         
+        <!-- Service module for ParameterStoreHelper -->
+        <dependency>
+            <groupId>co.thismakesmehappy</groupId>
+            <artifactId>toyapi-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
         <!-- REST Assured for API testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>
