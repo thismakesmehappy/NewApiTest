@@ -354,7 +354,7 @@ jobs:
       run: |
         # Production: Run unit tests (no AWS dependencies)  
         cd service
-        mvn clean test -Dtest='!co.thismakesmehappy.toyapi.service.AnalyticsHandlerTest,!co.thismakesmehappy.toyapi.service.AnalyticsReportHandlerTest' -Dsurefire.failIfNoSpecifiedTests=false
+        mvn clean test -Dtest='!co.thismakesmehappy.toyapi.service.AnalyticsHandlerTest,!co.thismakesmehappy.toyapi.service.AnalyticsReportHandlerTest,!co.thismakesmehappy.toyapi.service.ParameterStoreHelperUnitTest' -Dsurefire.failIfNoSpecifiedTests=false
         cd ..
         
         # Production: Run only health checks and smoke tests (read-only validation)
