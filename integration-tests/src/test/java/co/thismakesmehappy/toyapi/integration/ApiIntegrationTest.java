@@ -5,6 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.Tag;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
@@ -48,6 +49,8 @@ public class ApiIntegrationTest {
     }
     
     @Test
+    @Tag("smoke")
+    @Tag("health")
     void testPublicEndpoint() {
         given()
             .when()
@@ -61,6 +64,8 @@ public class ApiIntegrationTest {
     }
     
     @Test
+    @Tag("smoke")
+    @Tag("health")
     void testAuthenticationRequired() {
         // Test that auth endpoints require authentication
         given()
@@ -72,6 +77,7 @@ public class ApiIntegrationTest {
     }
     
     @Test
+    @Tag("integration")
     void testItemsEndpointRequiresAuth() {
         // Test that items endpoints require authentication
         given()
@@ -83,6 +89,7 @@ public class ApiIntegrationTest {
     }
     
     @Test
+    @Tag("integration")
     void testLoginEndpoint() {
         // Test login with test credentials
         given()
@@ -103,6 +110,7 @@ public class ApiIntegrationTest {
     }
     
     @Test
+    @Tag("integration")
     void testInvalidLogin() {
         // Test login with invalid credentials
         given()
@@ -120,6 +128,8 @@ public class ApiIntegrationTest {
     }
     
     @Test
+    @Tag("health")
+    @Tag("smoke")
     void testHealthCheck() {
         // Basic connectivity test
         given()

@@ -268,9 +268,9 @@ jobs:
         export ENVIRONMENT=stage
         cdk deploy ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
         
-    - name: Run integration tests
+    - name: Run full integration tests (staging only)
       run: |
-        # Run integration tests from project root to ensure dependencies are available
+        # Run ALL tests in staging - comprehensive validation before production
         mvn test -pl integration-tests -Dtest.environment=stage
         
     - name: Upload deployment logs
@@ -350,10 +350,15 @@ jobs:
         export ENVIRONMENT=prod
         cdk deploy ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
         
-    - name: Run smoke tests
+    - name: Run unit tests, health checks, and smoke tests only
       run: |
-        # Run smoke tests from project root to ensure dependencies are available
-        mvn test -pl integration-tests -Dtest.environment=prod -Dtest.suite=smoke
+        # Production: Run unit tests (no AWS dependencies)  
+        cd service
+        mvn clean test -Dtest='!co.thismakesmehappy.toyapi.service.AnalyticsHandlerTest,!co.thismakesmehappy.toyapi.service.AnalyticsReportHandlerTest' -Dsurefire.failIfNoSpecifiedTests=false
+        cd ..
+        
+        # Production: Run only health checks and smoke tests (read-only validation)
+        mvn test -pl integration-tests -Dtest.environment=prod -Dgroups="health,smoke"
         
     - name: Upload deployment logs
       uses: actions/upload-artifact@v4
