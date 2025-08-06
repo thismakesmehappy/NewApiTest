@@ -2376,14 +2376,14 @@ public class ToyApiStack extends Stack {
      * Only creates custom domain for production and staging environments.
      * 
      * Domain structure:
-     * - prod: api.thismakesmehappy.co
-     * - stage: api-stage.thismakesmehappy.co
+     * - prod: toyapi.thismakesmehappy.co
+     * - stage: toyapi-stage.thismakesmehappy.co
      */
     private void createCustomDomain(RestApi api) {
         // Define domain names based on environment
         String domainName = environment.equals("prod") ? 
-                "api.thismakesmehappy.co" : 
-                "api-" + environment + ".thismakesmehappy.co";
+                "toyapi.thismakesmehappy.co" : 
+                "toyapi-" + environment + ".thismakesmehappy.co";
         
         // Look up existing hosted zone (assumes domain is already registered and hosted zone exists)
         IHostedZone hostedZone = HostedZone.fromLookup(this, "HostedZone", 
