@@ -21,8 +21,8 @@ import java.util.*;
  */
 public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private final DynamoDbClient dynamoDbClient;
-    private final ApiGatewayClient apiGatewayClient;
+    private DynamoDbClient dynamoDbClient;
+    private ApiGatewayClient apiGatewayClient;
     private final ObjectMapper objectMapper;
     private final String tableName;
     private final String apiNamePrefix;
@@ -33,12 +33,24 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
     private String usagePlanId;
 
     public DeveloperHandler() {
-        this.dynamoDbClient = DynamoDbClient.builder().build();
-        this.apiGatewayClient = ApiGatewayClient.builder().build();
         this.objectMapper = new ObjectMapper();
         this.tableName = System.getenv("TABLE_NAME");
         this.apiNamePrefix = System.getenv("API_NAME_PREFIX");
         this.usagePlanPrefix = System.getenv("USAGE_PLAN_PREFIX");
+    }
+    
+    private synchronized DynamoDbClient getDynamoDbClient() {
+        if (dynamoDbClient == null) {
+            dynamoDbClient = DynamoDbClient.builder().build();
+        }
+        return dynamoDbClient;
+    }
+    
+    private synchronized ApiGatewayClient getApiGatewayClient() {
+        if (apiGatewayClient == null) {
+            apiGatewayClient = ApiGatewayClient.builder().build();
+        }
+        return apiGatewayClient;
     }
     
     /**
@@ -50,7 +62,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
         }
         
         try {
-            GetRestApisResponse response = apiGatewayClient.getRestApis();
+            GetRestApisResponse response = getApiGatewayClient().getRestApis();
             for (RestApi api : response.items()) {
                 if (api.name().startsWith(apiNamePrefix)) {
                     restApiId = api.id();
@@ -72,7 +84,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
         }
         
         try {
-            GetUsagePlansResponse response = apiGatewayClient.getUsagePlans();
+            GetUsagePlansResponse response = getApiGatewayClient().getUsagePlans();
             for (UsagePlan plan : response.items()) {
                 if (plan.name().startsWith(usagePlanPrefix)) {
                     usagePlanId = plan.id();
@@ -146,7 +158,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = dynamoDbClient.getItem(getRequest);
+            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
             if (getResponse.hasItem()) {
                 return createErrorResponse(409, "Developer already registered");
             }
@@ -171,7 +183,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            dynamoDbClient.putItem(putRequest);
+            getDynamoDbClient().putItem(putRequest);
 
             ObjectNode response = objectMapper.createObjectNode();
             response.put("developerId", developerId);
@@ -203,7 +215,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = dynamoDbClient.getItem(getRequest);
+            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
             if (!getResponse.hasItem()) {
                 return createErrorResponse(404, "Developer not found");
             }
@@ -217,7 +229,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     .enabled(true)
                     .build();
 
-            CreateApiKeyResponse createKeyResponse = apiGatewayClient.createApiKey(createKeyRequest);
+            CreateApiKeyResponse createKeyResponse = getApiGatewayClient().createApiKey(createKeyRequest);
             String apiKeyId = createKeyResponse.id();
             String apiKeyValue = createKeyResponse.value();
 
@@ -228,7 +240,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     .keyType("API_KEY")
                     .build();
 
-            apiGatewayClient.createUsagePlanKey(usagePlanKeyRequest);
+            getApiGatewayClient().createUsagePlanKey(usagePlanKeyRequest);
 
             // Store API key metadata in DynamoDB
             String createdAt = Instant.now().toString();
@@ -245,7 +257,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            dynamoDbClient.putItem(putRequest);
+            getDynamoDbClient().putItem(putRequest);
 
             ObjectNode response = objectMapper.createObjectNode();
             response.put("apiKeyId", apiKeyId);
@@ -277,7 +289,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = dynamoDbClient.getItem(getRequest);
+            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
             if (!getResponse.hasItem()) {
                 return createErrorResponse(404, "Developer not found");
             }
@@ -318,7 +330,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            QueryResponse queryResponse = dynamoDbClient.query(queryRequest);
+            QueryResponse queryResponse = getDynamoDbClient().query(queryRequest);
             
             List<ObjectNode> apiKeys = new ArrayList<>();
             for (Map<String, AttributeValue> item : queryResponse.items()) {
@@ -359,7 +371,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = dynamoDbClient.getItem(getRequest);
+            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
             if (!getResponse.hasItem()) {
                 return createErrorResponse(404, "Developer not found");
             }
@@ -396,7 +408,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     .returnValues(ReturnValue.ALL_NEW)
                     .build();
 
-            UpdateItemResponse updateResponse = dynamoDbClient.updateItem(updateRequest);
+            UpdateItemResponse updateResponse = getDynamoDbClient().updateItem(updateRequest);
             Map<String, AttributeValue> item = updateResponse.attributes();
 
             ObjectNode response = objectMapper.createObjectNode();
@@ -433,7 +445,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     .build();
 
             try {
-                apiGatewayClient.deleteApiKey(deleteKeyRequest);
+                getApiGatewayClient().deleteApiKey(deleteKeyRequest);
             } catch (NotFoundException e) {
                 context.getLogger().log("API key not found in API Gateway, continuing with DynamoDB cleanup");
             }
@@ -447,7 +459,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            dynamoDbClient.deleteItem(deleteRequest);
+            getDynamoDbClient().deleteItem(deleteRequest);
 
             ObjectNode response = objectMapper.createObjectNode();
             response.put("message", "API key deleted successfully");
