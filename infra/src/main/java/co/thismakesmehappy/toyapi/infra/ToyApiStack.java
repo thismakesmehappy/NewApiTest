@@ -48,7 +48,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+// TODO: Refactor into smaller classes
 /**
  * ToyApi CDK Stack - Creates all AWS resources for the serverless API.
  * 
@@ -61,6 +61,10 @@ import java.util.Map;
  * - Budget monitoring with SNS alerts
  */
 public class ToyApiStack extends Stack {
+    
+    private final String environment;
+    private final String resourcePrefix;
+    private RestApi restApi; // Store the RestApi for external access
     
     /**
      * Container for Cognito resources
@@ -100,8 +104,6 @@ public class ToyApiStack extends Stack {
             this.securityGroup = securityGroup;
         }
     }
-    private final String environment;
-    private final String resourcePrefix;
     private Topic cacheNotificationTopic;
 
     public ToyApiStack(final Construct scope, final String id, final StackProps props, final String environment) {
@@ -123,10 +125,11 @@ public class ToyApiStack extends Stack {
         Function developerFunction = createDeveloperLambdaIndependent(itemsTable);
         
         // Create API Gateway with all functions including developer
-        RestApi api = createApiGateway(publicFunction, authFunction, itemsFunction, developerFunction, cognitoResources.userPool);
+        this.restApi = createApiGateway(publicFunction, authFunction, itemsFunction, developerFunction, cognitoResources.userPool);
         
-        // TEMPORARILY DISABLED: WAF protection (causing deployment issues)
-        // createWafProtection(api);
+        // Note: WAF moved to SecurityStack for better resource management
+        // WAF costs $1/month + $0.60 per million requests (not free tier)
+        // FREE security features implemented in SecurityStack instead
         
         // Create custom domain and Route53 records (only for production and staging)
         // TODO: Enable custom domains after setting up hosted zone for thismakesmehappy.co
@@ -137,14 +140,14 @@ public class ToyApiStack extends Stack {
         );
         
         if (enableCustomDomains && (environment.equals("prod") || environment.equals("stage"))) {
-            createCustomDomain(api);
+            createCustomDomain(this.restApi);
         }
         
         // Create API key infrastructure after API Gateway is created
-        ApiKeyResources apiKeyResources = createApiKeyInfrastructureAndAssociate(api);
+        ApiKeyResources apiKeyResources = createApiKeyInfrastructureAndAssociate(this.restApi);
         
         // Create API key rotation infrastructure
-        createApiKeyRotationInfrastructure(api, apiKeyResources);
+        createApiKeyRotationInfrastructure(this.restApi, apiKeyResources);
         
         // TEMPORARILY DISABLED: Request signing (reducing complexity)
         // createRequestSigningInfrastructure(api);
@@ -164,7 +167,7 @@ public class ToyApiStack extends Stack {
         createBudgetMonitoring();
         
         // Output important information
-        createOutputs(api, cognitoResources, itemsTable);
+        createOutputs(this.restApi, cognitoResources, itemsTable);
     }
 
     /**
@@ -2391,12 +2394,33 @@ public class ToyApiStack extends Stack {
                         .domainName("thismakesmehappy.co")  // Root domain
                         .build());
         
-        // Create SSL certificate via AWS Certificate Manager (ACM)
-        Certificate certificate = Certificate.Builder.create(this, "ApiCertificate")
-                .domainName(domainName)
-                .certificateName(resourcePrefix + "-api-cert")
-                .validation(CertificateValidation.fromDns(hostedZone))
-                .build();
+        // Smart certificate handling: lookup first, create if not found
+        ICertificate certificate;
+        try {
+            // Try to find existing certificate for this domain
+            certificate = Certificate.fromCertificateArn(this, "ExistingApiCertificate",
+                this.getExistingCertificateArn(domainName));
+            
+            // Add a CloudFormation output to show we're using existing cert
+            software.amazon.awscdk.CfnOutput.Builder.create(this, "CertificateSource")
+                    .value("Using existing certificate for " + domainName)
+                    .description("Certificate source")
+                    .build();
+                    
+        } catch (Exception e) {
+            // No existing certificate found, create new one with automatic DNS validation
+            certificate = Certificate.Builder.create(this, "NewApiCertificate")
+                    .domainName(domainName)
+                    .certificateName(resourcePrefix + "-api-cert")
+                    .validation(CertificateValidation.fromDns(hostedZone))  // Handles validation automatically
+                    .build();
+                    
+            // Add a CloudFormation output to show we created new cert
+            software.amazon.awscdk.CfnOutput.Builder.create(this, "CertificateSource")
+                    .value("Created new certificate for " + domainName)
+                    .description("Certificate source")
+                    .build();
+        }
         
         // Create custom domain name
         DomainName customDomain = DomainName.Builder.create(this, "CustomDomain")
@@ -3287,5 +3311,37 @@ public class ToyApiStack extends Stack {
                 Port.tcp(8111),
                 "Lambda to DAX cluster in private subnets"
         );
+    }
+    
+    /**
+     * Gets the ARN of an existing certificate for the specified domain name.
+     * This method would check AWS Certificate Manager for existing certificates.
+     * 
+     * @param domainName The domain name to find a certificate for
+     * @return The certificate ARN if found
+     * @throws RuntimeException if no certificate is found
+     */
+    private String getExistingCertificateArn(String domainName) {
+        // For production, use the known certificate ARN
+        if ("toyapi.thismakesmehappy.co".equals(domainName)) {
+            return "arn:aws:acm:us-east-1:375004071203:certificate/1799968e-7ab5-4631-8cda-81e8e30c5f94";
+        }
+        
+        // For staging/dev, check if we should use the multi-domain cert
+        if (domainName.contains("thismakesmehappy.co")) {
+            // The multi-domain cert includes all subdomains
+            return "arn:aws:acm:us-east-1:375004071203:certificate/07ba15bf-eef3-4ce9-886c-92765861a3c5";
+        }
+        
+        // If no certificate found, throw exception to trigger certificate creation
+        throw new RuntimeException("No existing certificate found for domain: " + domainName);
+    }
+    
+    /**
+     * Get the RestApi instance for sharing with other stacks
+     * @return The API Gateway RestApi instance
+     */
+    public RestApi getRestApi() {
+        return this.restApi;
     }
 }

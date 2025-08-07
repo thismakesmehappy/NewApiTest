@@ -166,7 +166,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     return createErrorResponse(500, "INTERNAL_ERROR", "Failed to create item in mock database", null);
                 }
             }
-            
+            // TODO: find a better way to crete ids. right ow we have item-1, item-2. It should be something more randmoized
             String itemId = "item-" + UUID.randomUUID().toString();
             String now = Instant.now().toString();
             

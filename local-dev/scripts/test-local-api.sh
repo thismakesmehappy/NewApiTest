@@ -3,6 +3,7 @@
 # ToyApi Local API Testing Script
 # This script tests all endpoints in the local development environment
 
+
 set -e  # Exit on any error
 
 echo "🧪 Testing ToyApi Local Development API..."

@@ -14,6 +14,8 @@ import static org.hamcrest.Matchers.*;
  * Integration tests for ToyApi endpoints across different environments.
  * Tests run against live AWS infrastructure to validate end-to-end functionality.
  */
+
+// TODO separte tests for programmatic calls and for http callshow
 public class ApiIntegrationTest {
     
     private String baseUrl;

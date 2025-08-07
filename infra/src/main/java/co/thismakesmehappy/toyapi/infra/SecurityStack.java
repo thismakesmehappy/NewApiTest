@@ -94,16 +94,9 @@ public class SecurityStack extends Stack {
     
     /**
      * Enhances API Gateway security with free features
+     * Note: RequestValidator moved to main stack to avoid circular dependencies
      */
     private void setupApiGatewaySecurityEnhancements() {
-        // Enhanced request validation (prevents malformed requests)
-        RequestValidator strictValidator = RequestValidator.Builder.create(this, "StrictRequestValidator")
-                .restApi(null) // Would reference actual API
-                .requestValidatorName(resourcePrefix + "-strict-validator")
-                .validateRequestBody(true)
-                .validateRequestParameters(true)
-                .build();
-        
         // Enhanced CORS configuration with security headers
         CorsOptions secureCorsoptions = CorsOptions.builder()
                 .allowCredentials(false)  // Security: disable credentials in CORS

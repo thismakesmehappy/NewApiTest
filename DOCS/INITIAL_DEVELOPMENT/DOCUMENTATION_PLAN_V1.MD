@@ -135,3 +135,38 @@ Let's figure out a way to document everything. The plan should include considera
 - Goal: Talk about what I did to demonstrate my competence and land a job
 - Content:
   - Create a series of LinkedIn posts and other content 
+
+
+
+## API routing setup
+I used the following to setup the API routing; there was a mix of manual setup and CDK deployment:
+
+1. Register Your Domain
+   Make sure your custom domain is registered, either using AWS Route 53 or another domain registrar.
+2. Create/Import an ACM SSL Certificate
+   Navigate to AWS Certificate Manager (ACM).
+   Request or import an SSL certificate for your domain (e.g., api.example.com). This certificate must be in the same AWS region as your API Gateway API.
+   Validate the certificate (usually via DNS validation using a CNAME record in Route 53).
+3. Set Up a Custom Domain in API Gateway
+   Open the API Gateway console.
+   Go to "Custom Domain Names".
+   Click "Create" and enter your domain name (e.g., api.example.com).
+   Attach the ACM certificate you just created.
+   Choose the regional endpoint type (recommended for most use cases).
+   Once the domain is created, you'll receive a target domain name (API Gateway URL).
+4. Map Your API to the Custom Domain
+   In API Gateway, go to the custom domain you just created.
+   Use "API Mappings" to associate your API and its stage with this custom domain and set the base path mapping (like /v1 or / for root).
+5. Create a DNS Record in Route 53
+   Go to the Route 53 console and find the hosted zone for your domain.
+   If using Route 53, create a new record:
+   Record type: A (Alias)
+   Name: The subdomain (e.g., api)
+   Alias to: The API Gateway regional domain name you received earlier
+   Region: Select the AWS region of your API
+   If using another DNS provider, use a CNAME record pointing to the regional API Gateway domain.
+6. Test Your Custom Domain
+   Once the DNS propagates, you can now access your API using your custom URL, e.g., https://api.example.com/myapi.
+
+
+I did steps 1 and 2 manually, the rest hapened via CDK. There is an alternative for you to give me NS records to add to the domain. Document this too, but include a note that this gives full control over the domain to route 53

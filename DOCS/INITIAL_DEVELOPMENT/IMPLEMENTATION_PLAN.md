@@ -1,3 +1,4 @@
+[//]: # (TODO: separate code from documentation so they are not comingled; possibly create two subfolders, one for code and one for everything else)
 # AWS Serverless API Implementation Plan
 
 **PROJECT STATUS: ✅ PHASE 6 COMPLETE - ENTERPRISE CI/CD READY**

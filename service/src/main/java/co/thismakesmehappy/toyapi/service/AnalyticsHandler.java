@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+// TODO: We have all the classes in one directory; break into logival packages/modules for easier organization
 /**
  * Lambda function for processing analytics events from Kinesis stream.
  * Processes real-time API usage data and stores metrics in DynamoDB.
