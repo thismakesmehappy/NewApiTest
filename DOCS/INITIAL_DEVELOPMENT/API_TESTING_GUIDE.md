@@ -18,7 +18,7 @@
 - **DynamoDB Table**: `toyapi-stage-items`
 
 ### **Production Environment**
-- **Base URL**: `https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/`
+- **Base URL**: `https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod/`
 - **User Pool ID**: `us-east-1_[production-specific]`
 - **DynamoDB Table**: `toyapi-prod-items`
 
@@ -937,14 +937,14 @@ curl -s "https://8dida7flbl.execute-api.us-east-1.amazonaws.com/stage/items" -H 
 **Production Environment:**
 ```bash
 # Get token
-PROD_TOKEN=$(curl -s -X POST "https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/auth/login" \
+PROD_TOKEN=$(curl -s -X POST "https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","password":"TestPassword123"}' | jq -r '.idToken')
 
 # Test endpoints
-curl -s "https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/public/message" | jq .
-curl -s "https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/auth/message" -H "Authorization: Bearer $PROD_TOKEN" | jq .
-curl -s "https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod/items" -H "Authorization: Bearer $PROD_TOKEN" | jq .
+curl -s "https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod/public/message" | jq .
+curl -s "https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod/auth/message" -H "Authorization: Bearer $PROD_TOKEN" | jq .
+curl -s "https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod/items" -H "Authorization: Bearer $PROD_TOKEN" | jq .
 ```
 
 ### Test Results Summary (Latest: 2025-07-29)
