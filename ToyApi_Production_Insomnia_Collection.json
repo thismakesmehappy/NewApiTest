@@ -321,9 +321,9 @@
       "created": 1690403550000,
       "name": "Production Environment",
       "data": {
-        "base_url": "https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod",
-        "user_pool_id": "us-east-1_I4qtZJplu",
-        "user_pool_client_id": "7dl4b6coh47rs6bqaueb71gngh",
+        "base_url": "https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod",
+        "user_pool_id": "us-east-1_3M4tL8NPS",
+        "user_pool_client_id": "65bh4iquaqp95q3su0f9r9rea2",
         "dynamodb_table": "toyapi-prod-items",
         "environment_name": "prod",
         "id_token": "",
