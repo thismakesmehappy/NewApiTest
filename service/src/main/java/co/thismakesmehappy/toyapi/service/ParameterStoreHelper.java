@@ -11,6 +11,7 @@ import java.util.logging.Level;
  * Helper class for accessing AWS Systems Manager Parameter Store.
  * Provides secure access to test credentials and configuration values.
  */
+// TODO: Convert ParameterStoreHelper to use dependency injection for proper unit testing
 public class ParameterStoreHelper {
     
     private static final Logger logger = Logger.getLogger(ParameterStoreHelper.class.getName());

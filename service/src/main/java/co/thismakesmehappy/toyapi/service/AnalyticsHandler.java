@@ -19,11 +19,18 @@ import java.util.UUID;
  */
 public class AnalyticsHandler implements RequestHandler<KinesisEvent, String> {
 
-    private static final DynamoDbClient dynamoDbClient = DynamoDbClient.builder().build();
+    private static DynamoDbClient dynamoDbClient;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String USAGE_METRICS_TABLE = System.getenv("USAGE_METRICS_TABLE");
     private static final String DEVELOPER_INSIGHTS_TABLE = System.getenv("DEVELOPER_INSIGHTS_TABLE");
     private static final String ENVIRONMENT = System.getenv("ENVIRONMENT");
+
+    private static synchronized DynamoDbClient getDynamoDbClient() {
+        if (dynamoDbClient == null) {
+            dynamoDbClient = DynamoDbClient.builder().build();
+        }
+        return dynamoDbClient;
+    }
 
     @Override
     public String handleRequest(KinesisEvent event, Context context) {
@@ -111,7 +118,7 @@ public class AnalyticsHandler implements RequestHandler<KinesisEvent, String> {
                     .item(item)
                     .build();
             
-            dynamoDbClient.putItem(request);
+            getDynamoDbClient().putItem(request);
             
         } catch (Exception e) {
             context.getLogger().log("Error storing usage metrics: " + e.getMessage());
@@ -168,7 +175,7 @@ public class AnalyticsHandler implements RequestHandler<KinesisEvent, String> {
                     .expressionAttributeValues(expressionAttributeValues)
                     .build();
             
-            dynamoDbClient.updateItem(request);
+            getDynamoDbClient().updateItem(request);
             
         } catch (Exception e) {
             context.getLogger().log("Error updating insight counter for " + insightType + ": " + e.getMessage());

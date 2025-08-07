@@ -20,7 +20,14 @@ import java.util.stream.Collectors;
  */
 public class AnalyticsReportHandler implements RequestHandler<ScheduledEvent, String> {
 
-    private static final DynamoDbClient dynamoDbClient = DynamoDbClient.builder().build();
+    private static DynamoDbClient dynamoDbClient;
+    
+    private static synchronized DynamoDbClient getDynamoDbClient() {
+        if (dynamoDbClient == null) {
+            dynamoDbClient = DynamoDbClient.builder().build();
+        }
+        return dynamoDbClient;
+    }
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String USAGE_METRICS_TABLE = System.getenv("USAGE_METRICS_TABLE");
     private static final String DEVELOPER_INSIGHTS_TABLE = System.getenv("DEVELOPER_INSIGHTS_TABLE");
@@ -86,7 +93,7 @@ public class AnalyticsReportHandler implements RequestHandler<ScheduledEvent, St
                     .expressionAttributeValues(expressionAttributeValues)
                     .build();
             
-            QueryResponse response = dynamoDbClient.query(request);
+            QueryResponse response = getDynamoDbClient().query(request);
             
             summary.totalRequests = response.items().size();
             summary.uniqueApiKeys = response.items().stream()
@@ -133,7 +140,7 @@ public class AnalyticsReportHandler implements RequestHandler<ScheduledEvent, St
                     .expressionAttributeValues(expressionAttributeValues)
                     .build();
             
-            QueryResponse response = dynamoDbClient.query(request);
+            QueryResponse response = getDynamoDbClient().query(request);
             
             // Aggregate by endpoint
             Map<String, Integer> endpointCounts = new HashMap<>();
@@ -192,7 +199,7 @@ public class AnalyticsReportHandler implements RequestHandler<ScheduledEvent, St
                     .expressionAttributeValues(expressionAttributeValues)
                     .build();
             
-            QueryResponse response = dynamoDbClient.query(request);
+            QueryResponse response = getDynamoDbClient().query(request);
             
             Map<String, Integer> errorCodes = new HashMap<>();
             int totalRequests = response.items().size();
@@ -238,7 +245,7 @@ public class AnalyticsReportHandler implements RequestHandler<ScheduledEvent, St
                     .expressionAttributeValues(expressionAttributeValues)
                     .build();
             
-            QueryResponse response = dynamoDbClient.query(request);
+            QueryResponse response = getDynamoDbClient().query(request);
             
             if (!response.items().isEmpty()) {
                 double[] responseTimes = response.items().stream()
@@ -269,7 +276,7 @@ public class AnalyticsReportHandler implements RequestHandler<ScheduledEvent, St
                     .tableName(DEVELOPER_INSIGHTS_TABLE)
                     .build();
             
-            ScanResponse response = dynamoDbClient.scan(request);
+            ScanResponse response = getDynamoDbClient().scan(request);
             
             Set<String> activeDevelopers = new HashSet<>();
             int totalUsage = 0;
@@ -315,7 +322,7 @@ public class AnalyticsReportHandler implements RequestHandler<ScheduledEvent, St
                     .item(item)
                     .build();
             
-            dynamoDbClient.putItem(request);
+            getDynamoDbClient().putItem(request);
             
         } catch (Exception e) {
             context.getLogger().log("Error storing report: " + e.getMessage());
