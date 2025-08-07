@@ -44,6 +44,14 @@ public class ToyApiApp {
                 .description("ToyApi monitoring and observability for " + environment + " environment")
                 .build(), environment);
 
+        // Create security stack for free-tier security enhancements  
+        String securityStackName = "ToyApiSecurity-" + environment;
+        
+        SecurityStack securityStack = new SecurityStack(app, securityStackName, StackProps.builder()
+                .env(awsEnvironment)
+                .description("ToyApi free-tier security enhancements for " + environment + " environment")
+                .build(), environment);
+
         // Add tags to all resources
         software.amazon.awscdk.Tags.of(stack).add("Project", "ToyApi");
         software.amazon.awscdk.Tags.of(stack).add("Environment", environment);
@@ -54,6 +62,11 @@ public class ToyApiApp {
         software.amazon.awscdk.Tags.of(monitoringStack).add("Environment", environment);
         software.amazon.awscdk.Tags.of(monitoringStack).add("Owner", "thismakesmehappy");
         software.amazon.awscdk.Tags.of(monitoringStack).add("CostCenter", "ToyApi-" + environment);
+        
+        software.amazon.awscdk.Tags.of(securityStack).add("Project", "ToyApi");
+        software.amazon.awscdk.Tags.of(securityStack).add("Environment", environment);
+        software.amazon.awscdk.Tags.of(securityStack).add("Owner", "thismakesmehappy");
+        software.amazon.awscdk.Tags.of(securityStack).add("CostCenter", "ToyApi-" + environment);
 
         app.synth();
     }
