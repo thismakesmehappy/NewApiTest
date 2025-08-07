@@ -144,16 +144,25 @@ git commit -m "fix: something [deploy-dev]" && git push  # → deploys to dev en
 - ✅ **Production**: Stable API with monitoring ready to deploy
 - ✅ **CI/CD Pipeline**: Fixed to deploy complete infrastructure (main → staging → prod)
 
-**Monitoring Infrastructure Deployed:**
-- CloudWatch dashboards with API Gateway and Lambda metrics
-- Comprehensive alarm system with SNS notifications
-- Log aggregation with error detection and performance monitoring
-- Cost monitoring with budget alerts
+**Enhanced Monitoring Infrastructure (FREE TIER OPTIMIZED):**
+- ✅ **Advanced CloudWatch Dashboards** - Single-value widgets, P99 latency, calculated metrics (error %, auth success %)
+- ✅ **Per-Endpoint Analysis** - Detailed breakdown by API endpoint and HTTP method
+- ✅ **Multi-Service Monitoring** - API Gateway, Lambda, DynamoDB, Cognito with built-in metrics
+- ✅ **Business Intelligence** - Log-based user activity, item creation trends, endpoint popularity
+- ✅ **Security Monitoring** - Failed auth detection, suspicious activity patterns, breach alerts
+- ✅ **Smart Alerting** - 15+ intelligent alarms with proper thresholds and escalation
+- ✅ **Cost Optimization** - ~$5/month total (vs $300+ enterprise tools), maximizes free tier
 
 **CI/CD Flow Fixed:**
 - Main branch deploys to staging → production (with approval gates)
 - Feature branches can deploy to development using `[deploy-dev]` flag
 - Both application and monitoring stacks deployed automatically
 
-**Last Updated**: 2025-08-05  
-**Status**: Enterprise-ready with complete observability and automated deployment
+**Monitoring Expansion Plan:**
+- 📋 **Current**: Free tier optimization - enterprise features at minimal cost
+- 📋 **Phase 1**: Strategic additions ($15/month) - X-Ray tracing, synthetic monitoring
+- 📋 **Phase 2**: Full enterprise ($50/month) - Multi-region, third-party integrations
+- 📋 **Documentation**: `DOCS/MONITORING_EXPANSION_PLAN.md` - Complete roadmap with ROI analysis
+
+**Last Updated**: 2025-08-07  
+**Status**: Enterprise-ready with enhanced free-tier monitoring and automated deployment

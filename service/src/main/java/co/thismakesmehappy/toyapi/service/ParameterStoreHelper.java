@@ -15,9 +15,16 @@ import java.util.logging.Level;
 public class ParameterStoreHelper {
     
     private static final Logger logger = Logger.getLogger(ParameterStoreHelper.class.getName());
-    private static final SsmClient ssmClient = SsmClient.builder()
-            .region(software.amazon.awssdk.regions.Region.US_EAST_1)
-            .build();
+    private static SsmClient ssmClient;
+    
+    private static synchronized SsmClient getSsmClient() {
+        if (ssmClient == null) {
+            ssmClient = SsmClient.builder()
+                    .region(software.amazon.awssdk.regions.Region.US_EAST_1)
+                    .build();
+        }
+        return ssmClient;
+    }
     
     private static final String ENVIRONMENT = System.getenv("ENVIRONMENT");
     private static final String PARAMETER_PREFIX = "/toyapi-" + (ENVIRONMENT != null ? ENVIRONMENT : "dev");
@@ -38,7 +45,7 @@ public class ParameterStoreHelper {
                     .withDecryption(true)  // Decrypt if it's a SecureString
                     .build();
             
-            GetParameterResponse response = ssmClient.getParameter(request);
+            GetParameterResponse response = getSsmClient().getParameter(request);
             return response.parameter().value();
             
         } catch (SsmException e) {

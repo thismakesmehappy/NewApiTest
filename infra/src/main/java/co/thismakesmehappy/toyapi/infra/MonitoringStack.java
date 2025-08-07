@@ -50,8 +50,12 @@ public class MonitoringStack extends Stack {
         // Set up monitoring components
         setupApiGatewayMonitoring();
         setupLambdaMonitoring();
+        setupDynamoDBMonitoring();  // New: Free DynamoDB metrics
+        setupCognitoMonitoring();   // New: Free Cognito metrics
         setupErrorMonitoring();
         setupPerformanceMonitoring();
+        setupBusinessMetrics();     // New: Log-based business insights
+        setupSecurityMonitoring();  // New: Free security pattern detection
         setupCostMonitoring();
         setupLogAggregationAndAnalysis();
         
@@ -85,12 +89,13 @@ public class MonitoringStack extends Stack {
     }
     
     /**
-     * Sets up API Gateway monitoring and alerts
+     * Sets up enhanced API Gateway monitoring and alerts
+     * Includes per-endpoint metrics, authentication tracking, and performance analysis
      */
     private void setupApiGatewayMonitoring() {
         String apiName = resourcePrefix + "-api";
         
-        // API Gateway metrics
+        // Overall API Gateway metrics
         Metric apiCallsMetric = Metric.Builder.create()
                 .namespace("AWS/ApiGateway")
                 .metricName("Count")
@@ -104,6 +109,14 @@ public class MonitoringStack extends Stack {
                 .metricName("Latency")
                 .dimensionsMap(Map.of("ApiName", apiName))
                 .statistic("Average")
+                .period(Duration.minutes(5))
+                .build();
+                
+        Metric apiP99LatencyMetric = Metric.Builder.create()
+                .namespace("AWS/ApiGateway")
+                .metricName("Latency")
+                .dimensionsMap(Map.of("ApiName", apiName))
+                .statistic("p99")
                 .period(Duration.minutes(5))
                 .build();
                 
@@ -123,25 +136,99 @@ public class MonitoringStack extends Stack {
                 .period(Duration.minutes(5))
                 .build();
         
-        // Add widgets to dashboard
+        // Per-endpoint metrics for detailed analysis
+        Map<String, Metric> endpointMetrics = createEndpointSpecificMetrics(apiName);
+        
+        // Authentication-related metrics
+        Metric authSuccessMetric = Metric.Builder.create()
+                .namespace("AWS/ApiGateway")
+                .metricName("Count")
+                .dimensionsMap(Map.of("ApiName", apiName, "Method", "POST", "Resource", "/auth/login"))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+                
+        Metric authFailureMetric = Metric.Builder.create()
+                .namespace("AWS/ApiGateway")
+                .metricName("4XXError")
+                .dimensionsMap(Map.of("ApiName", apiName, "Method", "POST", "Resource", "/auth/login"))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        // Enhanced dashboard widgets with better visualizations
         dashboard.addWidgets(
+            // Top row - Overview metrics
+            SingleValueWidget.Builder.create()
+                .title("Total API Requests (5min)")
+                .metrics(Arrays.asList(apiCallsMetric))
+                .width(6)
+                .height(3)
+                .build(),
+                
+            SingleValueWidget.Builder.create()
+                .title("Average Latency (ms)")
+                .metrics(Arrays.asList(apiLatencyMetric))
+                .width(6)
+                .height(3)
+                .build(),
+                
+            SingleValueWidget.Builder.create()
+                .title("Error Rate (%)")
+                .metrics(Arrays.asList(MathExpression.Builder.create()
+                    .expression("(m1+m2)/m3*100")
+                    .usingMetrics(Map.of(
+                        "m1", apiErrorsMetric,
+                        "m2", apiServerErrorsMetric,
+                        "m3", apiCallsMetric
+                    ))
+                    .label("Error Rate %")
+                    .build()))
+                .width(6)
+                .height(3)
+                .build(),
+                
+            SingleValueWidget.Builder.create()
+                .title("Auth Success Rate (%)")
+                .metrics(Arrays.asList(MathExpression.Builder.create()
+                    .expression("m1/(m1+m2)*100")
+                    .usingMetrics(Map.of(
+                        "m1", authSuccessMetric,
+                        "m2", authFailureMetric
+                    ))
+                    .label("Auth Success %")
+                    .build()))
+                .width(6)
+                .height(3)
+                .build(),
+                
+            // Second row - Detailed performance
             GraphWidget.Builder.create()
-                .title("API Gateway - Request Volume")
+                .title("API Gateway - Request Volume Over Time")
                 .left(Arrays.asList(apiCallsMetric))
                 .width(12)
                 .height(6)
                 .build(),
                 
             GraphWidget.Builder.create()
-                .title("API Gateway - Latency")
+                .title("API Gateway - Performance Distribution")
                 .left(Arrays.asList(apiLatencyMetric))
+                .right(Arrays.asList(apiP99LatencyMetric))
+                .width(12)
+                .height(6)
+                .build(),
+                
+            // Third row - Error analysis and endpoint breakdown
+            GraphWidget.Builder.create()
+                .title("API Gateway - Error Analysis")
+                .left(Arrays.asList(apiErrorsMetric, apiServerErrorsMetric))
                 .width(12)
                 .height(6)
                 .build(),
                 
             GraphWidget.Builder.create()
-                .title("API Gateway - Errors")
-                .left(Arrays.asList(apiErrorsMetric, apiServerErrorsMetric))
+                .title("Per-Endpoint Request Volume")
+                .left(endpointMetrics.values().stream().limit(6).collect(java.util.stream.Collectors.toList()))
                 .width(12)
                 .height(6)
                 .build()
@@ -567,5 +654,294 @@ public class MonitoringStack extends Stack {
                 .value(alertTopic.getTopicArn())
                 .description("SNS Topic ARN for monitoring alerts")
                 .build();
+    }
+    
+    /**
+     * Creates endpoint-specific metrics for detailed API analysis
+     * FREE: Uses existing CloudWatch metrics with different dimensions
+     */
+    private Map<String, Metric> createEndpointSpecificMetrics(String apiName) {
+        Map<String, Metric> endpointMetrics = new HashMap<>();
+        
+        // Define key endpoints to monitor
+        String[] endpoints = {"/public/message", "/auth/login", "/auth/message", "/items", "/items/{id}"};
+        String[] methods = {"GET", "POST", "PUT", "DELETE"};
+        
+        for (String endpoint : endpoints) {
+            for (String method : methods) {
+                String key = method + " " + endpoint;
+                endpointMetrics.put(key, Metric.Builder.create()
+                    .namespace("AWS/ApiGateway")
+                    .metricName("Count")
+                    .dimensionsMap(Map.of(
+                        "ApiName", apiName,
+                        "Method", method,
+                        "Resource", endpoint
+                    ))
+                    .statistic("Sum")
+                    .period(Duration.minutes(5))
+                    .build());
+            }
+        }
+        
+        return endpointMetrics;
+    }
+    
+    /**
+     * Sets up DynamoDB monitoring using free CloudWatch metrics
+     * FREE: Uses built-in DynamoDB metrics at no additional cost
+     */
+    private void setupDynamoDBMonitoring() {
+        String tableName = resourcePrefix + "-items";
+        
+        // DynamoDB read/write metrics
+        Metric readCapacityMetric = Metric.Builder.create()
+                .namespace("AWS/DynamoDB")
+                .metricName("ConsumedReadCapacityUnits")
+                .dimensionsMap(Map.of("TableName", tableName))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+                
+        Metric writeCapacityMetric = Metric.Builder.create()
+                .namespace("AWS/DynamoDB")
+                .metricName("ConsumedWriteCapacityUnits")
+                .dimensionsMap(Map.of("TableName", tableName))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+                
+        Metric itemCountMetric = Metric.Builder.create()
+                .namespace("AWS/DynamoDB")
+                .metricName("ItemCount")
+                .dimensionsMap(Map.of("TableName", tableName))
+                .statistic("Average")
+                .period(Duration.hours(1))
+                .build();
+                
+        Metric tableSizeMetric = Metric.Builder.create()
+                .namespace("AWS/DynamoDB")
+                .metricName("TableSizeBytes")
+                .dimensionsMap(Map.of("TableName", tableName))
+                .statistic("Average")
+                .period(Duration.hours(1))
+                .build();
+        
+        // Add DynamoDB dashboard widgets
+        dashboard.addWidgets(
+            GraphWidget.Builder.create()
+                .title("DynamoDB - Read/Write Capacity Usage")
+                .left(Arrays.asList(readCapacityMetric))
+                .right(Arrays.asList(writeCapacityMetric))
+                .width(12)
+                .height(6)
+                .build(),
+                
+            GraphWidget.Builder.create()
+                .title("DynamoDB - Table Growth")
+                .left(Arrays.asList(itemCountMetric))
+                .right(Arrays.asList(tableSizeMetric))
+                .width(12)
+                .height(6)
+                .build()
+        );
+        
+        // DynamoDB throttle alarm (free metric)
+        Metric throttleMetric = Metric.Builder.create()
+                .namespace("AWS/DynamoDB")
+                .metricName("UserErrors")
+                .dimensionsMap(Map.of("TableName", tableName))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+                
+        Alarm dynamoThrottleAlarm = Alarm.Builder.create(this, "DynamoDBThrottleAlarm")
+                .alarmName(resourcePrefix + "-dynamodb-throttles")
+                .alarmDescription("DynamoDB table is experiencing throttling")
+                .metric(throttleMetric)
+                .threshold(1)
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
+                .build();
+                
+        dynamoThrottleAlarm.addAlarmAction(new SnsAction(alertTopic));
+    }
+    
+    /**
+     * Sets up Cognito monitoring using free CloudWatch metrics
+     * FREE: Uses built-in Cognito metrics at no additional cost
+     */
+    private void setupCognitoMonitoring() {
+        String userPoolName = resourcePrefix + "-users";
+        
+        // Cognito authentication metrics
+        Metric authSuccessMetric = Metric.Builder.create()
+                .namespace("AWS/Cognito")
+                .metricName("SignInSuccesses")
+                .dimensionsMap(Map.of("UserPool", userPoolName, "UserPoolClient", "ALL"))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+                
+        Metric authFailureMetric = Metric.Builder.create()
+                .namespace("AWS/Cognito")
+                .metricName("SignInThrottles")
+                .dimensionsMap(Map.of("UserPool", userPoolName, "UserPoolClient", "ALL"))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        // Add Cognito dashboard widgets
+        dashboard.addWidgets(
+            GraphWidget.Builder.create()
+                .title("Cognito - Authentication Activity")
+                .left(Arrays.asList(authSuccessMetric))
+                .right(Arrays.asList(authFailureMetric))
+                .width(12)
+                .height(6)
+                .build()
+        );
+        
+        // High authentication failure alarm
+        Alarm authFailureAlarm = Alarm.Builder.create(this, "CognitoAuthFailureAlarm")
+                .alarmName(resourcePrefix + "-cognito-auth-failures")
+                .alarmDescription("High number of authentication failures in Cognito")
+                .metric(authFailureMetric)
+                .threshold(10) // 10 failures in 5 minutes
+                .evaluationPeriods(2)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .build();
+                
+        authFailureAlarm.addAlarmAction(new SnsAction(alertTopic));
+    }
+    
+    /**
+     * Sets up business metrics using log analysis
+     * FREE: Uses log metric filters to extract business insights at no additional cost
+     */
+    private void setupBusinessMetrics() {
+        // Create log group if it doesn't exist (for business metrics extraction)
+        LogGroup businessLogGroup = LogGroup.Builder.create(this, "BusinessMetricsLogGroup")
+                .logGroupName("/aws/lambda/" + resourcePrefix + "-business-metrics")
+                .retention(RetentionDays.ONE_WEEK)
+                .removalPolicy(software.amazon.awscdk.RemovalPolicy.DESTROY)
+                .build();
+        
+        // User registration metric filter
+        MetricFilter userRegistrationFilter = MetricFilter.Builder.create(this, "UserRegistrationFilter")
+                .logGroup(businessLogGroup)
+                .filterPattern(FilterPattern.literal("[timestamp, requestId, level=\"INFO\", message=\"User registered\", ...]"))
+                .metricNamespace("ToyApi/Business/" + environment)
+                .metricName("UserRegistrations")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // Item creation metric filter
+        MetricFilter itemCreationFilter = MetricFilter.Builder.create(this, "ItemCreationFilter")
+                .logGroup(businessLogGroup)
+                .filterPattern(FilterPattern.literal("[timestamp, requestId, level=\"INFO\", message=\"Item created\", ...]"))
+                .metricNamespace("ToyApi/Business/" + environment)
+                .metricName("ItemsCreated")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // API usage by endpoint metric filter
+        MetricFilter endpointUsageFilter = MetricFilter.Builder.create(this, "EndpointUsageFilter")
+                .logGroup(businessLogGroup)
+                .filterPattern(FilterPattern.literal("[timestamp, requestId, level=\"INFO\", message=\"API request\", endpoint, ...]"))
+                .metricNamespace("ToyApi/Business/" + environment)
+                .metricName("EndpointUsage")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // Business metrics dashboard
+        Metric userRegMetric = Metric.Builder.create()
+                .namespace("ToyApi/Business/" + environment)
+                .metricName("UserRegistrations")
+                .statistic("Sum")
+                .period(Duration.hours(1))
+                .build();
+                
+        Metric itemCreationMetric = Metric.Builder.create()
+                .namespace("ToyApi/Business/" + environment)
+                .metricName("ItemsCreated")
+                .statistic("Sum")
+                .period(Duration.hours(1))
+                .build();
+        
+        dashboard.addWidgets(
+            GraphWidget.Builder.create()
+                .title("Business Metrics - User Activity")
+                .left(Arrays.asList(userRegMetric))
+                .right(Arrays.asList(itemCreationMetric))
+                .width(12)
+                .height(6)
+                .build()
+        );
+    }
+    
+    /**
+     * Sets up security monitoring using log pattern analysis
+     * FREE: Uses log metric filters to detect security patterns at no additional cost
+     */
+    private void setupSecurityMonitoring() {
+        // Create security log group
+        LogGroup securityLogGroup = LogGroup.Builder.create(this, "SecurityLogGroup")
+                .logGroupName("/aws/lambda/" + resourcePrefix + "-security")
+                .retention(RetentionDays.TWO_WEEKS) // Keep security logs longer
+                .removalPolicy(software.amazon.awscdk.RemovalPolicy.DESTROY)
+                .build();
+        
+        // Failed authentication attempts
+        MetricFilter failedAuthFilter = MetricFilter.Builder.create(this, "FailedAuthFilter")
+                .logGroup(securityLogGroup)
+                .filterPattern(FilterPattern.anyTerm("UNAUTHORIZED", "Invalid credentials", "Authentication failed", "401"))
+                .metricNamespace("ToyApi/Security/" + environment)
+                .metricName("FailedAuthentications")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // Suspicious API usage patterns (high frequency from single source)
+        MetricFilter suspiciousUsageFilter = MetricFilter.Builder.create(this, "SuspiciousUsageFilter")
+                .logGroup(securityLogGroup)
+                .filterPattern(FilterPattern.literal("[timestamp, requestId, level=\"WARN\", message=\"High frequency requests\", ...]"))
+                .metricNamespace("ToyApi/Security/" + environment)
+                .metricName("SuspiciousActivity")
+                .metricValue("1")
+                .defaultValue(0)
+                .build();
+        
+        // Security alarms
+        Metric failedAuthMetric = Metric.Builder.create()
+                .namespace("ToyApi/Security/" + environment)
+                .metricName("FailedAuthentications")
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        Alarm securityAlarm = Alarm.Builder.create(this, "SecurityAlarm")
+                .alarmName(resourcePrefix + "-security-breach-attempt")
+                .alarmDescription("Potential security breach detected")
+                .metric(failedAuthMetric)
+                .threshold(20) // 20 failed auths in 5 minutes
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .build();
+                
+        securityAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // Security dashboard widget
+        dashboard.addWidgets(
+            GraphWidget.Builder.create()
+                .title("Security Monitoring - Authentication Failures")
+                .left(Arrays.asList(failedAuthMetric))
+                .width(12)
+                .height(6)
+                .build()
+        );
     }
 }
