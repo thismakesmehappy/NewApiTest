@@ -28,7 +28,7 @@ public class ApiIntegrationTest {
         switch (environment.toLowerCase()) {
             case "prod":
             case "production":
-                baseUrl = "https://55g7hsw2c1.execute-api.us-east-1.amazonaws.com/prod";
+                baseUrl = "https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod";
                 break;
             case "stage":
             case "staging":
