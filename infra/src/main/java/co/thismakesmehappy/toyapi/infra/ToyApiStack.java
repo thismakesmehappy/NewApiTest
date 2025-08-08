@@ -404,6 +404,15 @@ public class ToyApiStack extends Stack {
 
         // Grant DynamoDB permissions
         itemsTable.grantReadWriteData(function);
+        
+        // Grant permissions to query GSI (Global Secondary Index)
+        function.addToRolePolicy(PolicyStatement.Builder.create()
+                .effect(Effect.ALLOW)
+                .actions(Arrays.asList("dynamodb:Query"))
+                .resources(Arrays.asList(
+                        itemsTable.getTableArn() + "/index/*"  // Grant access to all GSIs
+                ))
+                .build());
 
         // Grant Cognito permissions if needed
         if (userPool != null) {
@@ -472,6 +481,15 @@ public class ToyApiStack extends Stack {
 
         // Grant DynamoDB permissions
         itemsTable.grantReadWriteData(function);
+        
+        // Grant permissions to query GSI (Global Secondary Index)
+        function.addToRolePolicy(PolicyStatement.Builder.create()
+                .effect(Effect.ALLOW)
+                .actions(Arrays.asList("dynamodb:Query"))
+                .resources(Arrays.asList(
+                        itemsTable.getTableArn() + "/index/*"  // Grant access to all GSIs
+                ))
+                .build());
 
         // Grant Cognito permissions
         function.addToRolePolicy(PolicyStatement.Builder.create()

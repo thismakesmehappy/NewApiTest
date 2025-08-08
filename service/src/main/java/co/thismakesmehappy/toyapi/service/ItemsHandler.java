@@ -27,7 +27,18 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final String environment = System.getenv("ENVIRONMENT");
     private final String tableName = System.getenv("TABLE_NAME");
     private final DynamoDbClient dynamoDb;
-    private final boolean useLocalMock = true; // Test warm containers with mock
+    private final boolean useLocalMock;
+    
+    // Determine if we should use mock database based on environment
+    {
+        String dynamoEndpoint = System.getenv("DYNAMODB_ENDPOINT");
+        String environment = System.getenv("ENVIRONMENT");
+        
+        // Use mock ONLY for local development (when DYNAMODB_ENDPOINT is set to local DynamoDB)
+        // All AWS environments (dev, stage, prod) should use real DynamoDB
+        this.useLocalMock = (dynamoEndpoint != null && !dynamoEndpoint.isEmpty() && 
+                           (environment == null || "local".equals(environment)));
+    }
 
     public ItemsHandler() {
         String dynamoEndpoint = System.getenv("DYNAMODB_ENDPOINT");
