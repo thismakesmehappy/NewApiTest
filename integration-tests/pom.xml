@@ -88,11 +88,103 @@
     </build>
 
     <profiles>
+        <!-- Run all integration tests (default) -->
         <profile>
             <id>integration-test</id>
             <properties>
                 <test.environment>dev</test.environment>
-                <api.base.url>https://api-dev.toyapi.thismakesmehappy.co</api.base.url>
+                <test.custom.domains.enabled>false</test.custom.domains.enabled>
+            </properties>
+        </profile>
+        
+        <!-- Run only programmatic tests (AWS SDK calls) -->
+        <profile>
+            <id>programmatic-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>programmatic</groups>
+                            <systemPropertyVariables>
+                                <test.environment>${test.environment}</test.environment>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <test.environment>dev</test.environment>
+            </properties>
+        </profile>
+        
+        <!-- Run only HTTP tests with AWS API Gateway URLs -->
+        <profile>
+            <id>http-aws-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>http &amp; aws</groups>
+                            <systemPropertyVariables>
+                                <test.environment>${test.environment}</test.environment>
+                                <test.custom.domains.enabled>false</test.custom.domains.enabled>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <test.environment>dev</test.environment>
+            </properties>
+        </profile>
+        
+        <!-- Run only HTTP tests with custom domain URLs -->
+        <profile>
+            <id>http-custom-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>http &amp; custom</groups>
+                            <systemPropertyVariables>
+                                <test.environment>${test.environment}</test.environment>
+                                <test.custom.domains.enabled>true</test.custom.domains.enabled>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <test.environment>dev</test.environment>
+            </properties>
+        </profile>
+        
+        <!-- Run smoke tests only (quick health checks) -->
+        <profile>
+            <id>smoke-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>smoke</groups>
+                            <systemPropertyVariables>
+                                <test.environment>${test.environment}</test.environment>
+                                <test.custom.domains.enabled>false</test.custom.domains.enabled>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <test.environment>dev</test.environment>
             </properties>
         </profile>
     </profiles>
