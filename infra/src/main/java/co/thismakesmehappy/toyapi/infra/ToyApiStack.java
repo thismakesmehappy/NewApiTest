@@ -281,7 +281,7 @@ public class ToyApiStack extends Stack {
     private Function createPublicLambda(ITable itemsTable) {
         return createLambdaFunction(
                 "ToyApiLambdaPublic",
-                "co.thismakesmehappy.toyapi.service.PublicHandler",
+                "co.thismakesmehappy.toyapi.service.handlers.PublicHandler",
                 "Handles public API endpoints",
                 itemsTable,
                 null
@@ -294,7 +294,7 @@ public class ToyApiStack extends Stack {
     private Function createAuthLambda(ITable itemsTable, CognitoResources cognitoResources) {
         return createLambdaFunctionWithClient(
                 "ToyApiLambdaAuth", 
-                "co.thismakesmehappy.toyapi.service.AuthHandler",
+                "co.thismakesmehappy.toyapi.service.handlers.AuthHandler",
                 "Handles authentication endpoints",
                 itemsTable,
                 cognitoResources
@@ -307,7 +307,7 @@ public class ToyApiStack extends Stack {
     private Function createItemsLambda(ITable itemsTable, UserPool userPool) {
         return createLambdaFunction(
                 "ToyApiLambdaItems",
-                "co.thismakesmehappy.toyapi.service.ItemsHandler", 
+                "co.thismakesmehappy.toyapi.service.handlers.ItemsHandler", 
                 "Handles items CRUD operations",
                 itemsTable,
                 userPool
@@ -337,7 +337,7 @@ public class ToyApiStack extends Stack {
         Function function = Function.Builder.create(this, "ToyApiLambdaDeveloper")
                 .functionName(resourcePrefix + "-developerfunction")
                 .runtime(Runtime.JAVA_17)
-                .handler("co.thismakesmehappy.toyapi.service.DeveloperHandler")
+                .handler("co.thismakesmehappy.toyapi.service.handlers.DeveloperHandler")
                 .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
                 .timeout(Duration.seconds(30))
                 .memorySize(512)
@@ -2907,7 +2907,7 @@ public class ToyApiStack extends Stack {
                 .functionName(resourcePrefix + "-analytics-processor")
                 .runtime(Runtime.JAVA_17)
                 .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
-                .handler("co.thismakesmehappy.toyapi.service.AnalyticsHandler::handleEvent")
+                .handler("co.thismakesmehappy.toyapi.service.analytics.AnalyticsHandler::handleEvent")
                 .timeout(Duration.minutes(5))
                 .memorySize(512)
                 .environment(Map.of(
@@ -2937,7 +2937,7 @@ public class ToyApiStack extends Stack {
                 .functionName(resourcePrefix + "-analytics-reporter")
                 .runtime(Runtime.JAVA_17)
                 .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
-                .handler("co.thismakesmehappy.toyapi.service.AnalyticsReportHandler::generateReport")
+                .handler("co.thismakesmehappy.toyapi.service.analytics.AnalyticsReportHandler::generateReport")
                 .timeout(Duration.minutes(10))
                 .memorySize(1024)
                 .environment(Map.of(
