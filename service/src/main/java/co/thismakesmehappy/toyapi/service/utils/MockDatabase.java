@@ -1,4 +1,4 @@
-package co.thismakesmehappy.toyapi.service;
+package co.thismakesmehappy.toyapi.service.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

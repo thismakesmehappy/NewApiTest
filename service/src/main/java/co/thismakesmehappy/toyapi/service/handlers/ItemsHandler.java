@@ -1,4 +1,4 @@
-package co.thismakesmehappy.toyapi.service;
+package co.thismakesmehappy.toyapi.service.handlers;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -14,6 +14,8 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.time.Instant;
 import java.util.*;
+
+import co.thismakesmehappy.toyapi.service.utils.MockDatabase;
 
 /**
  * Lambda handler for items CRUD operations.

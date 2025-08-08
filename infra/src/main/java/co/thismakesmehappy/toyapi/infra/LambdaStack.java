@@ -52,7 +52,7 @@ public class LambdaStack extends Stack {
     private Function createPublicLambda(ITable itemsTable) {
         return createLambdaFunction(
                 "ToyApiLambdaPublic",
-                "co.thismakesmehappy.toyapi.service.PublicHandler",
+                "co.thismakesmehappy.toyapi.service.handlers.PublicHandler",
                 "Handles public API endpoints",
                 itemsTable,
                 null
@@ -65,7 +65,7 @@ public class LambdaStack extends Stack {
     private Function createAuthLambda(ITable itemsTable, CognitoStack.CognitoResources cognitoResources) {
         return createLambdaFunctionWithClient(
                 "ToyApiLambdaAuth", 
-                "co.thismakesmehappy.toyapi.service.AuthHandler",
+                "co.thismakesmehappy.toyapi.service.handlers.AuthHandler",
                 "Handles authentication endpoints",
                 itemsTable,
                 cognitoResources
@@ -78,7 +78,7 @@ public class LambdaStack extends Stack {
     private Function createItemsLambda(ITable itemsTable, UserPool userPool) {
         return createLambdaFunction(
                 "ToyApiLambdaItems",
-                "co.thismakesmehappy.toyapi.service.ItemsHandler", 
+                "co.thismakesmehappy.toyapi.service.handlers.ItemsHandler", 
                 "Handles items CRUD operations",
                 itemsTable,
                 userPool
@@ -108,7 +108,7 @@ public class LambdaStack extends Stack {
         Function function = Function.Builder.create(this, "ToyApiLambdaDeveloper")
                 .functionName(resourcePrefix + "-developerfunction")
                 .runtime(Runtime.JAVA_17)
-                .handler("co.thismakesmehappy.toyapi.service.DeveloperHandler")
+                .handler("co.thismakesmehappy.toyapi.service.handlers.DeveloperHandler")
                 .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
                 .timeout(Duration.seconds(30))
                 .memorySize(512)

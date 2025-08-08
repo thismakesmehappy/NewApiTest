@@ -1,4 +1,4 @@
-package co.thismakesmehappy.toyapi.service;
+package co.thismakesmehappy.toyapi.service.analytics;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;

@@ -1,4 +1,4 @@
-package co.thismakesmehappy.toyapi.service;
+package co.thismakesmehappy.toyapi.service.utils;
 
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterRequest;

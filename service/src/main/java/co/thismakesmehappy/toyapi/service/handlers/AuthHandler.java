@@ -1,4 +1,4 @@
-package co.thismakesmehappy.toyapi.service;
+package co.thismakesmehappy.toyapi.service.handlers;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+
+import co.thismakesmehappy.toyapi.service.utils.ParameterStoreHelper;
 
 /**
  * Lambda handler for authentication-related API endpoints.
