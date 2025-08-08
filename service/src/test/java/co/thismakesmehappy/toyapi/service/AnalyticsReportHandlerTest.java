@@ -1,5 +1,7 @@
 package co.thismakesmehappy.toyapi.service;
 
+import co.thismakesmehappy.toyapi.service.analytics.AnalyticsReportHandler;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent;
