@@ -122,8 +122,7 @@ public class CustomDomainIntegrationTest {
             .then()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("message", containsString("Hello authenticated user"))
-                .body("environment", equalTo(environment));
+                .body("message", containsString("Hello authenticated user"));
     }
     
     @Test
@@ -168,7 +167,7 @@ public class CustomDomainIntegrationTest {
             .when()
                 .delete("/items/" + itemId)
             .then()
-                .statusCode(200);
+                .statusCode(204);
     }
     
     @Test

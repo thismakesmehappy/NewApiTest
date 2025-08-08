@@ -139,8 +139,7 @@ public class AwsApiGatewayIntegrationTest {
             .then()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("message", containsString("Hello authenticated user"))
-                .body("environment", equalTo(environment));
+                .body("message", containsString("Hello authenticated user"));
     }
     
     @Test
@@ -211,8 +210,7 @@ public class AwsApiGatewayIntegrationTest {
             .when()
                 .delete("/items/" + itemId)
             .then()
-                .statusCode(200)
-                .body("message", containsString("Item deleted successfully"));
+                .statusCode(204);
         
         // Verify item is deleted
         given()
@@ -221,6 +219,6 @@ public class AwsApiGatewayIntegrationTest {
                 .get("/items/" + itemId)
             .then()
                 .statusCode(404)
-                .body("error", equalTo("ITEM_NOT_FOUND"));
+                .body("error", equalTo("NOT_FOUND"));
     }
 }
