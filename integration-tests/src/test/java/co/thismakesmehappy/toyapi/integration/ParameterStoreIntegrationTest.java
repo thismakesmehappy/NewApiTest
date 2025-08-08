@@ -1,6 +1,6 @@
 package co.thismakesmehappy.toyapi.integration;
 
-import co.thismakesmehappy.toyapi.service.ParameterStoreHelper;
+import co.thismakesmehappy.toyapi.service.utils.ParameterStoreHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
