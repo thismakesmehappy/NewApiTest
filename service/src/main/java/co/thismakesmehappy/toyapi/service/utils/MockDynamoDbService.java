@@ -72,9 +72,12 @@ public class MockDynamoDbService implements DynamoDbService {
         String keyString = generateKey(key);
         Map<String, AttributeValue> item = mockTable.get(keyString);
         
-        return GetItemResponse.builder()
-                .item(item != null ? item : new HashMap<>())
-                .build();
+        // AWS SDK returns null item map when no item is found, not an empty map
+        GetItemResponse.Builder responseBuilder = GetItemResponse.builder();
+        if (item != null) {
+            responseBuilder.item(item);
+        }
+        return responseBuilder.build();
     }
     
     @Override
@@ -92,6 +95,7 @@ public class MockDynamoDbService implements DynamoDbService {
         Map<String, AttributeValue> existingItem = mockTable.get(keyString);
         Map<String, AttributeValue> item = existingItem != null ? new HashMap<>(existingItem) : new HashMap<>(key);
         
+        // Handle legacy attributeUpdates
         if (request.attributeUpdates() != null) {
             request.attributeUpdates().forEach((attrName, attrUpdate) -> {
                 if (attrUpdate.action() == AttributeAction.PUT && attrUpdate.value() != null) {
@@ -100,9 +104,39 @@ public class MockDynamoDbService implements DynamoDbService {
             });
         }
         
+        // Handle modern updateExpression (simplified parser for SET operations)
+        if (request.updateExpression() != null && request.expressionAttributeValues() != null) {
+            String updateExpr = request.updateExpression();
+            Map<String, AttributeValue> exprValues = request.expressionAttributeValues();
+            
+            // Simple parser for "SET attr1 = :val1, attr2 = :val2" format
+            if (updateExpr.toUpperCase().startsWith("SET ")) {
+                String setClause = updateExpr.substring(4); // Remove "SET "
+                String[] assignments = setClause.split(",");
+                
+                for (String assignment : assignments) {
+                    String[] parts = assignment.trim().split("=");
+                    if (parts.length == 2) {
+                        String attrName = parts[0].trim();
+                        String valuePlaceholder = parts[1].trim();
+                        
+                        AttributeValue value = exprValues.get(valuePlaceholder);
+                        if (value != null) {
+                            item.put(attrName, value);
+                        }
+                    }
+                }
+            }
+        }
+        
         mockTable.put(keyString, item);
         
-        return UpdateItemResponse.builder().build();
+        // Return the updated item if ReturnValue.ALL_NEW is requested
+        UpdateItemResponse.Builder responseBuilder = UpdateItemResponse.builder();
+        if (request.returnValues() == ReturnValue.ALL_NEW) {
+            responseBuilder.attributes(item);
+        }
+        return responseBuilder.build();
     }
     
     @Override
@@ -155,7 +189,14 @@ public class MockDynamoDbService implements DynamoDbService {
      * Looks for common key attributes in a predictable order.
      */
     private String generateKey(Map<String, AttributeValue> attributes) {
-        // Try common key names in order
+        // Handle composite keys (PK + SK pattern used by DeveloperHandler)
+        AttributeValue pk = attributes.get("PK");
+        AttributeValue sk = attributes.get("SK");
+        if (pk != null && sk != null && pk.s() != null && sk.s() != null) {
+            return "PK:" + pk.s() + "#SK:" + sk.s();
+        }
+        
+        // Try common single key names in order
         String[] commonKeys = {"id", "pk", "key", "recordId", "developerId", "metricType"};
         
         for (String keyName : commonKeys) {

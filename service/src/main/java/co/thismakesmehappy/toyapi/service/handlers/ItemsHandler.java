@@ -16,6 +16,8 @@ import java.time.Instant;
 import java.util.*;
 
 import co.thismakesmehappy.toyapi.service.utils.MockDatabase;
+import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
+import co.thismakesmehappy.toyapi.service.utils.AwsDynamoDbService;
 
 /**
  * Lambda handler for items CRUD operations.
@@ -26,37 +28,57 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private static final Logger logger = LoggerFactory.getLogger(ItemsHandler.class);
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     
-    private final String environment = System.getenv("ENVIRONMENT");
-    private final String tableName = System.getenv("TABLE_NAME");
-    private final DynamoDbClient dynamoDb;
+    private final DynamoDbService dynamoDbService;
+    private final String environment;
+    private final String tableName;
     private final boolean useLocalMock;
-    
-    // Determine if we should use mock database based on environment
-    {
+
+    /**
+     * Default constructor for Lambda runtime.
+     * Creates services with default AWS clients and environment-specific configuration.
+     */
+    public ItemsHandler() {
         String dynamoEndpoint = System.getenv("DYNAMODB_ENDPOINT");
         String environment = System.getenv("ENVIRONMENT");
         
-        // Use mock ONLY for local development (when DYNAMODB_ENDPOINT is set to local DynamoDB)
-        // All AWS environments (dev, stage, prod) should use real DynamoDB
-        this.useLocalMock = (dynamoEndpoint != null && !dynamoEndpoint.isEmpty() && 
-                           (environment == null || "local".equals(environment)));
-    }
-
-    public ItemsHandler() {
-        String dynamoEndpoint = System.getenv("DYNAMODB_ENDPOINT");
+        DynamoDbClient dynamoDb;
         if (dynamoEndpoint != null && !dynamoEndpoint.isEmpty()) {
             // Local development with DynamoDB Local
-            this.dynamoDb = DynamoDbClient.builder()
+            dynamoDb = DynamoDbClient.builder()
                     .endpointOverride(java.net.URI.create(dynamoEndpoint))
                     .region(software.amazon.awssdk.regions.Region.US_EAST_1)
                     .credentialsProvider(() -> software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create("local", "local"))
                     .build();
         } else {
             // AWS environment
-            this.dynamoDb = DynamoDbClient.builder()
+            dynamoDb = DynamoDbClient.builder()
                     .region(software.amazon.awssdk.regions.Region.US_EAST_1)
                     .build();
         }
+        
+        this.dynamoDbService = new AwsDynamoDbService(dynamoDb);
+        this.environment = System.getenv("ENVIRONMENT");
+        this.tableName = System.getenv("TABLE_NAME");
+        
+        // Use mock ONLY for local development (when DYNAMODB_ENDPOINT is set to local DynamoDB)
+        // All AWS environments (dev, stage, prod) should use real DynamoDB
+        this.useLocalMock = (dynamoEndpoint != null && !dynamoEndpoint.isEmpty() && 
+                           (environment == null || "local".equals(environment)));
+    }
+    
+    /**
+     * Constructor for dependency injection (testing).
+     * 
+     * @param dynamoDbService The DynamoDB service to use
+     */
+    public ItemsHandler(DynamoDbService dynamoDbService) {
+        this.dynamoDbService = dynamoDbService;
+        // For testing, use system properties as fallback if env vars are not set
+        this.environment = System.getenv("ENVIRONMENT") != null ? System.getenv("ENVIRONMENT") : 
+                          System.getProperty("ENVIRONMENT", "test");
+        this.tableName = System.getenv("TABLE_NAME") != null ? System.getenv("TABLE_NAME") : 
+                        System.getProperty("TABLE_NAME", "test-table");
+        this.useLocalMock = false; // When using DI, assume we're testing with mocks
     }
 
     @Override
@@ -122,7 +144,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     .expressionAttributeValues(keyCondition)
                     .build();
             
-            QueryResponse queryResponse = dynamoDb.query(queryRequest);
+            QueryResponse queryResponse = dynamoDbService.query(queryRequest);
             
             List<Map<String, Object>> items = new ArrayList<>();
             for (Map<String, AttributeValue> item : queryResponse.items()) {
@@ -197,7 +219,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     .item(item)
                     .build();
             
-            dynamoDb.putItem(putRequest);
+            dynamoDbService.putItem(putRequest);
             
             Map<String, Object> response = new HashMap<>();
             response.put("id", itemId);
@@ -244,7 +266,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     .key(key)
                     .build();
             
-            GetItemResponse getResponse = dynamoDb.getItem(getRequest);
+            GetItemResponse getResponse = dynamoDbService.getItem(getRequest);
             
             if (!getResponse.hasItem() || getResponse.item().isEmpty()) {
                 return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
@@ -321,7 +343,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     .build();
             
             try {
-                UpdateItemResponse updateResponse = dynamoDb.updateItem(updateRequest);
+                UpdateItemResponse updateResponse = dynamoDbService.updateItem(updateRequest);
                 Map<String, AttributeValue> updatedItem = updateResponse.attributes();
                 
                 Map<String, Object> response = new HashMap<>();
@@ -375,7 +397,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     .build();
             
             try {
-                dynamoDb.deleteItem(deleteRequest);
+                dynamoDbService.deleteItem(deleteRequest);
                 logger.info("Deleted item {} for user: {}", itemId, userId);
                 return createSuccessResponse(204, null);
                 
@@ -402,9 +424,11 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
      */
     private String getUserIdFromRequest(APIGatewayProxyRequestEvent input) {
         // Use mock authentication for local development
-        String mockAuth = System.getenv("MOCK_AUTHENTICATION");
+        String mockAuth = System.getenv("MOCK_AUTHENTICATION") != null ? System.getenv("MOCK_AUTHENTICATION") :
+                         System.getProperty("MOCK_AUTHENTICATION");
         if ("true".equals(mockAuth)) {
-            String localUserId = System.getenv("LOCAL_TEST_USER_ID");
+            String localUserId = System.getenv("LOCAL_TEST_USER_ID") != null ? System.getenv("LOCAL_TEST_USER_ID") :
+                                System.getProperty("LOCAL_TEST_USER_ID");
             if (localUserId != null) {
                 return localUserId;
             }

@@ -11,6 +11,8 @@ import software.amazon.awssdk.services.apigateway.ApiGatewayClient;
 import software.amazon.awssdk.services.apigateway.model.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
+import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
+import co.thismakesmehappy.toyapi.service.utils.AwsDynamoDbService;
 
 import java.time.Instant;
 import java.util.*;
@@ -21,7 +23,7 @@ import java.util.*;
  */
 public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private DynamoDbClient dynamoDbClient;
+    private final DynamoDbService dynamoDbService;
     private ApiGatewayClient apiGatewayClient;
     private final ObjectMapper objectMapper;
     private final String tableName;
@@ -32,18 +34,34 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
     private String restApiId;
     private String usagePlanId;
 
+    /**
+     * Default constructor for Lambda runtime.
+     * Creates services with default AWS clients.
+     */
     public DeveloperHandler() {
+        DynamoDbClient dynamoClient = DynamoDbClient.builder().build();
+        this.dynamoDbService = new AwsDynamoDbService(dynamoClient);
         this.objectMapper = new ObjectMapper();
         this.tableName = System.getenv("TABLE_NAME");
         this.apiNamePrefix = System.getenv("API_NAME_PREFIX");
         this.usagePlanPrefix = System.getenv("USAGE_PLAN_PREFIX");
     }
     
-    private synchronized DynamoDbClient getDynamoDbClient() {
-        if (dynamoDbClient == null) {
-            dynamoDbClient = DynamoDbClient.builder().build();
-        }
-        return dynamoDbClient;
+    /**
+     * Constructor for dependency injection (testing).
+     * 
+     * @param dynamoDbService The DynamoDB service to use
+     */
+    public DeveloperHandler(DynamoDbService dynamoDbService) {
+        this.dynamoDbService = dynamoDbService;
+        this.objectMapper = new ObjectMapper();
+        // For testing, use system properties as fallback if env vars are not set
+        this.tableName = System.getenv("TABLE_NAME") != null ? System.getenv("TABLE_NAME") : 
+                        System.getProperty("TABLE_NAME", "test-table");
+        this.apiNamePrefix = System.getenv("API_NAME_PREFIX") != null ? System.getenv("API_NAME_PREFIX") : 
+                            System.getProperty("API_NAME_PREFIX", "test-api");
+        this.usagePlanPrefix = System.getenv("USAGE_PLAN_PREFIX") != null ? System.getenv("USAGE_PLAN_PREFIX") : 
+                              System.getProperty("USAGE_PLAN_PREFIX", "test-plan");
     }
     
     private synchronized ApiGatewayClient getApiGatewayClient() {
@@ -158,7 +176,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
+            GetItemResponse getResponse = dynamoDbService.getItem(getRequest);
             if (getResponse.hasItem()) {
                 return createErrorResponse(409, "Developer already registered");
             }
@@ -183,7 +201,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            getDynamoDbClient().putItem(putRequest);
+            dynamoDbService.putItem(putRequest);
 
             ObjectNode response = objectMapper.createObjectNode();
             response.put("developerId", developerId);
@@ -215,7 +233,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
+            GetItemResponse getResponse = dynamoDbService.getItem(getRequest);
             if (!getResponse.hasItem()) {
                 return createErrorResponse(404, "Developer not found");
             }
@@ -257,7 +275,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            getDynamoDbClient().putItem(putRequest);
+            dynamoDbService.putItem(putRequest);
 
             ObjectNode response = objectMapper.createObjectNode();
             response.put("apiKeyId", apiKeyId);
@@ -289,7 +307,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
+            GetItemResponse getResponse = dynamoDbService.getItem(getRequest);
             if (!getResponse.hasItem()) {
                 return createErrorResponse(404, "Developer not found");
             }
@@ -330,7 +348,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            QueryResponse queryResponse = getDynamoDbClient().query(queryRequest);
+            QueryResponse queryResponse = dynamoDbService.query(queryRequest);
             
             List<ObjectNode> apiKeys = new ArrayList<>();
             for (Map<String, AttributeValue> item : queryResponse.items()) {
@@ -371,7 +389,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            GetItemResponse getResponse = getDynamoDbClient().getItem(getRequest);
+            GetItemResponse getResponse = dynamoDbService.getItem(getRequest);
             if (!getResponse.hasItem()) {
                 return createErrorResponse(404, "Developer not found");
             }
@@ -408,7 +426,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     .returnValues(ReturnValue.ALL_NEW)
                     .build();
 
-            UpdateItemResponse updateResponse = getDynamoDbClient().updateItem(updateRequest);
+            UpdateItemResponse updateResponse = dynamoDbService.updateItem(updateRequest);
             Map<String, AttributeValue> item = updateResponse.attributes();
 
             ObjectNode response = objectMapper.createObjectNode();
@@ -459,7 +477,7 @@ public class DeveloperHandler implements RequestHandler<APIGatewayProxyRequestEv
                     ))
                     .build();
 
-            getDynamoDbClient().deleteItem(deleteRequest);
+            dynamoDbService.deleteItem(deleteRequest);
 
             ObjectNode response = objectMapper.createObjectNode();
             response.put("message", "API key deleted successfully");

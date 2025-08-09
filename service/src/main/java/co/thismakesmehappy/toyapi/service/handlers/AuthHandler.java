@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import co.thismakesmehappy.toyapi.service.utils.ParameterStoreHelper;
+import co.thismakesmehappy.toyapi.service.utils.CognitoService;
+import co.thismakesmehappy.toyapi.service.utils.AwsCognitoService;
 
 /**
  * Lambda handler for authentication-related API endpoints.
@@ -27,17 +29,44 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
     private static final Logger logger = LoggerFactory.getLogger(AuthHandler.class);
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     
+    private final CognitoService cognitoService;
+    private final String environment;
+    private final String userPoolId;
+    private final String userPoolClientId;
+    private final boolean mockAuthentication;
+
+    /**
+     * Default constructor for Lambda runtime.
+     * Creates services with default AWS clients.
+     */
     public AuthHandler() {
-        this.cognitoClient = CognitoIdentityProviderClient.builder()
+        CognitoIdentityProviderClient cognitoClient = CognitoIdentityProviderClient.builder()
                 .region(software.amazon.awssdk.regions.Region.US_EAST_1)
                 .build();
+        this.cognitoService = new AwsCognitoService(cognitoClient);
+        this.environment = System.getenv("ENVIRONMENT");
+        this.userPoolId = System.getenv("USER_POOL_ID");
+        this.userPoolClientId = System.getenv("USER_POOL_CLIENT_ID");
+        this.mockAuthentication = "true".equals(System.getenv("MOCK_AUTHENTICATION"));
     }
     
-    private final String environment = System.getenv("ENVIRONMENT");
-    private final String userPoolId = System.getenv("USER_POOL_ID");
-    private final String userPoolClientId = System.getenv("USER_POOL_CLIENT_ID");
-    private final boolean mockAuthentication = "true".equals(System.getenv("MOCK_AUTHENTICATION"));
-    private final CognitoIdentityProviderClient cognitoClient;
+    /**
+     * Constructor for dependency injection (testing).
+     * 
+     * @param cognitoService The Cognito service to use
+     */
+    public AuthHandler(CognitoService cognitoService) {
+        this.cognitoService = cognitoService;
+        // For testing, use system properties as fallback if env vars are not set
+        this.environment = System.getenv("ENVIRONMENT") != null ? System.getenv("ENVIRONMENT") : 
+                          System.getProperty("ENVIRONMENT", "test");
+        this.userPoolId = System.getenv("USER_POOL_ID") != null ? System.getenv("USER_POOL_ID") : 
+                         System.getProperty("USER_POOL_ID", "test-pool");
+        this.userPoolClientId = System.getenv("USER_POOL_CLIENT_ID") != null ? System.getenv("USER_POOL_CLIENT_ID") : 
+                               System.getProperty("USER_POOL_CLIENT_ID", "test-client");
+        this.mockAuthentication = System.getenv("MOCK_AUTHENTICATION") != null ? "true".equals(System.getenv("MOCK_AUTHENTICATION")) :
+                                 "true".equals(System.getProperty("MOCK_AUTHENTICATION", "false"));
+    }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
@@ -121,7 +150,7 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
                         ))
                         .build();
                 
-                AdminInitiateAuthResponse authResponse = cognitoClient.adminInitiateAuth(authRequest);
+                AdminInitiateAuthResponse authResponse = cognitoService.adminInitiateAuth(authRequest);
                 
                 if (authResponse.authenticationResult() != null) {
                     Map<String, Object> response = new HashMap<>();
