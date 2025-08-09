@@ -90,6 +90,7 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
     /**
      * Creates an error API Gateway response
      */
+
     private APIGatewayProxyResponseEvent createErrorResponse(int statusCode, String error, String message, String details) {
         try {
             Map<String, Object> errorBody = new HashMap<>();

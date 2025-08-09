@@ -7,30 +7,42 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
+import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
+import co.thismakesmehappy.toyapi.service.utils.AwsDynamoDbService;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-// TODO: We have all the classes in one directory; break into logival packages/modules for easier organization
 /**
  * Lambda function for processing analytics events from Kinesis stream.
  * Processes real-time API usage data and stores metrics in DynamoDB.
  */
 public class AnalyticsHandler implements RequestHandler<KinesisEvent, String> {
 
-    private static DynamoDbClient dynamoDbClient;
+    private final DynamoDbService dynamoDbService;
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String USAGE_METRICS_TABLE = System.getenv("USAGE_METRICS_TABLE");
     private static final String DEVELOPER_INSIGHTS_TABLE = System.getenv("DEVELOPER_INSIGHTS_TABLE");
     private static final String ENVIRONMENT = System.getenv("ENVIRONMENT");
 
-    private static synchronized DynamoDbClient getDynamoDbClient() {
-        if (dynamoDbClient == null) {
-            dynamoDbClient = DynamoDbClient.builder().build();
-        }
-        return dynamoDbClient;
+    /**
+     * Default constructor for Lambda runtime.
+     * Creates a new AwsDynamoDbService with default DynamoDB client.
+     */
+    public AnalyticsHandler() {
+        DynamoDbClient client = DynamoDbClient.builder().build();
+        this.dynamoDbService = new AwsDynamoDbService(client);
+    }
+
+    /**
+     * Constructor for dependency injection (testing).
+     * 
+     * @param dynamoDbService The DynamoDB service to use
+     */
+    public AnalyticsHandler(DynamoDbService dynamoDbService) {
+        this.dynamoDbService = dynamoDbService;
     }
 
     @Override
@@ -119,7 +131,7 @@ public class AnalyticsHandler implements RequestHandler<KinesisEvent, String> {
                     .item(item)
                     .build();
             
-            getDynamoDbClient().putItem(request);
+            dynamoDbService.putItem(request);
             
         } catch (Exception e) {
             context.getLogger().log("Error storing usage metrics: " + e.getMessage());
@@ -176,7 +188,7 @@ public class AnalyticsHandler implements RequestHandler<KinesisEvent, String> {
                     .expressionAttributeValues(expressionAttributeValues)
                     .build();
             
-            getDynamoDbClient().updateItem(request);
+            dynamoDbService.updateItem(request);
             
         } catch (Exception e) {
             context.getLogger().log("Error updating insight counter for " + insightType + ": " + e.getMessage());
