@@ -1,33 +1,41 @@
 package co.thismakesmehappy.toyapi.service.utils;
 
 import software.amazon.awssdk.services.ssm.SsmClient;
-import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
-import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
-import software.amazon.awssdk.services.ssm.model.SsmException;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * Helper class for accessing AWS Systems Manager Parameter Store.
  * Provides secure access to test credentials and configuration values.
+ * 
+ * @deprecated Use {@link ParameterStoreService} for dependency injection instead.
+ * This class is maintained for backward compatibility.
  */
-// TODO: Convert ParameterStoreHelper to use dependency injection for proper unit testing
+@Deprecated
 public class ParameterStoreHelper {
     
-    private static final Logger logger = Logger.getLogger(ParameterStoreHelper.class.getName());
-    private static SsmClient ssmClient;
+    private static ParameterStoreService parameterStoreService;
     
-    private static synchronized SsmClient getSsmClient() {
-        if (ssmClient == null) {
-            ssmClient = SsmClient.builder()
+    /**
+     * Gets the Parameter Store service instance, creating it if needed.
+     * Uses lazy initialization with AWS SSM client.
+     */
+    private static synchronized ParameterStoreService getParameterStoreService() {
+        if (parameterStoreService == null) {
+            SsmClient ssmClient = SsmClient.builder()
                     .region(software.amazon.awssdk.regions.Region.US_EAST_1)
                     .build();
+            parameterStoreService = new AwsParameterStoreService(ssmClient);
         }
-        return ssmClient;
+        return parameterStoreService;
     }
     
-    private static final String ENVIRONMENT = System.getenv("ENVIRONMENT");
-    private static final String PARAMETER_PREFIX = "/toyapi-" + (ENVIRONMENT != null ? ENVIRONMENT : "dev");
+    /**
+     * Sets the Parameter Store service for testing.
+     * 
+     * @param service The Parameter Store service to use
+     */
+    public static void setParameterStoreService(ParameterStoreService service) {
+        parameterStoreService = service;
+    }
     
     /**
      * Retrieves a parameter value from Parameter Store.
@@ -37,26 +45,7 @@ public class ParameterStoreHelper {
      * @return The parameter value or default value
      */
     public static String getParameter(String parameterName, String defaultValue) {
-        try {
-            String fullParameterName = PARAMETER_PREFIX + "/" + parameterName;
-            
-            GetParameterRequest request = GetParameterRequest.builder()
-                    .name(fullParameterName)
-                    .withDecryption(true)  // Decrypt if it's a SecureString
-                    .build();
-            
-            GetParameterResponse response = getSsmClient().getParameter(request);
-            return response.parameter().value();
-            
-        } catch (SsmException e) {
-            // Log warning but don't fail - return default value
-            logger.log(Level.WARNING, "Could not retrieve parameter {0}: {1}", new Object[]{parameterName, e.getMessage()});
-            return defaultValue;
-        } catch (Exception e) {
-            // For any other exception, log and return default
-            logger.log(Level.SEVERE, "Error accessing Parameter Store for parameter {0}: {1}", new Object[]{parameterName, e.getMessage()});
-            return defaultValue;
-        }
+        return getParameterStoreService().getParameter(parameterName, defaultValue);
     }
     
     /**
@@ -66,25 +55,7 @@ public class ParameterStoreHelper {
      * @return The test username
      */
     public static String getTestUsername() {
-        // First try Parameter Store
-        String username = getParameter("test-credentials/username", null);
-        
-        // Fall back to system property (for testing)
-        if (username == null) {
-            username = System.getProperty("TEST_USERNAME");
-        }
-        
-        // Fall back to environment variable
-        if (username == null) {
-            username = System.getenv("TEST_USERNAME");
-        }
-        
-        // Final fallback to default
-        if (username == null) {
-            username = "testuser";
-        }
-        
-        return username;
+        return getParameterStoreService().getTestUsername();
     }
     
     /**
@@ -94,25 +65,7 @@ public class ParameterStoreHelper {
      * @return The test password
      */
     public static String getTestPassword() {
-        // First try Parameter Store
-        String password = getParameter("test-credentials/password", null);
-        
-        // Fall back to system property (for testing)
-        if (password == null) {
-            password = System.getProperty("TEST_PASSWORD");
-        }
-        
-        // Fall back to environment variable
-        if (password == null) {
-            password = System.getenv("TEST_PASSWORD");
-        }
-        
-        // Final fallback to default
-        if (password == null) {
-            password = "TestPassword123";
-        }
-        
-        return password;
+        return getParameterStoreService().getTestPassword();
     }
     
     /**
@@ -121,8 +74,7 @@ public class ParameterStoreHelper {
      * @return The API base URL
      */
     public static String getApiUrl() {
-        String env = ENVIRONMENT != null ? ENVIRONMENT : "dev";
-        return getParameter("config/api-url", "https://placeholder.execute-api.us-east-1.amazonaws.com/" + env + "/");
+        return getParameterStoreService().getApiUrl();
     }
     
     /**
@@ -131,6 +83,6 @@ public class ParameterStoreHelper {
      * @return The AWS region
      */
     public static String getRegion() {
-        return getParameter("config/region", "us-east-1");
+        return getParameterStoreService().getRegion();
     }
 }
