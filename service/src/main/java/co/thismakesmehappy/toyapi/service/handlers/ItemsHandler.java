@@ -18,6 +18,8 @@ import java.util.*;
 import co.thismakesmehappy.toyapi.service.utils.MockDatabase;
 import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
 import co.thismakesmehappy.toyapi.service.utils.AwsDynamoDbService;
+import co.thismakesmehappy.toyapi.service.services.items.GetItemsService;
+import co.thismakesmehappy.toyapi.service.services.items.PostItemsService;
 
 /**
  * Lambda handler for items CRUD operations.
@@ -32,6 +34,10 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final String environment;
     private final String tableName;
     private final boolean useLocalMock;
+    
+    // Service layer
+    private final GetItemsService getItemsService;
+    private final PostItemsService postItemsService;
 
     /**
      * Default constructor for Lambda runtime.
@@ -64,6 +70,10 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         // All AWS environments (dev, stage, prod) should use real DynamoDB
         this.useLocalMock = (dynamoEndpoint != null && !dynamoEndpoint.isEmpty() && 
                            (environment == null || "local".equals(environment)));
+                           
+        // Initialize services
+        this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
+        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
     }
     
     /**
@@ -79,6 +89,10 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         this.tableName = System.getenv("TABLE_NAME") != null ? System.getenv("TABLE_NAME") : 
                         System.getProperty("TABLE_NAME", "test-table");
         this.useLocalMock = false; // When using DI, assume we're testing with mocks
+        
+        // Initialize services
+        this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
+        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
     }
 
     @Override
@@ -117,51 +131,14 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         try {
             String userId = getUserIdFromRequest(input);
             
-            if (useLocalMock) {
-                // Use mock database for local development
-                List<MockDatabase.Item> mockItems = MockDatabase.getUserItems(userId);
-                List<Map<String, Object>> items = new ArrayList<>();
-                for (MockDatabase.Item item : mockItems) {
-                    items.add(item.toMap());
-                }
-                
-                Map<String, Object> response = new HashMap<>();
-                response.put("items", items);
-                response.put("count", items.size());
-                
-                logger.info("Returning {} items for user: {} (using mock database)", items.size(), userId);
-                return createSuccessResponse(200, response);
-            }
+            // Use the enhanced GetItemsService
+            GetItemsService.GetItemsRequest request = new GetItemsService.GetItemsRequest(
+                userId, null, null, "desc"
+            );
             
-            // Query items for this user using DynamoDB
-            Map<String, AttributeValue> keyCondition = new HashMap<>();
-            keyCondition.put(":userId", AttributeValue.builder().s(userId).build());
+            Map<String, Object> response = getItemsService.execute(request);
             
-            QueryRequest queryRequest = QueryRequest.builder()
-                    .tableName(tableName)
-                    .indexName("UserIndex")
-                    .keyConditionExpression("userId = :userId")
-                    .expressionAttributeValues(keyCondition)
-                    .build();
-            
-            QueryResponse queryResponse = dynamoDbService.query(queryRequest);
-            
-            List<Map<String, Object>> items = new ArrayList<>();
-            for (Map<String, AttributeValue> item : queryResponse.items()) {
-                Map<String, Object> itemMap = new HashMap<>();
-                itemMap.put("id", item.get("SK").s().substring(5)); // Remove "ITEM#" prefix
-                itemMap.put("message", item.get("message").s());
-                itemMap.put("userId", item.get("userId").s());
-                itemMap.put("createdAt", item.get("createdAt").s());
-                itemMap.put("updatedAt", item.get("updatedAt").s());
-                items.add(itemMap);
-            }
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("items", items);
-            response.put("count", items.size());
-            
-            logger.info("Returning {} items for user: {}", items.size(), userId);
+            logger.info("Returning response for user: {}", userId);
             return createSuccessResponse(200, response);
             
         } catch (Exception e) {
@@ -189,46 +166,14 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 return createErrorResponse(400, "BAD_REQUEST", "Message is required", null);
             }
             
-            if (useLocalMock) {
-                // Use mock database for local development
-                String itemId = MockDatabase.createItem(userId, message.trim());
-                Optional<MockDatabase.Item> createdItem = MockDatabase.getItem(itemId, userId);
-                
-                if (createdItem.isPresent()) {
-                    logger.info("Created item {} for user: {} (using mock database)", itemId, userId);
-                    return createSuccessResponse(201, createdItem.get().toMap());
-                } else {
-                    return createErrorResponse(500, "INTERNAL_ERROR", "Failed to create item in mock database", null);
-                }
-            }
-            // TODO: find a better way to crete ids. right ow we have item-1, item-2. It should be something more randmoized
-            String itemId = "item-" + UUID.randomUUID().toString();
-            String now = Instant.now().toString();
+            // Use the enhanced PostItemsService
+            PostItemsService.CreateItemRequest request = new PostItemsService.CreateItemRequest(
+                message.trim(), userId
+            );
             
-            // Create item in DynamoDB
-            Map<String, AttributeValue> item = new HashMap<>();
-            item.put("PK", AttributeValue.builder().s("USER#" + userId).build());
-            item.put("SK", AttributeValue.builder().s("ITEM#" + itemId).build());
-            item.put("userId", AttributeValue.builder().s(userId).build());
-            item.put("message", AttributeValue.builder().s(message.trim()).build());
-            item.put("createdAt", AttributeValue.builder().s(now).build());
-            item.put("updatedAt", AttributeValue.builder().s(now).build());
+            Map<String, Object> response = postItemsService.execute(request);
             
-            PutItemRequest putRequest = PutItemRequest.builder()
-                    .tableName(tableName)
-                    .item(item)
-                    .build();
-            
-            dynamoDbService.putItem(putRequest);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", itemId);
-            response.put("message", message.trim());
-            response.put("userId", userId);
-            response.put("createdAt", now);
-            response.put("updatedAt", now);
-            
-            logger.info("Created item {} for user: {}", itemId, userId);
+            logger.info("Created item for user: {}", userId);
             return createSuccessResponse(201, response);
             
         } catch (Exception e) {

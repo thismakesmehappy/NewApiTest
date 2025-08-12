@@ -1,5 +1,6 @@
 package co.thismakesmehappy.toyapi.service.handlers;
 
+import co.thismakesmehappy.toyapi.service.services.publicendpoint.GetPublicMessageService;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -22,7 +23,24 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
     private static final Logger logger = LoggerFactory.getLogger(PublicHandler.class);
     private static final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     
-    private final String environment = System.getenv("ENVIRONMENT");
+    private final GetPublicMessageService getPublicMessageService;
+    
+    /**
+     * Default constructor for Lambda runtime.
+     */
+    public PublicHandler() {
+        String environment = System.getenv("ENVIRONMENT");
+        this.getPublicMessageService = new GetPublicMessageService(environment);
+    }
+    
+    /**
+     * Constructor for dependency injection (testing).
+     * 
+     * @param getPublicMessageService The service for GET /public/message
+     */
+    public PublicHandler(GetPublicMessageService getPublicMessageService) {
+        this.getPublicMessageService = getPublicMessageService;
+    }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
@@ -50,11 +68,9 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
      */
     private APIGatewayProxyResponseEvent handleGetPublicMessage(APIGatewayProxyRequestEvent input, Context context) {
         try {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Hello from ToyApi public endpoint2! Environment: " + environment);
-            response.put("timestamp", Instant.now().toString());
+            Map<String, Object> response = getPublicMessageService.execute();
             
-            logger.info("Returning public message for environment: {}", environment);
+            logger.info("Returning public message");
             
             return createSuccessResponse(200, response);
             
