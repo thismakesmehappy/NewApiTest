@@ -36,7 +36,10 @@ public class ItemPersistenceService {
         try {
             logger.debug("Persisting item {} for user {}", itemId, userId);
             
+            // Use composite key structure that matches the actual DynamoDB table schema
             Map<String, AttributeValue> itemAttributes = new HashMap<>();
+            itemAttributes.put("PK", AttributeValue.builder().s("USER#" + userId).build());
+            itemAttributes.put("SK", AttributeValue.builder().s("ITEM#" + itemId).build());
             itemAttributes.put("id", AttributeValue.builder().s(itemId).build());
             itemAttributes.put("userId", AttributeValue.builder().s(userId).build());
             itemAttributes.put("message", AttributeValue.builder().s(message).build());
