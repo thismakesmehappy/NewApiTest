@@ -8,7 +8,7 @@ import software.amazon.awscdk.services.apigateway.*;
 import software.amazon.awscdk.services.cloudwatch.*;
 import software.amazon.awscdk.services.cloudwatch.actions.SnsAction;
 import software.amazon.awscdk.services.iam.*;
-import software.amazon.awscdk.services.kms.Key;
+// Removed: import software.amazon.awscdk.services.kms.Key; - no longer creating customer KMS keys
 import software.amazon.awscdk.services.logs.*;
 import software.amazon.awscdk.services.sns.Topic;
 import software.amazon.awscdk.services.sns.subscriptions.EmailSubscription;
@@ -36,7 +36,7 @@ public class SecurityStack extends Stack {
     private final String environment;
     private final String resourcePrefix;
     private final Topic securityAlertTopic;
-    private final Key encryptionKey;
+    // Removed: encryptionKey - using AWS-managed encryption (free) instead of customer-managed KMS keys
     
     public SecurityStack(final Construct scope, final String id, final StackProps props, 
                         final String environment) {
@@ -48,8 +48,7 @@ public class SecurityStack extends Stack {
         // Create dedicated security alert topic
         this.securityAlertTopic = createSecurityAlertTopic();
         
-        // Create KMS key for encryption (free tier: 20,000 requests/month)
-        this.encryptionKey = createEncryptionKey();
+        // Note: Using AWS-managed encryption (free) instead of customer-managed KMS keys ($1/month each)
         
         // Set up free security features
         setupApiGatewaySecurityEnhancements();
@@ -81,16 +80,10 @@ public class SecurityStack extends Stack {
     }
     
     /**
-     * Creates KMS key for encrypting sensitive data
-     * FREE: 20,000 requests per month
+     * Note: Removed customer-managed KMS key creation to eliminate $1/month cost per environment.
+     * AWS services use AWS-managed encryption keys by default (free).
+     * Customer-managed keys only needed for specific compliance requirements.
      */
-    private Key createEncryptionKey() {
-        return Key.Builder.create(this, "SecurityEncryptionKey")
-                .description("ToyApi " + environment + " security encryption key")
-                .enableKeyRotation(true)  // Annual rotation for enhanced security
-                .removalPolicy(environment.equals("prod") ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY)
-                .build();
-    }
     
     /**
      * Enhances API Gateway security with free features
@@ -244,14 +237,7 @@ public class SecurityStack extends Stack {
                 
         secureExecutionRole.addToPolicy(cognitoPolicy);
         
-        // KMS permissions for encryption
-        PolicyStatement kmsPolicy = PolicyStatement.Builder.create()
-                .effect(Effect.ALLOW)
-                .actions(Arrays.asList("kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"))
-                .resources(Arrays.asList(encryptionKey.getKeyArn()))
-                .build();
-                
-        secureExecutionRole.addToPolicy(kmsPolicy);
+        // Note: Removed KMS policy - using AWS-managed encryption (free) instead
     }
     
     /**
@@ -427,7 +413,7 @@ public class SecurityStack extends Stack {
                 .build();
                 
         software.amazon.awscdk.CfnOutput.Builder.create(this, "EncryptionKeyId")
-                .value(encryptionKey.getKeyId())
+                .value("aws-managed") // Using AWS-managed encryption instead of customer KMS key
                 .description("KMS Key ID for security encryption")
                 .build();
         
