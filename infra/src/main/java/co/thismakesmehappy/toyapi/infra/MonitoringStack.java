@@ -525,17 +525,8 @@ public class MonitoringStack extends Stack {
                 .period(Duration.minutes(5))
                 .build();
                 
-        Alarm errorRateAlarm = Alarm.Builder.create(this, "LogErrorRateAlarm")
-                .alarmName(resourcePrefix + "-log-error-rate")
-                .alarmDescription("High error rate detected in API logs")
-                .metric(errorRateMetric)
-                .threshold(10) // More than 10 errors in 5 minutes
-                .evaluationPeriods(2)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .treatMissingData(TreatMissingData.NOT_BREACHING)
-                .build();
-                
-        // Note: Log-based alarms created selectively by environment to manage alarm count
+        // Note: Log-based error alarms are created in environment-specific alarm methods
+        // to avoid duplicates and manage free tier alarm limits
     }
     
     /**
@@ -604,10 +595,12 @@ public class MonitoringStack extends Stack {
                 .description("CloudWatch Dashboard URL")
                 .build();
                 
-        software.amazon.awscdk.CfnOutput.Builder.create(this, "AlertTopicArn")
-                .value(alertTopic.getTopicArn())
-                .description("SNS Topic ARN for monitoring alerts")
-                .build();
+        if (alertTopic != null) {
+            software.amazon.awscdk.CfnOutput.Builder.create(this, "AlertTopicArn")
+                    .value(alertTopic.getTopicArn())
+                    .description("SNS Topic ARN for monitoring alerts")
+                    .build();
+        }
     }
     
     /**
@@ -700,25 +693,8 @@ public class MonitoringStack extends Stack {
                 .build()
         );
         
-        // DynamoDB throttle alarm (free metric)
-        Metric throttleMetric = Metric.Builder.create()
-                .namespace("AWS/DynamoDB")
-                .metricName("UserErrors")
-                .dimensionsMap(Map.of("TableName", tableName))
-                .statistic("Sum")
-                .period(Duration.minutes(5))
-                .build();
-                
-        Alarm dynamoThrottleAlarm = Alarm.Builder.create(this, "DynamoDBThrottleAlarm")
-                .alarmName(resourcePrefix + "-dynamodb-throttles")
-                .alarmDescription("DynamoDB table is experiencing throttling")
-                .metric(throttleMetric)
-                .threshold(1)
-                .evaluationPeriods(1)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
-                .build();
-                
-        // Note: DynamoDB alarms created selectively by environment to manage alarm count
+        // Note: DynamoDB throttle alarm is created in environment-specific alarm methods
+        // to avoid duplicates and manage free tier alarm limits
     }
     
     /**
@@ -756,17 +732,8 @@ public class MonitoringStack extends Stack {
                 .build()
         );
         
-        // High authentication failure alarm
-        Alarm authFailureAlarm = Alarm.Builder.create(this, "CognitoAuthFailureAlarm")
-                .alarmName(resourcePrefix + "-cognito-auth-failures")
-                .alarmDescription("High number of authentication failures in Cognito")
-                .metric(authFailureMetric)
-                .threshold(10) // 10 failures in 5 minutes
-                .evaluationPeriods(2)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .build();
-                
-        // Note: Cognito alarms created selectively by environment to manage alarm count
+        // Note: Cognito auth failure alarms are created in environment-specific alarm methods
+        // to avoid duplicates and manage free tier alarm limits
     }
     
     /**
@@ -877,16 +844,8 @@ public class MonitoringStack extends Stack {
                 .period(Duration.minutes(5))
                 .build();
         
-        Alarm securityAlarm = Alarm.Builder.create(this, "SecurityAlarm")
-                .alarmName(resourcePrefix + "-security-breach-attempt")
-                .alarmDescription("Potential security breach detected")
-                .metric(failedAuthMetric)
-                .threshold(20) // 20 failed auths in 5 minutes
-                .evaluationPeriods(1)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .build();
-                
-        // Note: Security alarms created selectively by environment to manage alarm count
+        // Note: Security alarms are created in environment-specific alarm methods
+        // to avoid duplicates and manage free tier alarm limits
         
         // Security dashboard widget
         dashboard.addWidgets(
@@ -1000,8 +959,8 @@ public class MonitoringStack extends Stack {
                 .build();
         
         Alarm dynamoThrottleAlarm = Alarm.Builder.create(this, "ProdDynamoThrottleAlarm")
-                .alarmName(resourcePrefix + "-dynamodb-throttles")
-                .alarmDescription("DynamoDB experiencing throttling")
+                .alarmName(resourcePrefix + "-prod-dynamodb-throttles")
+                .alarmDescription("DynamoDB experiencing throttling in production")
                 .metric(dynamoThrottleMetric)
                 .threshold(1) // Any throttling is critical
                 .evaluationPeriods(1)
