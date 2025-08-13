@@ -77,16 +77,12 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         this.useLocalMock = (dynamoEndpoint != null && !dynamoEndpoint.isEmpty() && 
                            (environment == null || "local".equals(environment)));
         
-        // Initialize feature flag service
-        SsmClient ssmClient = SsmClient.builder()
-                .region(software.amazon.awssdk.regions.Region.US_EAST_1)
-                .build();
-        ParameterStoreService parameterStore = new AwsParameterStoreService(ssmClient);
-        this.featureFlagService = new ParameterStoreFeatureFlagService(parameterStore);
+        // FeatureFlagService is optional - only initialize in production AWS environments
+        this.featureFlagService = null; // Will be initialized later if needed
                            
-        // Initialize services
+        // Initialize services - PostItemsService has a constructor without FeatureFlagService for backward compatibility
         this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
-        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock, this.featureFlagService);
+        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
     }
     
     /**
@@ -167,8 +163,9 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
      * Handles POST /items - create a new item
      */
     private APIGatewayProxyResponseEvent handleCreateItem(APIGatewayProxyRequestEvent input, Context context) {
+        String userId = null;
         try {
-            String userId = getUserIdFromRequest(input);
+            userId = getUserIdFromRequest(input);
             String body = input.getBody();
             
             if (body == null || body.trim().isEmpty()) {
@@ -183,18 +180,20 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             }
             
             // Use the enhanced PostItemsService
+            logger.info("Creating item for user: {} with message length: {}", userId, message.length());
             PostItemsService.CreateItemRequest request = new PostItemsService.CreateItemRequest(
                 message.trim(), userId
             );
             
+            logger.info("Executing PostItemsService for user: {}", userId);
             Map<String, Object> response = postItemsService.execute(request);
             
             logger.info("Created item for user: {}", userId);
             return createSuccessResponse(201, response);
             
         } catch (Exception e) {
-            logger.error("Error creating item", e);
-            return createErrorResponse(500, "INTERNAL_ERROR", "Failed to create item", e.getMessage());
+            logger.error("Error creating item for user: {} - Exception type: {} - Message: {}", userId, e.getClass().getSimpleName(), e.getMessage(), e);
+            return createErrorResponse(500, "INTERNAL_ERROR", "Failed to create item", e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
     
