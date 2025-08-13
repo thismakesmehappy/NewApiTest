@@ -8,11 +8,11 @@ info:
     email: bernardo+toyAPI@thismakesmehappy.co
 
 servers:
-  - url: https://api.toyapi.thismakesmehappy.co
+  - url: https://toyapi.thismakesmehappy.co
     description: Production server
-  - url: https://api-stage.toyapi.thismakesmehappy.co
+  - url: https://stage.toyapi.thismakesmehappy.co
     description: Staging server
-  - url: https://api-dev.toyapi.thismakesmehappy.co
+  - url: https://dev.toyapi.thismakesmehappy.co
     description: Development server
 
 paths:

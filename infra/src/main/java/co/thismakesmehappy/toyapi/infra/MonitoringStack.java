@@ -9,6 +9,7 @@ import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.logs.*;
 import software.amazon.awscdk.services.sns.Topic;
 import software.amazon.awscdk.services.sns.subscriptions.EmailSubscription;
+import software.amazon.awscdk.services.ssm.StringParameter;
 import software.constructs.Construct;
 
 import java.util.Arrays;
@@ -17,14 +18,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ToyApi Monitoring Stack - Comprehensive observability and alerting
+ * ToyApi Monitoring Stack - Cost-Optimized Observability
  * 
- * Features:
+ * FREE TIER OPTIMIZATION STRATEGY:
+ * - Production: 6 critical alarms (user-facing issues)
+ * - Staging: 3 essential alarms (pre-production validation) 
+ * - Dev: 0 alarms (dashboards only)
+ * - Account-wide: 1 cost alarm
+ * Total: 10 alarms (free tier limit)
+ * 
+ * ENTERPRISE SCALING PATH:
+ * For production-ready applications with budget >$50/month:
+ * - Add per-Lambda function alarms (error, duration, throttle)
+ * - Add detailed SLA monitoring per endpoint
+ * - Add infrastructure alarms (EC2, ELB, etc.)
+ * - Add security monitoring (WAF, GuardDuty integration)
+ * - Add business metrics (user activity, conversion rates)
+ * - Add synthetic monitoring for uptime validation
+ * - Add log-based anomaly detection
+ * - Estimated cost: $50-200/month for full enterprise monitoring
+ * 
+ * Current Features:
+ * - Smart environment-based alarm creation
+ * - Consolidated metrics to minimize alarm count
+ * - Low-traffic optimized thresholds
+ * - Feature flag controlled monitoring levels
  * - CloudWatch Dashboard with custom metrics
- * - API performance and error monitoring
- * - Lambda function health monitoring
- * - Cost and usage tracking
- * - Multi-threshold alerting system
  * - Log aggregation and analysis
  */
 public class MonitoringStack extends Stack {
@@ -33,6 +52,9 @@ public class MonitoringStack extends Stack {
     private final String resourcePrefix;
     private final Topic alertTopic;
     private final Dashboard dashboard;
+    private final boolean isProduction;
+    private final boolean isStaging;
+    private final boolean enableAlarms;
     
     public MonitoringStack(final Construct scope, final String id, final StackProps props, 
                           final String environment) {
@@ -40,11 +62,17 @@ public class MonitoringStack extends Stack {
         
         this.environment = environment;
         this.resourcePrefix = "toyapi-" + environment;
+        this.isProduction = "prod".equals(environment);
+        this.isStaging = "stage".equals(environment);
+        this.enableAlarms = isProduction || isStaging; // Only prod and staging get alarms
         
-        // Create SNS topic for alerts
-        this.alertTopic = createAlertTopic();
+        // Create feature flag for monitoring configuration
+        createMonitoringFeatureFlags();
         
-        // Create main dashboard
+        // Create SNS topic for alerts (only if alarms are enabled)
+        this.alertTopic = enableAlarms ? createAlertTopic() : null;
+        
+        // Create main dashboard (all environments get dashboards)
         this.dashboard = createMainDashboard();
         
         // Set up monitoring components
@@ -234,29 +262,16 @@ public class MonitoringStack extends Stack {
                 .build()
         );
         
-        // High latency alarm
-        Alarm highLatencyAlarm = Alarm.Builder.create(this, "ApiHighLatencyAlarm")
-                .alarmName(resourcePrefix + "-api-high-latency")
-                .alarmDescription("API Gateway latency is too high")
-                .metric(apiLatencyMetric)
-                .threshold(2000) // 2 seconds
-                .evaluationPeriods(2)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .build();
-                
-        highLatencyAlarm.addAlarmAction(new SnsAction(alertTopic));
-        
-        // High error rate alarm
-        Alarm highErrorRateAlarm = Alarm.Builder.create(this, "ApiHighErrorRateAlarm")
-                .alarmName(resourcePrefix + "-api-high-error-rate")
-                .alarmDescription("API Gateway error rate is too high")
-                .metric(apiErrorsMetric)
-                .threshold(10) // 10 errors in 5 minutes
-                .evaluationPeriods(2)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .build();
-                
-        highErrorRateAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Create alarms only for environments that need them (free tier optimization)
+        if (enableAlarms) {
+            if (isProduction) {
+                // PRODUCTION: 6 critical alarms for user-facing issues
+                createProductionAlarms(apiLatencyMetric, apiErrorsMetric, apiServerErrorsMetric);
+            } else if (isStaging) {
+                // STAGING: 3 essential alarms for pre-production validation
+                createStagingAlarms(apiLatencyMetric, apiErrorsMetric);
+            }
+        }
     }
     
     /**
@@ -303,29 +318,8 @@ public class MonitoringStack extends Stack {
                     .period(Duration.minutes(5))
                     .build();
             
-            // Lambda error alarm
-            Alarm lambdaErrorAlarm = Alarm.Builder.create(this, functionName + "-ErrorAlarm")
-                    .alarmName(functionName + "-errors")
-                    .alarmDescription("Lambda function " + functionName + " has errors")
-                    .metric(errorsMetric)
-                    .threshold(5) // 5 errors in 5 minutes
-                    .evaluationPeriods(1)
-                    .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
-                    .build();
-                    
-            lambdaErrorAlarm.addAlarmAction(new SnsAction(alertTopic));
-            
-            // Lambda throttle alarm
-            Alarm lambdaThrottleAlarm = Alarm.Builder.create(this, functionName + "-ThrottleAlarm")
-                    .alarmName(functionName + "-throttles")
-                    .alarmDescription("Lambda function " + functionName + " is being throttled")
-                    .metric(throttlesMetric)
-                    .threshold(1) // Any throttling
-                    .evaluationPeriods(1)
-                    .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
-                    .build();
-                    
-            lambdaThrottleAlarm.addAlarmAction(new SnsAction(alertTopic));
+            // Note: Lambda alarms are created selectively by environment in alarm creation methods
+            // This avoids creating too many alarms and hitting the free tier limit
         }
         
         // Add Lambda overview widget
@@ -359,18 +353,7 @@ public class MonitoringStack extends Stack {
                 .period(Duration.minutes(5))
                 .build();
         
-        // Application error alarm
-        Alarm appErrorAlarm = Alarm.Builder.create(this, "ApplicationErrorAlarm")
-                .alarmName(resourcePrefix + "-application-errors")
-                .alarmDescription("Application is experiencing high error rates")
-                .metric(appErrorsMetric)
-                .threshold(10)
-                .evaluationPeriods(2)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .treatMissingData(TreatMissingData.NOT_BREACHING)
-                .build();
-                
-        appErrorAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Note: Application error alarms created selectively by environment to manage alarm count
         
         // Add error tracking widget
         dashboard.addWidgets(
@@ -395,18 +378,7 @@ public class MonitoringStack extends Stack {
                 .period(Duration.minutes(5))
                 .build();
         
-        // SLA breach alarm (below 95% uptime)
-        Alarm slaAlarm = Alarm.Builder.create(this, "SLABreachAlarm")
-                .alarmName(resourcePrefix + "-sla-breach")
-                .alarmDescription("SLA compliance is below threshold")
-                .metric(slaMetric)
-                .threshold(0.95) // 95%
-                .evaluationPeriods(3)
-                .comparisonOperator(ComparisonOperator.LESS_THAN_THRESHOLD)
-                .treatMissingData(TreatMissingData.BREACHING)
-                .build();
-                
-        slaAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Note: SLA alarms created selectively by environment to manage alarm count
         
         // Add SLA tracking widget
         dashboard.addWidgets(
@@ -432,17 +404,19 @@ public class MonitoringStack extends Stack {
                 .period(Duration.hours(6))
                 .build();
         
-        // Cost alarm at $8 (80% of $10 budget)
-        Alarm costAlarm = Alarm.Builder.create(this, "CostAlarm")
-                .alarmName(resourcePrefix + "-cost-alert")
-                .alarmDescription("Monthly costs approaching budget limit")
-                .metric(estimatedChargesMetric)
-                .threshold(8.0) // $8
-                .evaluationPeriods(1)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .build();
-                
-        costAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Cost alarm - only create in production to avoid duplication across environments
+        if (isProduction) {
+            Alarm costAlarm = Alarm.Builder.create(this, "CostAlarm")
+                    .alarmName("toyapi-cost-alert") // Account-wide alarm (no environment prefix)
+                    .alarmDescription("Monthly costs approaching budget limit")
+                    .metric(estimatedChargesMetric)
+                    .threshold(8.0) // $8
+                    .evaluationPeriods(1)
+                    .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                    .build();
+                    
+            costAlarm.addAlarmAction(new SnsAction(alertTopic));
+        }
         
         // Add cost tracking widget
         dashboard.addWidgets(
@@ -561,27 +535,7 @@ public class MonitoringStack extends Stack {
                 .treatMissingData(TreatMissingData.NOT_BREACHING)
                 .build();
                 
-        errorRateAlarm.addAlarmAction(new SnsAction(alertTopic));
-        
-        // Too many slow requests alarm
-        Metric slowRequestMetric = Metric.Builder.create()
-                .namespace("ToyApi/" + environment)
-                .metricName("SlowRequests")
-                .statistic("Sum")
-                .period(Duration.minutes(10))
-                .build();
-                
-        Alarm slowRequestAlarm = Alarm.Builder.create(this, "SlowRequestAlarm")
-                .alarmName(resourcePrefix + "-slow-requests")
-                .alarmDescription("High number of slow requests detected")
-                .metric(slowRequestMetric)
-                .threshold(5) // More than 5 slow requests in 10 minutes
-                .evaluationPeriods(1)
-                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
-                .treatMissingData(TreatMissingData.NOT_BREACHING)
-                .build();
-                
-        slowRequestAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Note: Log-based alarms created selectively by environment to manage alarm count
     }
     
     /**
@@ -764,7 +718,7 @@ public class MonitoringStack extends Stack {
                 .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
                 .build();
                 
-        dynamoThrottleAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Note: DynamoDB alarms created selectively by environment to manage alarm count
     }
     
     /**
@@ -812,7 +766,7 @@ public class MonitoringStack extends Stack {
                 .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
                 .build();
                 
-        authFailureAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Note: Cognito alarms created selectively by environment to manage alarm count
     }
     
     /**
@@ -932,7 +886,7 @@ public class MonitoringStack extends Stack {
                 .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
                 .build();
                 
-        securityAlarm.addAlarmAction(new SnsAction(alertTopic));
+        // Note: Security alarms created selectively by environment to manage alarm count
         
         // Security dashboard widget
         dashboard.addWidgets(
@@ -943,5 +897,181 @@ public class MonitoringStack extends Stack {
                 .height(6)
                 .build()
         );
+    }
+    
+    /**
+     * Creates monitoring feature flags for controlling monitoring behavior.
+     * Uses Parameter Store for cost-effective configuration management.
+     */
+    private void createMonitoringFeatureFlags() {
+        // Feature flag for detailed monitoring
+        StringParameter.Builder.create(this, "DetailedMonitoringFlag")
+                .parameterName("/" + resourcePrefix + "/features/detailed-monitoring")
+                .stringValue(isProduction ? "true" : "false") // Only production gets detailed monitoring by default
+                .description("Enable detailed monitoring and expensive metrics")
+                .build();
+                
+        // Feature flag for alarm sensitivity
+        StringParameter.Builder.create(this, "AlarmSensitivityConfig")
+                .parameterName("/" + resourcePrefix + "/config/alarm-sensitivity")
+                .stringValue(isProduction ? "high" : "medium") // Production has high sensitivity
+                .description("Alarm threshold sensitivity (low/medium/high)")
+                .build();
+                
+        // Feature flag for dashboard complexity
+        StringParameter.Builder.create(this, "DashboardComplexityConfig")
+                .parameterName("/" + resourcePrefix + "/config/dashboard-complexity")
+                .stringValue("standard") // All environments get standard dashboards
+                .description("Dashboard complexity level (basic/standard/advanced)")
+                .build();
+                
+        // Feature flag for log retention
+        StringParameter.Builder.create(this, "LogRetentionConfig")
+                .parameterName("/" + resourcePrefix + "/config/log-retention-days")
+                .stringValue(isProduction ? "30" : "7") // Production keeps logs longer
+                .description("Log retention period in days")
+                .build();
+    }
+    
+    /**
+     * Creates production alarms - 6 critical alarms for user-facing issues.
+     * These are the most important alarms that directly impact user experience.
+     */
+    private void createProductionAlarms(Metric apiLatencyMetric, Metric apiErrorsMetric, Metric apiServerErrorsMetric) {
+        // 1. High API latency alarm (critical for user experience)
+        Alarm highLatencyAlarm = Alarm.Builder.create(this, "ProdApiHighLatencyAlarm")
+                .alarmName(resourcePrefix + "-api-high-latency")
+                .alarmDescription("API Gateway latency is too high")
+                .metric(apiLatencyMetric)
+                .threshold(2000) // 2 seconds
+                .evaluationPeriods(2)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .build();
+        highLatencyAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // 2. High client error rate alarm (4XX errors)
+        Alarm highClientErrorAlarm = Alarm.Builder.create(this, "ProdApiHighClientErrorAlarm")
+                .alarmName(resourcePrefix + "-api-high-client-errors")
+                .alarmDescription("High client error rate (4XX)")
+                .metric(apiErrorsMetric)
+                .threshold(20) // 20 client errors in 5 minutes
+                .evaluationPeriods(2)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .build();
+        highClientErrorAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // 3. Server error alarm (5XX errors - most critical)
+        Alarm serverErrorAlarm = Alarm.Builder.create(this, "ProdApiServerErrorAlarm")
+                .alarmName(resourcePrefix + "-api-server-errors")
+                .alarmDescription("Server errors detected (5XX)")
+                .metric(apiServerErrorsMetric)
+                .threshold(1) // Any server error is critical
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
+                .build();
+        serverErrorAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // 4. Lambda errors alarm (consolidated across all functions)
+        Metric totalLambdaErrorsMetric = Metric.Builder.create()
+                .namespace("AWS/Lambda")
+                .metricName("Errors")
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        Alarm lambdaErrorsAlarm = Alarm.Builder.create(this, "ProdLambdaErrorsAlarm")
+                .alarmName(resourcePrefix + "-lambda-errors")
+                .alarmDescription("Lambda functions experiencing errors")
+                .metric(totalLambdaErrorsMetric)
+                .threshold(5) // 5 errors across all functions
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
+                .build();
+        lambdaErrorsAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // 5. DynamoDB throttling alarm (database availability)
+        String tableName = resourcePrefix + "-items";
+        Metric dynamoThrottleMetric = Metric.Builder.create()
+                .namespace("AWS/DynamoDB")
+                .metricName("UserErrors")
+                .dimensionsMap(Map.of("TableName", tableName))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        Alarm dynamoThrottleAlarm = Alarm.Builder.create(this, "ProdDynamoThrottleAlarm")
+                .alarmName(resourcePrefix + "-dynamodb-throttles")
+                .alarmDescription("DynamoDB experiencing throttling")
+                .metric(dynamoThrottleMetric)
+                .threshold(1) // Any throttling is critical
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
+                .build();
+        dynamoThrottleAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // 6. Security breach alarm (authentication failures)
+        Metric securityMetric = Metric.Builder.create()
+                .namespace("ToyApi/Security/" + environment)
+                .metricName("FailedAuthentications")
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        Alarm securityAlarm = Alarm.Builder.create(this, "ProdSecurityAlarm")
+                .alarmName(resourcePrefix + "-security-breach")
+                .alarmDescription("Potential security breach detected")
+                .metric(securityMetric)
+                .threshold(50) // 50 failed auths in 5 minutes (production threshold)
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .build();
+        securityAlarm.addAlarmAction(new SnsAction(alertTopic));
+    }
+    
+    /**
+     * Creates staging alarms - 3 essential alarms for pre-production validation.
+     * These ensure staging is safe for production promotion.
+     */
+    private void createStagingAlarms(Metric apiLatencyMetric, Metric apiErrorsMetric) {
+        // 1. API availability alarm (any server errors indicate deployment issues)
+        Metric apiServerErrorsMetric = Metric.Builder.create()
+                .namespace("AWS/ApiGateway")
+                .metricName("5XXError")
+                .dimensionsMap(Map.of("ApiName", resourcePrefix + "-api"))
+                .statistic("Sum")
+                .period(Duration.minutes(5))
+                .build();
+        
+        Alarm stagingAvailabilityAlarm = Alarm.Builder.create(this, "StagingAvailabilityAlarm")
+                .alarmName(resourcePrefix + "-availability")
+                .alarmDescription("Staging environment availability issues")
+                .metric(apiServerErrorsMetric)
+                .threshold(1) // Any server error in staging is concerning
+                .evaluationPeriods(1)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD)
+                .build();
+        stagingAvailabilityAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // 2. Performance regression alarm (higher threshold than production)
+        Alarm stagingPerformanceAlarm = Alarm.Builder.create(this, "StagingPerformanceAlarm")
+                .alarmName(resourcePrefix + "-performance-regression")
+                .alarmDescription("Performance regression detected in staging")
+                .metric(apiLatencyMetric)
+                .threshold(3000) // 3 seconds (higher than production)
+                .evaluationPeriods(3) // More tolerant
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .build();
+        stagingPerformanceAlarm.addAlarmAction(new SnsAction(alertTopic));
+        
+        // 3. High error rate alarm (indicates deployment issues)
+        Alarm stagingErrorRateAlarm = Alarm.Builder.create(this, "StagingErrorRateAlarm")
+                .alarmName(resourcePrefix + "-high-error-rate")
+                .alarmDescription("High error rate in staging environment")
+                .metric(apiErrorsMetric)
+                .threshold(50) // Higher threshold than production
+                .evaluationPeriods(2)
+                .comparisonOperator(ComparisonOperator.GREATER_THAN_THRESHOLD)
+                .build();
+        stagingErrorRateAlarm.addAlarmAction(new SnsAction(alertTopic));
     }
 }

@@ -3,6 +3,7 @@ package co.thismakesmehappy.toyapi.service.services.items;
 import co.thismakesmehappy.toyapi.service.components.items.*;
 import co.thismakesmehappy.toyapi.service.pipeline.*;
 import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
+import co.thismakesmehappy.toyapi.service.utils.FeatureFlagService;
 import co.thismakesmehappy.toyapi.service.validation.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +24,16 @@ public class PostItemsService extends ServicePipeline<PostItemsService.CreateIte
     private final ItemBusinessRulesService businessRulesService;
     private final ItemPersistenceService persistenceService;
     private final ItemResponseBuilder responseBuilder;
+    private final FeatureFlagService featureFlags;
     
     public PostItemsService(DynamoDbService dynamoDbService, String tableName, boolean useLocalMock) {
+        this(dynamoDbService, tableName, useLocalMock, null);
+    }
+    
+    public PostItemsService(DynamoDbService dynamoDbService, String tableName, boolean useLocalMock, FeatureFlagService featureFlags) {
         // Initialize specialized services
-        this.validationService = new ItemValidationService();
+        this.featureFlags = featureFlags;
+        this.validationService = new ItemValidationService(featureFlags);
         this.decorationService = new ItemDecorationService(dynamoDbService, useLocalMock);
         this.businessRulesService = new ItemBusinessRulesService();
         this.persistenceService = new ItemPersistenceService(dynamoDbService, tableName);

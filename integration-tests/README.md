@@ -82,9 +82,9 @@ mvn test -Psmoke-test -Dtest.environment=dev
 - **Production**: `https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod`
 
 ### Custom Domain URLs
-- **Dev**: `https://dev.api.thismakesmehappy.co`
-- **Stage**: `https://stage.api.thismakesmehappy.co`
-- **Production**: `https://api.thismakesmehappy.co`
+- **Dev**: `https://dev.toyapi.thismakesmehappy.co`
+- **Stage**: `https://stage.toyapi.thismakesmehappy.co`
+- **Production**: `https://toyapi.thismakesmehappy.co`
 
 ## Test Tags
 

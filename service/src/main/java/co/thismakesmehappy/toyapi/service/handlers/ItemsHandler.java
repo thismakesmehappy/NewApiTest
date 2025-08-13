@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
+import software.amazon.awssdk.services.ssm.SsmClient;
 
 import java.time.Instant;
 import java.util.*;
@@ -18,6 +19,10 @@ import java.util.*;
 import co.thismakesmehappy.toyapi.service.utils.MockDatabase;
 import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
 import co.thismakesmehappy.toyapi.service.utils.AwsDynamoDbService;
+import co.thismakesmehappy.toyapi.service.utils.FeatureFlagService;
+import co.thismakesmehappy.toyapi.service.utils.ParameterStoreFeatureFlagService;
+import co.thismakesmehappy.toyapi.service.utils.ParameterStoreService;
+import co.thismakesmehappy.toyapi.service.utils.AwsParameterStoreService;
 import co.thismakesmehappy.toyapi.service.services.items.GetItemsService;
 import co.thismakesmehappy.toyapi.service.services.items.PostItemsService;
 
@@ -34,6 +39,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final String environment;
     private final String tableName;
     private final boolean useLocalMock;
+    private final FeatureFlagService featureFlagService;
     
     // Service layer
     private final GetItemsService getItemsService;
@@ -70,10 +76,17 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         // All AWS environments (dev, stage, prod) should use real DynamoDB
         this.useLocalMock = (dynamoEndpoint != null && !dynamoEndpoint.isEmpty() && 
                            (environment == null || "local".equals(environment)));
+        
+        // Initialize feature flag service
+        SsmClient ssmClient = SsmClient.builder()
+                .region(software.amazon.awssdk.regions.Region.US_EAST_1)
+                .build();
+        ParameterStoreService parameterStore = new AwsParameterStoreService(ssmClient);
+        this.featureFlagService = new ParameterStoreFeatureFlagService(parameterStore);
                            
         // Initialize services
         this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
-        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
+        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock, this.featureFlagService);
     }
     
     /**
@@ -90,9 +103,12 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                         System.getProperty("TABLE_NAME", "test-table");
         this.useLocalMock = false; // When using DI, assume we're testing with mocks
         
+        // For testing, use a mock feature flag service
+        this.featureFlagService = null; // Tests can pass null since validation service handles it
+        
         // Initialize services
         this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
-        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
+        this.postItemsService = new PostItemsService(this.dynamoDbService, this.tableName, this.useLocalMock, this.featureFlagService);
     }
 
     @Override

@@ -168,5 +168,4 @@ I used the following to setup the API routing; there was a mix of manual setup a
 6. Test Your Custom Domain
    Once the DNS propagates, you can now access your API using your custom URL, e.g., https://api.example.com/myapi.
 
-
 I did steps 1 and 2 manually, the rest hapened via CDK. There is an alternative for you to give me NS records to add to the domain. Document this too, but include a note that this gives full control over the domain to route 53

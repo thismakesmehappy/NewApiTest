@@ -32,20 +32,20 @@ public class TestConfiguration {
     }
     
     /**
-     * Get custom domain URL for the environment (when DNS propagates)
+     * Get custom domain URL for the environment (when custom domains are enabled)
      */
     public static String getCustomApiUrl(String environment) {
         switch (environment.toLowerCase()) {
             case "prod":
             case "production":
-                return "https://api.thismakesmehappy.co";
+                return "https://toyapi.thismakesmehappy.co";
             case "stage":
             case "staging":
-                return "https://stage.api.thismakesmehappy.co";
+                return "https://stage.toyapi.thismakesmehappy.co";
             case "dev":
             case "development":
             default:
-                return "https://dev.api.thismakesmehappy.co";
+                return "https://dev.toyapi.thismakesmehappy.co";
         }
     }
     

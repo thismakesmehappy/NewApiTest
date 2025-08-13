@@ -8,6 +8,10 @@
   - Dev: `https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/` (deployment issues resolved)
   - Staging: `https://5ytzml6fnb.execute-api.us-east-1.amazonaws.com/stage/` ✅ **NEW DEPLOYMENT**
   - Production: `https://skslof01gg.execute-api.us-east-1.amazonaws.com/prod/` ✅ **WORKING**
+- **Custom Domains** (ready to enable):
+  - Dev: `https://dev.toyapi.thismakesmehappy.co` 
+  - Staging: `https://stage.toyapi.thismakesmehappy.co`
+  - Production: `https://toyapi.thismakesmehappy.co`
 - **CI/CD**: GitHub Actions with approval gates and multi-environment deployment
 - **Authentication**: Real AWS Cognito JWT tokens across all environments
 - **Infrastructure**: Fully isolated multi-environment CDK stacks
