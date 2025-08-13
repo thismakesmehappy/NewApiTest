@@ -899,7 +899,7 @@ public class MonitoringStack extends Stack {
     private void createProductionAlarms(Metric apiLatencyMetric, Metric apiErrorsMetric, Metric apiServerErrorsMetric) {
         // 1. High API latency alarm (critical for user experience)
         Alarm highLatencyAlarm = Alarm.Builder.create(this, "ProdApiHighLatencyAlarm")
-                .alarmName(resourcePrefix + "-api-high-latency")
+                .alarmName(resourcePrefix + "-v2-api-high-latency")
                 .alarmDescription("API Gateway latency is too high")
                 .metric(apiLatencyMetric)
                 .threshold(2000) // 2 seconds
@@ -910,7 +910,7 @@ public class MonitoringStack extends Stack {
         
         // 2. High client error rate alarm (4XX errors)
         Alarm highClientErrorAlarm = Alarm.Builder.create(this, "ProdApiHighClientErrorAlarm")
-                .alarmName(resourcePrefix + "-api-high-client-errors")
+                .alarmName(resourcePrefix + "-v2-api-high-client-errors")
                 .alarmDescription("High client error rate (4XX)")
                 .metric(apiErrorsMetric)
                 .threshold(20) // 20 client errors in 5 minutes
@@ -921,7 +921,7 @@ public class MonitoringStack extends Stack {
         
         // 3. Server error alarm (5XX errors - most critical)
         Alarm serverErrorAlarm = Alarm.Builder.create(this, "ProdApiServerErrorAlarm")
-                .alarmName(resourcePrefix + "-api-server-errors")
+                .alarmName(resourcePrefix + "-v2-api-server-errors")
                 .alarmDescription("Server errors detected (5XX)")
                 .metric(apiServerErrorsMetric)
                 .threshold(1) // Any server error is critical
@@ -939,7 +939,7 @@ public class MonitoringStack extends Stack {
                 .build();
         
         Alarm lambdaErrorsAlarm = Alarm.Builder.create(this, "ProdLambdaErrorsAlarm")
-                .alarmName(resourcePrefix + "-lambda-errors")
+                .alarmName(resourcePrefix + "-v2-lambda-errors")
                 .alarmDescription("Lambda functions experiencing errors")
                 .metric(totalLambdaErrorsMetric)
                 .threshold(5) // 5 errors across all functions
@@ -959,7 +959,7 @@ public class MonitoringStack extends Stack {
                 .build();
         
         Alarm dynamoThrottleAlarm = Alarm.Builder.create(this, "ProdDynamoThrottleAlarm")
-                .alarmName(resourcePrefix + "-prod-dynamodb-throttles")
+                .alarmName(resourcePrefix + "-v2-dynamodb-throttles")
                 .alarmDescription("DynamoDB experiencing throttling in production")
                 .metric(dynamoThrottleMetric)
                 .threshold(1) // Any throttling is critical
@@ -977,7 +977,7 @@ public class MonitoringStack extends Stack {
                 .build();
         
         Alarm securityAlarm = Alarm.Builder.create(this, "ProdSecurityAlarm")
-                .alarmName(resourcePrefix + "-security-breach")
+                .alarmName(resourcePrefix + "-v2-security-breach")
                 .alarmDescription("Potential security breach detected")
                 .metric(securityMetric)
                 .threshold(50) // 50 failed auths in 5 minutes (production threshold)
@@ -1002,7 +1002,7 @@ public class MonitoringStack extends Stack {
                 .build();
         
         Alarm stagingAvailabilityAlarm = Alarm.Builder.create(this, "StagingAvailabilityAlarm")
-                .alarmName(resourcePrefix + "-availability")
+                .alarmName(resourcePrefix + "-v2-availability")
                 .alarmDescription("Staging environment availability issues")
                 .metric(apiServerErrorsMetric)
                 .threshold(1) // Any server error in staging is concerning
@@ -1013,7 +1013,7 @@ public class MonitoringStack extends Stack {
         
         // 2. Performance regression alarm (higher threshold than production)
         Alarm stagingPerformanceAlarm = Alarm.Builder.create(this, "StagingPerformanceAlarm")
-                .alarmName(resourcePrefix + "-performance-regression")
+                .alarmName(resourcePrefix + "-v2-performance-regression")
                 .alarmDescription("Performance regression detected in staging")
                 .metric(apiLatencyMetric)
                 .threshold(3000) // 3 seconds (higher than production)
@@ -1024,7 +1024,7 @@ public class MonitoringStack extends Stack {
         
         // 3. High error rate alarm (indicates deployment issues)
         Alarm stagingErrorRateAlarm = Alarm.Builder.create(this, "StagingErrorRateAlarm")
-                .alarmName(resourcePrefix + "-high-error-rate")
+                .alarmName(resourcePrefix + "-v2-high-error-rate")
                 .alarmDescription("High error rate in staging environment")
                 .metric(apiErrorsMetric)
                 .threshold(50) // Higher threshold than production
