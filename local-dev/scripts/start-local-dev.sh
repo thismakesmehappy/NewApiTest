@@ -1,11 +1,39 @@
 #!/bin/bash
 
-# TODO: Don't run unit tests when building locally, should Only run unit tests locally wjem the user asks
-
 # ToyApi Local Development Startup Script
 # This script sets up and starts the complete local development environment
+#
+# Usage:
+#   ./start-local-dev.sh                 # Skip tests (default, fast startup)
+#   ./start-local-dev.sh --with-tests    # Run unit tests during build
 
 set -e  # Exit on any error
+
+# Parse command line arguments
+RUN_TESTS=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --with-tests)
+            RUN_TESTS=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --with-tests     Run unit tests during build (slower startup)"
+            echo "  --help, -h       Show this help message"
+            echo ""
+            echo "Default behavior skips tests for faster startup time."
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
 
 echo "🚀 Starting ToyApi Local Development Environment..."
 
@@ -115,7 +143,16 @@ echo -e "\n${YELLOW}Building service...${NC}"
 cd "$PROJECT_ROOT/service"
 if [ ! -f "target/toyapi-service-1.0-SNAPSHOT.jar" ] || [ "src/main/java" -nt "target/toyapi-service-1.0-SNAPSHOT.jar" ]; then
     echo -e "${YELLOW}Service JAR not found or source files newer, building...${NC}"
-    mvn clean package -DskipTests -q
+    
+    # Choose build command based on test flag
+    if [ "$RUN_TESTS" = true ]; then
+        echo -e "${BLUE}Running with unit tests (slower startup)...${NC}"
+        mvn clean package -q
+    else
+        echo -e "${BLUE}Skipping tests for faster startup...${NC}"
+        mvn clean package -DskipTests -q
+    fi
+    
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Service build failed${NC}"
         exit 1
