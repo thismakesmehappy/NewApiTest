@@ -113,4 +113,9 @@ public class MockFeatureFlagService implements FeatureFlagService {
     public double getSpamDetectionThreshold() {
         return getConfigValueAsDouble("spam-threshold", 0.8);
     }
+    
+    @Override
+    public boolean isCustomDomainsEnabled() {
+        return isFeatureEnabled("custom-domains", false); // Default: disabled to control costs
+    }
 }

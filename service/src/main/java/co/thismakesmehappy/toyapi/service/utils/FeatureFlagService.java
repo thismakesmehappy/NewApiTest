@@ -113,4 +113,15 @@ public interface FeatureFlagService {
      * @return Spam detection threshold (default: 0.8)
      */
     double getSpamDetectionThreshold();
+    
+    /**
+     * Check if custom domains are enabled for the environment.
+     * Parameter: /toyapi-{env}/features/custom-domains
+     * 
+     * This flag allows enabling/disabling custom domains after they're working
+     * to control AWS costs (Route53 hosted zone charges).
+     * 
+     * @return true if custom domains should be active
+     */
+    boolean isCustomDomainsEnabled();
 }

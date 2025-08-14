@@ -154,15 +154,16 @@ public class ToyApiStack extends Stack {
         // WAF costs $1/month + $0.60 per million requests (not free tier)
         // FREE security features implemented in SecurityStack instead
         
-        // Create custom domain and Route53 records (only for production and staging)
-        // TODO: Enable custom domains after setting up hosted zone for thismakesmehappy.co
-        // See: https://docs.aws.amazon.com/route53/latest/developerguide/CreatingHostedZone.html
+        // Create custom domain and Route53 records (feature flag controlled)
+        // Can be enabled/disabled via ParameterStore: /toyapi-{env}/features/custom-domains
+        // CDK Context can override: --context enableCustomDomains=true
         boolean enableCustomDomains = Boolean.parseBoolean(
             this.getNode().tryGetContext("enableCustomDomains") != null ? 
             this.getNode().tryGetContext("enableCustomDomains").toString() : "false"
         );
         
-        if (enableCustomDomains && (environment.equals("prod") || environment.equals("stage"))) {
+        // Support all environments (dev/stage/prod) with custom domains
+        if (enableCustomDomains) {
             createCustomDomain(this.restApi);
         }
         
@@ -2425,9 +2426,20 @@ public class ToyApiStack extends Stack {
      */
     private void createCustomDomain(RestApi api) {
         // Define domain names based on environment
-        String domainName = environment.equals("prod") ? 
-                "toyapi.thismakesmehappy.co" : 
-                "toyapi-" + environment + ".thismakesmehappy.co";
+        String domainName;
+        switch (environment) {
+            case "prod":
+                domainName = "toyapi.thismakesmehappy.co";
+                break;
+            case "stage":
+                domainName = "stage.toyapi.thismakesmehappy.co";
+                break;
+            case "dev":
+                domainName = "dev.toyapi.thismakesmehappy.co";
+                break;
+            default:
+                domainName = environment + ".toyapi.thismakesmehappy.co";
+        }
         
         // Look up existing hosted zone (assumes domain is already registered and hosted zone exists)
         IHostedZone hostedZone = HostedZone.fromLookup(this, "HostedZone", 

@@ -97,4 +97,9 @@ public class ParameterStoreFeatureFlagService implements FeatureFlagService {
     public double getSpamDetectionThreshold() {
         return getConfigValueAsDouble("spam-threshold", 0.8); // Default: 80% confidence threshold
     }
+    
+    @Override
+    public boolean isCustomDomainsEnabled() {
+        return isFeatureEnabled("custom-domains", false); // Default: disabled to control costs
+    }
 }
