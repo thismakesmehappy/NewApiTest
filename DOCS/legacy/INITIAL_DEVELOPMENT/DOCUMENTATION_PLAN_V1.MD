@@ -18,7 +18,11 @@ Let's figure out a way to document everything. The plan should include considera
   - Is tehre an out of the box solution or should it be custom>
   - How can we update the content
   - Can we access it offline?
-  - this is a planning dcument; review where in the overall file structure the actual documentation should go
+  - this is a planning document; review where in the overall file structure the actual documentation should go
+
+- Parallel to producing new documentation, evaluate all existing doumentaiton and evaluate the code and infrastructure and update all existing documentation to make sure it is up to date. Include the date of the latest update for all documents, including the ones we are packaging now.
+
+- All code should be properly documented and if there are any possible refactors (rename, reorganize, etc) to improve code legibility, annotate with TODO tasks. Code comments should be limited to where they are required for complex business logic; outside of Javadocs, we should minimize documentation
 
 ## Retrsopect
 - Context: you are a technical project manager who oversaw the entire process. You have ten years of exprience, icluding some experience coding and writing technical documentation. You are great at writin and documenting
