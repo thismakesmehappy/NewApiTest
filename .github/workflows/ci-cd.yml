@@ -122,8 +122,34 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, security-scan]
     if: github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-dev]')
+    concurrency:
+      group: deploy-dev
+      cancel-in-progress: false
     
     steps:
+    - name: Cancel superseded dev deployments
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "🔍 Checking for superseded development deployments..."
+        
+        # Get current run info
+        CURRENT_RUN_ID="${{ github.run_id }}"
+        CURRENT_SHA="${{ github.sha }}"
+        
+        # Find other running workflows on dev route (with [deploy-dev])
+        gh api repos/${{ github.repository }}/actions/runs \
+          --jq '.workflow_runs[] | select(.status == "in_progress" or .status == "queued") | select(.name == "ToyApi CI/CD Pipeline") | select(.id != '$CURRENT_RUN_ID') | select(.head_commit.message | contains("[deploy-dev]")) | "\\(.id) \\(.head_sha) \\(.created_at)"' \
+          | while read run_id sha created_at; do
+            if [ -n "$run_id" ]; then
+              echo "📅 Found superseded dev deployment: Run $run_id (SHA: ${sha:0:7}) from $created_at"
+              echo "❌ Cancelling superseded run $run_id..."
+              gh api repos/${{ github.repository }}/actions/runs/$run_id/cancel -X POST || echo "⚠️  Could not cancel run $run_id (may already be completed)"
+            fi
+          done
+        
+        echo "✅ Superseded deployment check complete"
+    
     - name: Checkout code
       uses: actions/checkout@v4
       
@@ -205,8 +231,34 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, security-scan]
     if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')) && !contains(github.event.head_commit.message, '[deploy-dev]')
+    concurrency:
+      group: deploy-staging-prod
+      cancel-in-progress: false
     
     steps:
+    - name: Cancel superseded staging-prod deployments
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "🔍 Checking for superseded staging-production deployments..."
+        
+        # Get current run info
+        CURRENT_RUN_ID="${{ github.run_id }}"
+        CURRENT_SHA="${{ github.sha }}"
+        
+        # Find other running workflows on staging-prod route (without [deploy-dev])
+        gh api repos/${{ github.repository }}/actions/runs \
+          --jq '.workflow_runs[] | select(.status == "in_progress" or .status == "queued") | select(.name == "ToyApi CI/CD Pipeline") | select(.id != '$CURRENT_RUN_ID') | select(.head_commit.message | contains("[deploy-dev]") | not) | "\\(.id) \\(.head_sha) \\(.created_at)"' \
+          | while read run_id sha created_at; do
+            if [ -n "$run_id" ]; then
+              echo "📅 Found superseded staging-prod deployment: Run $run_id (SHA: ${sha:0:7}) from $created_at"
+              echo "❌ Cancelling superseded run $run_id..."
+              gh api repos/${{ github.repository }}/actions/runs/$run_id/cancel -X POST || echo "⚠️  Could not cancel run $run_id (may already be completed)"
+            fi
+          done
+        
+        echo "✅ Superseded deployment check complete"
+    
     - name: Checkout code
       uses: actions/checkout@v4
       
@@ -287,8 +339,34 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-staging
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    concurrency:
+      group: deploy-staging-prod
+      cancel-in-progress: false
     
     steps:
+    - name: Cancel superseded staging-prod deployments
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "🔍 Checking for superseded staging-production deployments..."
+        
+        # Get current run info
+        CURRENT_RUN_ID="${{ github.run_id }}"
+        CURRENT_SHA="${{ github.sha }}"
+        
+        # Find other running workflows on staging-prod route (without [deploy-dev])
+        gh api repos/${{ github.repository }}/actions/runs \
+          --jq '.workflow_runs[] | select(.status == "in_progress" or .status == "queued") | select(.name == "ToyApi CI/CD Pipeline") | select(.id != '$CURRENT_RUN_ID') | select(.head_commit.message | contains("[deploy-dev]") | not) | "\\(.id) \\(.head_sha) \\(.created_at)"' \
+          | while read run_id sha created_at; do
+            if [ -n "$run_id" ]; then
+              echo "📅 Found superseded staging-prod deployment: Run $run_id (SHA: ${sha:0:7}) from $created_at"
+              echo "❌ Cancelling superseded run $run_id..."
+              gh api repos/${{ github.repository }}/actions/runs/$run_id/cancel -X POST || echo "⚠️  Could not cancel run $run_id (may already be completed)"
+            fi
+          done
+        
+        echo "✅ Superseded deployment check complete"
+    
     - name: Checkout code
       uses: actions/checkout@v4
       
