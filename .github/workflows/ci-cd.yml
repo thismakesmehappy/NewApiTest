@@ -143,8 +143,29 @@ jobs:
           | while read run_id sha created_at; do
             if [ -n "$run_id" ]; then
               echo "📅 Found superseded dev deployment: Run $run_id (SHA: ${sha:0:7}) from $created_at"
-              echo "❌ Cancelling superseded run $run_id..."
+              echo "❌ Cancelling superseded run $run_id with explanatory comment..."
+              
+              # Cancel with explanatory comment
               gh api repos/${{ github.repository }}/actions/runs/$run_id/cancel -X POST || echo "⚠️  Could not cancel run $run_id (may already be completed)"
+              
+              # Create commit status to explain the cancellation
+              gh api repos/${{ github.repository }}/statuses/$sha -X POST \
+                --field state=error \
+                --field context="ci/deployment-superseded" \
+                --field description="Cancelled: Newer dev deployment takes precedence (Run #${{ github.run_id }})" \
+                --field target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+                2>/dev/null || echo "💬 Could not create commit status"
+              
+              # Add a comment explaining the cancellation
+              gh pr comment --repo ${{ github.repository }} --body "🤖 **Automated Pipeline Management**
+
+**Run #$run_id was automatically cancelled** because a newer commit is deploying to the same environment.
+
+**Reason**: Smart cancellation - newer development deployment takes precedence  
+**Cancelled by**: Run #${{ github.run_id }} (SHA: ${{ github.sha }})  
+**Route**: Development deployment (\`[deploy-dev]\` flag)
+
+This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts." 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
             fi
           done
         
@@ -252,8 +273,29 @@ jobs:
           | while read run_id sha created_at; do
             if [ -n "$run_id" ]; then
               echo "📅 Found superseded staging-prod deployment: Run $run_id (SHA: ${sha:0:7}) from $created_at"
-              echo "❌ Cancelling superseded run $run_id..."
+              echo "❌ Cancelling superseded run $run_id with explanatory comment..."
+              
+              # Cancel with explanatory comment
               gh api repos/${{ github.repository }}/actions/runs/$run_id/cancel -X POST || echo "⚠️  Could not cancel run $run_id (may already be completed)"
+              
+              # Create commit status to explain the cancellation
+              gh api repos/${{ github.repository }}/statuses/$sha -X POST \
+                --field state=error \
+                --field context="ci/deployment-superseded" \
+                --field description="Cancelled: Newer staging-prod deployment takes precedence (Run #${{ github.run_id }})" \
+                --field target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+                2>/dev/null || echo "💬 Could not create commit status"
+              
+              # Add a comment explaining the cancellation
+              gh pr comment --repo ${{ github.repository }} --body "🤖 **Automated Pipeline Management**
+
+**Run #$run_id was automatically cancelled** because a newer commit is deploying to the same environments.
+
+**Reason**: Smart cancellation - newer staging/production deployment takes precedence  
+**Cancelled by**: Run #${{ github.run_id }} (SHA: ${{ github.sha }})  
+**Route**: Staging → Production deployment (main branch)
+
+This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts and ensure the latest changes are deployed." 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
             fi
           done
         
@@ -360,8 +402,30 @@ jobs:
           | while read run_id sha created_at; do
             if [ -n "$run_id" ]; then
               echo "📅 Found superseded staging-prod deployment: Run $run_id (SHA: ${sha:0:7}) from $created_at"
-              echo "❌ Cancelling superseded run $run_id..."
+              echo "❌ Cancelling superseded run $run_id with explanatory comment..."
+              
+              # Cancel with explanatory comment
               gh api repos/${{ github.repository }}/actions/runs/$run_id/cancel -X POST || echo "⚠️  Could not cancel run $run_id (may already be completed)"
+              
+              # Create commit status to explain the cancellation
+              gh api repos/${{ github.repository }}/statuses/$sha -X POST \
+                --field state=error \
+                --field context="ci/deployment-superseded" \
+                --field description="Cancelled: Newer production deployment takes precedence (Run #${{ github.run_id }})" \
+                --field target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+                2>/dev/null || echo "💬 Could not create commit status"
+              
+              # Add a comment explaining the cancellation
+              gh pr comment --repo ${{ github.repository }} --body "🤖 **Automated Pipeline Management**
+
+**Run #$run_id was automatically cancelled** because a newer commit is deploying to the same environments.
+
+**Reason**: Smart cancellation - newer staging/production deployment takes precedence  
+**Cancelled by**: Run #${{ github.run_id }} (SHA: ${{ github.sha }})  
+**Route**: Staging → Production deployment (main branch)  
+**Stage**: Production deployment phase
+
+This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts and ensure the latest changes are deployed." 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
             fi
           done
         
