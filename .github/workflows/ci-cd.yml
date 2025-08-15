@@ -157,8 +157,7 @@ jobs:
                 2>/dev/null || echo "💬 Could not create commit status"
               
               # Add a comment explaining the cancellation
-              gh pr comment --repo ${{ github.repository }} --body "$(cat <<'EOF'
-🤖 **Automated Pipeline Management**
+              gh pr comment --repo ${{ github.repository }} --body "🤖 **Automated Pipeline Management**
 
 **Run #$run_id was automatically cancelled** because a newer commit is deploying to the same environment.
 
@@ -166,9 +165,7 @@ jobs:
 **Cancelled by**: Run #${{ github.run_id }} (SHA: ${{ github.sha }})  
 **Route**: Development deployment (\`[deploy-dev]\` flag)
 
-This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts.
-EOF
-)" 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
+This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts." 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
             fi
           done
         
@@ -290,8 +287,7 @@ EOF
                 2>/dev/null || echo "💬 Could not create commit status"
               
               # Add a comment explaining the cancellation
-              gh pr comment --repo ${{ github.repository }} --body "$(cat <<'EOF'
-🤖 **Automated Pipeline Management**
+              gh pr comment --repo ${{ github.repository }} --body "🤖 **Automated Pipeline Management**
 
 **Run #$run_id was automatically cancelled** because a newer commit is deploying to the same environments.
 
@@ -299,9 +295,7 @@ EOF
 **Cancelled by**: Run #${{ github.run_id }} (SHA: ${{ github.sha }})  
 **Route**: Staging → Production deployment (main branch)
 
-This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts and ensure the latest changes are deployed.
-EOF
-)" 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
+This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts and ensure the latest changes are deployed." 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
             fi
           done
         
@@ -422,8 +416,7 @@ EOF
                 2>/dev/null || echo "💬 Could not create commit status"
               
               # Add a comment explaining the cancellation
-              gh pr comment --repo ${{ github.repository }} --body "$(cat <<'EOF'
-🤖 **Automated Pipeline Management**
+              gh pr comment --repo ${{ github.repository }} --body "🤖 **Automated Pipeline Management**
 
 **Run #$run_id was automatically cancelled** because a newer commit is deploying to the same environments.
 
@@ -432,9 +425,7 @@ EOF
 **Route**: Staging → Production deployment (main branch)  
 **Stage**: Production deployment phase
 
-This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts and ensure the latest changes are deployed.
-EOF
-)" 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
+This is part of the advanced CI/CD pipeline orchestration to prevent deployment conflicts and ensure the latest changes are deployed." 2>/dev/null || echo "💬 Could not add PR comment (no associated PR)"
             fi
           done
         
