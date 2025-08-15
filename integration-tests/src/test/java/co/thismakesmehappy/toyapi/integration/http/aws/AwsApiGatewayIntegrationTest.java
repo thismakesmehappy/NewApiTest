@@ -219,6 +219,7 @@ public class AwsApiGatewayIntegrationTest {
                 .get("/items/" + itemId)
             .then()
                 .statusCode(404)
-                .body("error", equalTo("NOT_FOUND"));
+                .body("error.code", equalTo("NOT_FOUND"))
+                .body("error.message", equalTo("Item not found"));
     }
 }
