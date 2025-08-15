@@ -102,4 +102,19 @@ public class ParameterStoreFeatureFlagService implements FeatureFlagService {
     public boolean isCustomDomainsEnabled() {
         return isFeatureEnabled("custom-domains", false); // Default: disabled to control costs
     }
+    
+    @Override
+    public boolean isSecurityAlarmsEnabled() {
+        return isFeatureEnabled("security-alarms", false); // Default: disabled to avoid false alarms
+    }
+    
+    @Override
+    public boolean isTrafficAlarmsEnabled() {
+        return isFeatureEnabled("traffic-alarms", false); // Default: disabled for low-traffic environments
+    }
+    
+    @Override
+    public boolean isPerformanceOptimizationEnabled() {
+        return isFeatureEnabled("performance-optimization", true); // Default: enabled for optimization
+    }
 }

@@ -166,8 +166,8 @@ public class LambdaStack extends Stack {
                 .runtime(Runtime.JAVA_17)
                 .handler(handler)
                 .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
-                .timeout(Duration.seconds(30))
-                .memorySize(512)  // Balanced cost/performance
+                .timeout(getOptimizedTimeout(functionName))
+                .memorySize(getOptimizedMemorySize(functionName))  // Performance-optimized memory allocation
                 .description(description + " (" + this.environment + ")")
                 .environment(environment)
                 .build();
@@ -304,6 +304,56 @@ public class LambdaStack extends Stack {
     
     public Function getDeveloperFunction() {
         return developerFunction;
+    }
+    
+    /**
+     * Get optimized memory size based on function type and performance requirements.
+     */
+    private int getOptimizedMemorySize(String functionName) {
+        String lowerName = functionName.toLowerCase();
+        
+        // High-memory functions for complex operations
+        if (lowerName.contains("analytics") || lowerName.contains("report")) {
+            return 1024;  // Analytics need more memory for data processing
+        }
+        
+        // Medium-memory functions for moderate complexity
+        if (lowerName.contains("items") || lowerName.contains("auth")) {
+            return 768;   // API operations with caching and optimization
+        }
+        
+        // Low-memory functions for simple operations
+        if (lowerName.contains("public") || lowerName.contains("health")) {
+            return 512;   // Simple public endpoints
+        }
+        
+        // Default optimized memory for general functions
+        return 640;  // Balanced performance for most operations
+    }
+    
+    /**
+     * Get optimized timeout based on function type.
+     */
+    private Duration getOptimizedTimeout(String functionName) {
+        String lowerName = functionName.toLowerCase();
+        
+        // Longer timeouts for complex operations
+        if (lowerName.contains("analytics") || lowerName.contains("report")) {
+            return Duration.seconds(45);  // Analytics may need more time
+        }
+        
+        // Medium timeouts for database operations
+        if (lowerName.contains("items") || lowerName.contains("auth")) {
+            return Duration.seconds(20);  // Most API operations should be fast
+        }
+        
+        // Short timeouts for simple operations
+        if (lowerName.contains("public") || lowerName.contains("health")) {
+            return Duration.seconds(10);  // Public endpoints should be very fast
+        }
+        
+        // Default timeout
+        return Duration.seconds(30);
     }
     
     public String getResourcePrefix() {

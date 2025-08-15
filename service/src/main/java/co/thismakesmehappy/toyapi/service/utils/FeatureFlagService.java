@@ -124,4 +124,37 @@ public interface FeatureFlagService {
      * @return true if custom domains should be active
      */
     boolean isCustomDomainsEnabled();
+    
+    /**
+     * Check if security monitoring alarms are enabled.
+     * Parameter: /toyapi-{env}/features/security-alarms
+     * 
+     * Controls additional security-focused CloudWatch alarms that may trigger
+     * in low-traffic environments. Disabled by default to avoid false alarms.
+     * 
+     * @return true if security alarms should be created
+     */
+    boolean isSecurityAlarmsEnabled();
+    
+    /**
+     * Check if traffic-dependent alarms are enabled.
+     * Parameter: /toyapi-{env}/features/traffic-alarms
+     * 
+     * Controls alarms that expect consistent traffic and may trigger false
+     * positives in low-traffic or development environments.
+     * 
+     * @return true if traffic-dependent alarms should be created
+     */
+    boolean isTrafficAlarmsEnabled();
+    
+    /**
+     * Check if performance optimization features are enabled.
+     * Parameter: /toyapi-{env}/features/performance-optimization
+     * 
+     * Enables advanced performance monitoring and optimization features
+     * like X-Ray tracing and detailed performance metrics.
+     * 
+     * @return true if performance optimization should be active
+     */
+    boolean isPerformanceOptimizationEnabled();
 }
