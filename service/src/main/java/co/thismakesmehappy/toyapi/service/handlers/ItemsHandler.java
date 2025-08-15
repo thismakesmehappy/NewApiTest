@@ -25,6 +25,9 @@ import co.thismakesmehappy.toyapi.service.utils.ParameterStoreService;
 import co.thismakesmehappy.toyapi.service.utils.AwsParameterStoreService;
 import co.thismakesmehappy.toyapi.service.services.items.GetItemsService;
 import co.thismakesmehappy.toyapi.service.services.items.PostItemsService;
+import co.thismakesmehappy.toyapi.service.versioning.ApiVersion;
+import co.thismakesmehappy.toyapi.service.versioning.ApiVersioningService;
+import co.thismakesmehappy.toyapi.service.versioning.VersionedResponseBuilder;
 
 /**
  * Lambda handler for items CRUD operations.
@@ -40,6 +43,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final String tableName;
     private final boolean useLocalMock;
     private final FeatureFlagService featureFlagService;
+    private final ApiVersioningService versioningService;
     
     // Service layer
     private final GetItemsService getItemsService;
@@ -79,6 +83,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         
         // FeatureFlagService is optional - only initialize in production AWS environments
         this.featureFlagService = null; // Will be initialized later if needed
+        this.versioningService = new ApiVersioningService();
                            
         // Initialize services - PostItemsService has a constructor without FeatureFlagService for backward compatibility
         this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
@@ -101,6 +106,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         
         // For testing, use a mock feature flag service
         this.featureFlagService = null; // Tests can pass null since validation service handles it
+        this.versioningService = new ApiVersioningService();
         
         // Initialize services
         this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
@@ -112,34 +118,48 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         logger.info("Handling items request: {} {}", input.getHttpMethod(), input.getPath());
         
         try {
+            // Extract API version from request
+            ApiVersion requestedVersion = versioningService.extractVersion(input);
+            logger.info("API version: {}", requestedVersion.getVersionString());
+            
+            // Check if version is supported
+            if (!versioningService.isVersionSupported(requestedVersion)) {
+                logger.warn("Unsupported API version: {}", requestedVersion.getVersionString());
+                return VersionedResponseBuilder.createErrorResponse(
+                    requestedVersion, 400, "Unsupported API version: " + requestedVersion.getVersionString(), "UNSUPPORTED_VERSION");
+            }
+            
             String path = input.getPath();
             String method = input.getHttpMethod();
             
             if ("GET".equals(method) && "/items".equals(path)) {
-                return handleListItems(input, context);
+                return handleListItems(input, context, requestedVersion);
             } else if ("POST".equals(method) && "/items".equals(path)) {
-                return handleCreateItem(input, context);
+                return handleCreateItem(input, context, requestedVersion);
             } else if ("GET".equals(method) && path.matches("/items/[^/]+")) {
-                return handleGetItem(input, context);
+                return handleGetItem(input, context, requestedVersion);
             } else if ("PUT".equals(method) && path.matches("/items/[^/]+")) {
-                return handleUpdateItem(input, context);
+                return handleUpdateItem(input, context, requestedVersion);
             } else if ("DELETE".equals(method) && path.matches("/items/[^/]+")) {
-                return handleDeleteItem(input, context);
+                return handleDeleteItem(input, context, requestedVersion);
             }
             
             // Unknown endpoint
-            return createErrorResponse(404, "NOT_FOUND", "Endpoint not found", null);
+            return VersionedResponseBuilder.createErrorResponse(
+                requestedVersion, 404, "Endpoint not found", "NOT_FOUND");
             
         } catch (Exception e) {
             logger.error("Error handling items request", e);
-            return createErrorResponse(500, "INTERNAL_ERROR", "Internal server error", e.getMessage());
+            ApiVersion fallbackVersion = ApiVersion.getDefault();
+            return VersionedResponseBuilder.createErrorResponse(
+                fallbackVersion, 500, "Internal server error: " + e.getMessage(), "INTERNAL_ERROR");
         }
     }
     
     /**
      * Handles GET /items - list all items for the authenticated user
      */
-    private APIGatewayProxyResponseEvent handleListItems(APIGatewayProxyRequestEvent input, Context context) {
+    private APIGatewayProxyResponseEvent handleListItems(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
             String userId = getUserIdFromRequest(input);
             
@@ -150,37 +170,44 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             
             Map<String, Object> response = getItemsService.execute(request);
             
-            logger.info("Returning response for user: {}", userId);
-            return createSuccessResponse(200, response);
+            logger.info("Returning response for user: {} with version {}", userId, version.getVersionString());
+            return new VersionedResponseBuilder(versioningService)
+                    .withVersion(version)
+                    .withStatusCode(200)
+                    .withBody(response)
+                    .build();
             
         } catch (Exception e) {
             logger.error("Error listing items", e);
-            return createErrorResponse(500, "INTERNAL_ERROR", "Failed to list items", e.getMessage());
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 500, "Failed to list items: " + e.getMessage(), "INTERNAL_ERROR");
         }
     }
     
     /**
      * Handles POST /items - create a new item
      */
-    private APIGatewayProxyResponseEvent handleCreateItem(APIGatewayProxyRequestEvent input, Context context) {
+    private APIGatewayProxyResponseEvent handleCreateItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         String userId = null;
         try {
             userId = getUserIdFromRequest(input);
             String body = input.getBody();
             
             if (body == null || body.trim().isEmpty()) {
-                return createErrorResponse(400, "BAD_REQUEST", "Request body is required", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 400, "Request body is required", "BAD_REQUEST");
             }
             
             JsonNode requestJson = objectMapper.readTree(body);
             String message = requestJson.get("message") != null ? requestJson.get("message").asText() : null;
             
             if (message == null || message.trim().isEmpty()) {
-                return createErrorResponse(400, "BAD_REQUEST", "Message is required", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 400, "Message is required", "BAD_REQUEST");
             }
             
             // Use the enhanced PostItemsService
-            logger.info("Creating item for user: {} with message length: {}", userId, message.length());
+            logger.info("Creating item for user: {} with message length: {} version: {}", userId, message.length(), version.getVersionString());
             PostItemsService.CreateItemRequest request = new PostItemsService.CreateItemRequest(
                 message.trim(), userId
             );
@@ -189,18 +216,23 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             Map<String, Object> response = postItemsService.execute(request);
             
             logger.info("Created item for user: {}", userId);
-            return createSuccessResponse(201, response);
+            return new VersionedResponseBuilder(versioningService)
+                    .withVersion(version)
+                    .withStatusCode(201)
+                    .withBody(response)
+                    .build();
             
         } catch (Exception e) {
             logger.error("Error creating item for user: {} - Exception type: {} - Message: {}", userId, e.getClass().getSimpleName(), e.getMessage(), e);
-            return createErrorResponse(500, "INTERNAL_ERROR", "Failed to create item", e.getClass().getSimpleName() + ": " + e.getMessage());
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 500, "Failed to create item: " + e.getClass().getSimpleName() + ": " + e.getMessage(), "INTERNAL_ERROR");
         }
     }
     
     /**
      * Handles GET /items/{id} - get a specific item
      */
-    private APIGatewayProxyResponseEvent handleGetItem(APIGatewayProxyRequestEvent input, Context context) {
+    private APIGatewayProxyResponseEvent handleGetItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
             String userId = getUserIdFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
@@ -209,10 +241,15 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 // Use mock database for local development
                 Optional<MockDatabase.Item> item = MockDatabase.getItem(itemId, userId);
                 if (item.isPresent()) {
-                    logger.info("Retrieved item {} for user: {} (using mock database)", itemId, userId);
-                    return createSuccessResponse(200, item.get().toMap());
+                    logger.info("Retrieved item {} for user: {} (using mock database) version: {}", itemId, userId, version.getVersionString());
+                    return new VersionedResponseBuilder(versioningService)
+                            .withVersion(version)
+                            .withStatusCode(200)
+                            .withBody(item.get().toMap())
+                            .build();
                 } else {
-                    return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                    return VersionedResponseBuilder.createErrorResponse(
+                        version, 404, "Item not found", "NOT_FOUND");
                 }
             }
             
@@ -229,7 +266,8 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             GetItemResponse getResponse = dynamoDbService.getItem(getRequest);
             
             if (!getResponse.hasItem() || getResponse.item().isEmpty()) {
-                return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 404, "Item not found", "NOT_FOUND");
             }
             
             Map<String, AttributeValue> item = getResponse.item();
@@ -240,33 +278,40 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             response.put("createdAt", item.get("createdAt").s());
             response.put("updatedAt", item.get("updatedAt").s());
             
-            logger.info("Retrieved item {} for user: {}", itemId, userId);
-            return createSuccessResponse(200, response);
+            logger.info("Retrieved item {} for user: {} version: {}", itemId, userId, version.getVersionString());
+            return new VersionedResponseBuilder(versioningService)
+                    .withVersion(version)
+                    .withStatusCode(200)
+                    .withBody(response)
+                    .build();
             
         } catch (Exception e) {
             logger.error("Error getting item", e);
-            return createErrorResponse(500, "INTERNAL_ERROR", "Failed to get item", e.getMessage());
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 500, "Failed to get item: " + e.getMessage(), "INTERNAL_ERROR");
         }
     }
     
     /**
      * Handles PUT /items/{id} - update an existing item
      */
-    private APIGatewayProxyResponseEvent handleUpdateItem(APIGatewayProxyRequestEvent input, Context context) {
+    private APIGatewayProxyResponseEvent handleUpdateItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
             String userId = getUserIdFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
             String body = input.getBody();
             
             if (body == null || body.trim().isEmpty()) {
-                return createErrorResponse(400, "BAD_REQUEST", "Request body is required", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 400, "Request body is required", "BAD_REQUEST");
             }
             
             JsonNode requestJson = objectMapper.readTree(body);
             String message = requestJson.get("message") != null ? requestJson.get("message").asText() : null;
             
             if (message == null || message.trim().isEmpty()) {
-                return createErrorResponse(400, "BAD_REQUEST", "Message is required", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 400, "Message is required", "BAD_REQUEST");
             }
             
             if (useLocalMock) {
@@ -275,11 +320,16 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 if (updated) {
                     Optional<MockDatabase.Item> updatedItem = MockDatabase.getItem(itemId, userId);
                     if (updatedItem.isPresent()) {
-                        logger.info("Updated item {} for user: {} (using mock database)", itemId, userId);
-                        return createSuccessResponse(200, updatedItem.get().toMap());
+                        logger.info("Updated item {} for user: {} (using mock database) version: {}", itemId, userId, version.getVersionString());
+                        return new VersionedResponseBuilder(versioningService)
+                                .withVersion(version)
+                                .withStatusCode(200)
+                                .withBody(updatedItem.get().toMap())
+                                .build();
                     }
                 }
-                return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 404, "Item not found", "NOT_FOUND");
             }
             
             String now = Instant.now().toString();
@@ -313,23 +363,29 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 response.put("createdAt", updatedItem.get("createdAt").s());
                 response.put("updatedAt", updatedItem.get("updatedAt").s());
                 
-                logger.info("Updated item {} for user: {}", itemId, userId);
-                return createSuccessResponse(200, response);
+                logger.info("Updated item {} for user: {} version: {}", itemId, userId, version.getVersionString());
+                return new VersionedResponseBuilder(versioningService)
+                        .withVersion(version)
+                        .withStatusCode(200)
+                        .withBody(response)
+                        .build();
                 
             } catch (ConditionalCheckFailedException e) {
-                return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 404, "Item not found", "NOT_FOUND");
             }
             
         } catch (Exception e) {
             logger.error("Error updating item", e);
-            return createErrorResponse(500, "INTERNAL_ERROR", "Failed to update item", e.getMessage());
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 500, "Failed to update item: " + e.getMessage(), "INTERNAL_ERROR");
         }
     }
     
     /**
      * Handles DELETE /items/{id} - delete an existing item
      */
-    private APIGatewayProxyResponseEvent handleDeleteItem(APIGatewayProxyRequestEvent input, Context context) {
+    private APIGatewayProxyResponseEvent handleDeleteItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
             String userId = getUserIdFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
@@ -338,10 +394,15 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                 // Use mock database for local development
                 boolean deleted = MockDatabase.deleteItem(itemId, userId);
                 if (deleted) {
-                    logger.info("Deleted item {} for user: {} (using mock database)", itemId, userId);
-                    return createSuccessResponse(204, null);
+                    logger.info("Deleted item {} for user: {} (using mock database) version: {}", itemId, userId, version.getVersionString());
+                    return new VersionedResponseBuilder(versioningService)
+                            .withVersion(version)
+                            .withStatusCode(204)
+                            .withBody(null)
+                            .build();
                 } else {
-                    return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                    return VersionedResponseBuilder.createErrorResponse(
+                        version, 404, "Item not found", "NOT_FOUND");
                 }
             }
             
@@ -358,16 +419,22 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             
             try {
                 dynamoDbService.deleteItem(deleteRequest);
-                logger.info("Deleted item {} for user: {}", itemId, userId);
-                return createSuccessResponse(204, null);
+                logger.info("Deleted item {} for user: {} version: {}", itemId, userId, version.getVersionString());
+                return new VersionedResponseBuilder(versioningService)
+                        .withVersion(version)
+                        .withStatusCode(204)
+                        .withBody(null)
+                        .build();
                 
             } catch (ConditionalCheckFailedException e) {
-                return createErrorResponse(404, "NOT_FOUND", "Item not found", null);
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 404, "Item not found", "NOT_FOUND");
             }
             
         } catch (Exception e) {
             logger.error("Error deleting item", e);
-            return createErrorResponse(500, "INTERNAL_ERROR", "Failed to delete item", e.getMessage());
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 500, "Failed to delete item: " + e.getMessage(), "INTERNAL_ERROR");
         }
     }
     

@@ -134,13 +134,15 @@ class ItemsHandlerTest {
         // Process request
         APIGatewayProxyResponseEvent response = itemsHandler.handleRequest(request, mockContext);
 
-        // Verify error response
+        // Verify error response with versioned format
         assertEquals(400, response.getStatusCode());
         
         try {
             JsonNode responseBody = objectMapper.readTree(response.getBody());
-            assertEquals("BAD_REQUEST", responseBody.get("error").asText());
-            assertEquals("Message is required", responseBody.get("message").asText());
+            JsonNode errorObject = responseBody.get("error");
+            assertNotNull(errorObject);
+            assertEquals("BAD_REQUEST", errorObject.get("code").asText());
+            assertEquals("Message is required", errorObject.get("message").asText());
         } catch (Exception e) {
             fail("Failed to parse response body: " + e.getMessage());
         }
@@ -190,8 +192,10 @@ class ItemsHandlerTest {
         
         try {
             JsonNode responseBody = objectMapper.readTree(response.getBody());
-            assertEquals("NOT_FOUND", responseBody.get("error").asText());
-            assertEquals("Item not found", responseBody.get("message").asText());
+            JsonNode errorObject = responseBody.get("error");
+            assertNotNull(errorObject);
+            assertEquals("NOT_FOUND", errorObject.get("code").asText());
+            assertEquals("Item not found", errorObject.get("message").asText());
         } catch (Exception e) {
             fail("Failed to parse response body: " + e.getMessage());
         }
@@ -217,13 +221,15 @@ class ItemsHandlerTest {
         // Process request
         APIGatewayProxyResponseEvent response = itemsHandler.handleRequest(request, mockContext);
 
-        // Verify error handling
+        // Verify error handling with versioned format
         assertEquals(500, response.getStatusCode());
         
         try {
             JsonNode responseBody = objectMapper.readTree(response.getBody());
-            assertEquals("INTERNAL_ERROR", responseBody.get("error").asText());
-            assertEquals("Failed to create item", responseBody.get("message").asText());
+            JsonNode errorObject = responseBody.get("error");
+            assertNotNull(errorObject);
+            assertEquals("INTERNAL_ERROR", errorObject.get("code").asText());
+            assertTrue(errorObject.get("message").asText().contains("Failed to create item"));
         } catch (Exception e) {
             fail("Failed to parse response body: " + e.getMessage());
         }

@@ -19,6 +19,9 @@ import java.util.Map;
 import co.thismakesmehappy.toyapi.service.utils.ParameterStoreHelper;
 import co.thismakesmehappy.toyapi.service.utils.CognitoService;
 import co.thismakesmehappy.toyapi.service.utils.AwsCognitoService;
+import co.thismakesmehappy.toyapi.service.versioning.ApiVersion;
+import co.thismakesmehappy.toyapi.service.versioning.ApiVersioningService;
+import co.thismakesmehappy.toyapi.service.versioning.VersionedResponseBuilder;
 
 /**
  * Lambda handler for authentication-related API endpoints.
@@ -34,6 +37,7 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
     private final String userPoolId;
     private final String userPoolClientId;
     private final boolean mockAuthentication;
+    private final ApiVersioningService versioningService;
 
     /**
      * Default constructor for Lambda runtime.
@@ -48,6 +52,7 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
         this.userPoolId = System.getenv("USER_POOL_ID");
         this.userPoolClientId = System.getenv("USER_POOL_CLIENT_ID");
         this.mockAuthentication = "true".equals(System.getenv("MOCK_AUTHENTICATION"));
+        this.versioningService = new ApiVersioningService();
     }
     
     /**
@@ -66,6 +71,7 @@ public class AuthHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
                                System.getProperty("USER_POOL_CLIENT_ID", "test-client");
         this.mockAuthentication = System.getenv("MOCK_AUTHENTICATION") != null ? "true".equals(System.getenv("MOCK_AUTHENTICATION")) :
                                  "true".equals(System.getProperty("MOCK_AUTHENTICATION", "false"));
+        this.versioningService = new ApiVersioningService();
     }
 
     @Override

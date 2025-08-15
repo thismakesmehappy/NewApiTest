@@ -64,10 +64,11 @@ class PublicHandlerTest {
         assertEquals("Hello from service!", responseBody.get("message").asText());
         assertEquals("2024-01-01T00:00:00Z", responseBody.get("timestamp").asText());
         
-        // Verify CORS headers
+        // Verify CORS headers and versioning headers
         assertNotNull(response.getHeaders());
-        assertEquals("application/json", response.getHeaders().get("Content-Type"));
+        assertEquals("application/vnd.toyapi.v1+json", response.getHeaders().get("Content-Type"));
         assertEquals("*", response.getHeaders().get("Access-Control-Allow-Origin"));
+        assertEquals("v1.0.0", response.getHeaders().get("API-Version"));
         
         // Verify service was called
         verify(mockGetPublicMessageService, times(1)).execute();
@@ -86,13 +87,14 @@ class PublicHandlerTest {
         // Process request
         APIGatewayProxyResponseEvent response = publicHandler.handleRequest(request, mockContext);
 
-        // Verify error response
+        // Verify error response with versioned format
         assertEquals(500, response.getStatusCode());
         
         JsonNode responseBody = objectMapper.readTree(response.getBody());
-        assertEquals("INTERNAL_ERROR", responseBody.get("error").asText());
-        assertEquals("Failed to create response", responseBody.get("message").asText());
-        assertTrue(responseBody.get("details").asText().contains("Service error"));
+        JsonNode errorObject = responseBody.get("error");
+        assertNotNull(errorObject);
+        assertEquals("INTERNAL_ERROR", errorObject.get("code").asText());
+        assertTrue(errorObject.get("message").asText().contains("Failed to create response"));
         
         // Verify service was called
         verify(mockGetPublicMessageService, times(1)).execute();
@@ -108,12 +110,14 @@ class PublicHandlerTest {
         // Process request
         APIGatewayProxyResponseEvent response = publicHandler.handleRequest(request, mockContext);
 
-        // Verify error response
+        // Verify error response with versioned format
         assertEquals(404, response.getStatusCode());
         
         JsonNode responseBody = objectMapper.readTree(response.getBody());
-        assertEquals("NOT_FOUND", responseBody.get("error").asText());
-        assertEquals("Endpoint not found", responseBody.get("message").asText());
+        JsonNode errorObject = responseBody.get("error");
+        assertNotNull(errorObject);
+        assertEquals("NOT_FOUND", errorObject.get("code").asText());
+        assertEquals("Endpoint not found", errorObject.get("message").asText());
         
         // Verify service was not called
         verify(mockGetPublicMessageService, never()).execute();
@@ -129,12 +133,14 @@ class PublicHandlerTest {
         // Process request
         APIGatewayProxyResponseEvent response = publicHandler.handleRequest(request, mockContext);
 
-        // Verify error response
+        // Verify error response with versioned format
         assertEquals(404, response.getStatusCode());
         
         JsonNode responseBody = objectMapper.readTree(response.getBody());
-        assertEquals("NOT_FOUND", responseBody.get("error").asText());
-        assertEquals("Endpoint not found", responseBody.get("message").asText());
+        JsonNode errorObject = responseBody.get("error");
+        assertNotNull(errorObject);
+        assertEquals("NOT_FOUND", errorObject.get("code").asText());
+        assertEquals("Endpoint not found", errorObject.get("message").asText());
         
         // Verify service was not called
         verify(mockGetPublicMessageService, never()).execute();
