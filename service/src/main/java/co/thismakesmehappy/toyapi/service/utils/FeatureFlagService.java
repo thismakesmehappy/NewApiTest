@@ -157,4 +157,15 @@ public interface FeatureFlagService {
      * @return true if performance optimization should be active
      */
     boolean isPerformanceOptimizationEnabled();
+    
+    /**
+     * Check if CloudWatch cost optimization is enabled.
+     * Parameter: /toyapi-{env}/features/cloudwatch-cost-optimization
+     * 
+     * Enables cost-saving measures like reduced log retention,
+     * minimal alarm configurations, and optimized logging levels.
+     * 
+     * @return true if CloudWatch cost optimizations should be applied
+     */
+    boolean isCloudWatchCostOptimizationEnabled();
 }

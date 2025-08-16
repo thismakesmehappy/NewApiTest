@@ -117,4 +117,9 @@ public class ParameterStoreFeatureFlagService implements FeatureFlagService {
     public boolean isPerformanceOptimizationEnabled() {
         return isFeatureEnabled("performance-optimization", true); // Default: enabled for optimization
     }
+    
+    @Override
+    public boolean isCloudWatchCostOptimizationEnabled() {
+        return isFeatureEnabled("cloudwatch-cost-optimization", false); // Default: disabled (explicit opt-in)
+    }
 }
