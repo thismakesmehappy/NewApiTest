@@ -109,7 +109,7 @@ public class LambdaStack extends Stack {
                 .functionName(resourcePrefix + "-developerfunction")
                 .runtime(Runtime.JAVA_17)
                 .handler("co.thismakesmehappy.toyapi.service.handlers.DeveloperHandler")
-                .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
+                .code(OptimizedAssetHelper.createEnvironmentOptimizedCode(this.environment))
                 .timeout(Duration.seconds(30))
                 .memorySize(512)
                 .description("Handles developer API key management (" + this.environment + ")")
@@ -165,7 +165,7 @@ public class LambdaStack extends Stack {
                 .functionName(resourcePrefix + "-" + functionName.toLowerCase())
                 .runtime(Runtime.JAVA_17)
                 .handler(handler)
-                .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
+                .code(OptimizedAssetHelper.createEnvironmentOptimizedCode(this.environment))
                 .timeout(getOptimizedTimeout(functionName))
                 .memorySize(getOptimizedMemorySize(functionName))  // Performance-optimized memory allocation
                 .description(description + " (" + this.environment + ")")
@@ -242,7 +242,7 @@ public class LambdaStack extends Stack {
                 .functionName(resourcePrefix + "-" + functionName.toLowerCase())
                 .runtime(Runtime.JAVA_17)
                 .handler(handler)
-                .code(Code.fromAsset("../service/target/toyapi-service-1.0-SNAPSHOT.jar"))
+                .code(OptimizedAssetHelper.createEnvironmentOptimizedCode(this.environment))
                 .timeout(Duration.seconds(30))
                 .memorySize(512)  // Balanced cost/performance
                 .description(description + " (" + this.environment + ")")

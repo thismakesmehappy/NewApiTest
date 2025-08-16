@@ -60,6 +60,7 @@ Let's figure out a way to document everything. The plan should include considera
     - Expected inputs and outputs
     - Error models
   - Custom URL routing
+    - Document that it has been implemented but behind the feature flag
   - Best practices
   - feature flags
   - versioning (include maintanance and best pracrices)
@@ -119,6 +120,12 @@ Let's figure out a way to document everything. The plan should include considera
     - Areas of vulnerability and solutions
     - Best practices
   - Granular explanation of the process we followed step by step
+    - Give me a retrospect of the process
+    - What were some of our difficulties? How did we solve them?
+    - What did we learn?
+    - What compromises did we make? 
+    - what improvements did we make over time?
+    - how did the project evolve from the initial specs and why?
   - At the end of this, I should be able to learn about AWS architecture, API architecture, understand and reproduce the whole process manually and I should be able to reproduce the whole process with you
   - AW guide
     - Give me a high-level, but ationably guide to AWS develoopment

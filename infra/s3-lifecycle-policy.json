@@ -1,0 +1,47 @@
+{
+  "Rules": [
+    {
+      "ID": "CDKAssetCleanup",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "cdk-"
+      },
+      "Transitions": [
+        {
+          "Days": 7,
+          "StorageClass": "STANDARD_IA"
+        },
+        {
+          "Days": 30,
+          "StorageClass": "GLACIER"
+        }
+      ],
+      "Expiration": {
+        "Days": 90
+      }
+    },
+    {
+      "ID": "OrphanedAssetCleanup",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "asset."
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 1
+      },
+      "Expiration": {
+        "Days": 30
+      }
+    },
+    {
+      "ID": "TempArtifactCleanup", 
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "tmp/"
+      },
+      "Expiration": {
+        "Days": 3
+      }
+    }
+  ]
+}

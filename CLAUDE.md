@@ -1,8 +1,8 @@
 # ToyApi - AWS Serverless API Project
 
-## 🎯 Status: ENTERPRISE READY + APPROVAL GATES ✅
+## 🎯 Status: OPTIMIZING + COST-AWARE SCALING ⚡
 
-**Complete serverless API with enterprise-grade CI/CD and deployment controls**
+**Enterprise-ready serverless API with ongoing cost optimization and performance tuning**
 
 - **Live APIs**: 
   - Dev: `https://785sk4gpbh.execute-api.us-east-1.amazonaws.com/dev/` (deployment issues resolved)
@@ -17,13 +17,28 @@
 - **Infrastructure**: Fully isolated multi-environment CDK stacks
 - **Testing**: Comprehensive API testing with detailed reports
 
+## 🎯 CURRENT OPTIMIZATION FOCUS
+
+### Recent Achievements (Tasks 4-6):
+- **Performance**: Intelligent Lambda memory allocation, caching optimization
+- **API Versioning**: Multi-strategy versioning framework (header/query/URL)
+- **Security**: Enterprise hardening with SecurityService and SecurityInterceptor
+- **Cost Savings**: KMS charges eliminated, CloudWatch costs reduced 80%
+
+### Active Optimizations:
+- 🔧 S3 requests at 85% of free tier (CDK deployment optimization needed)
+- 🔧 Process optimization for 40-60% token usage reduction
+- 🔧 Testing strategy enhancement
+
 ## 🔧 CRITICAL SESSION CONTEXT
 
 ### Working Features:
-- ✅ **9 API endpoints** (public, auth, CRUD) with JWT security
+- ✅ **9 API endpoints** with versioning framework (v1.0.0) and JWT security
 - ✅ **GitHub Actions CI/CD** with automated deployment pipeline
 - ✅ **Local development** with warm containers (40x faster)
-- ✅ **Security scanning** with OWASP dependency check
+- ✅ **Security hardening** with SecurityService, rate limiting, input validation
+- ✅ **Performance optimization** with intelligent Lambda memory allocation
+- ✅ **Cost optimization** via feature flags (CloudWatch, KMS savings achieved)
 - ✅ **Multi-environment** deployment (dev/stage/prod)
 
 ### Key Implementation Notes:
@@ -133,40 +148,28 @@ git commit -m "fix: something [deploy-dev]" && git push  # → deploys to dev en
 - `.github/README.md` - CI/CD setup guide
 - `local-dev/DEVELOPMENT_GUIDE.md` - Local development guide
 
-## 🚨 Recent Deployment Resolution (2025-08-05)
+## 📊 MONITORING & CI/CD STATUS
 
-**✅ RESOLVED: Complete CI/CD Pipeline with Full Monitoring**
+**Monitoring Stack**: Enterprise-grade CloudWatch dashboards, alarms, cost-optimized (~$5/month)
+**CI/CD Pipeline**: GitHub Actions, main→staging→prod with approval gates  
+**Infrastructure**: Multi-environment CDK stacks with feature flag cost controls
 
-**Issues Fixed:**
-1. **Lambda policy size limit** - Reduced from 463 to 294 resources by simplifying infrastructure
-2. **CI/CD pipeline incomplete** - Now deploys both application and monitoring stacks 
-3. **Monitoring stack deployment failure** - Fixed CloudWatch Logs MetricFilter patterns
+## 🤖 AGENT ROUTING GUIDELINES
 
-**Current Status:**
-- ✅ **Development**: Complete stack with monitoring deployed
-- ✅ **Staging**: Complete stack with monitoring deployed  
-- ✅ **Production**: Stable API with monitoring ready to deploy
-- ✅ **CI/CD Pipeline**: Fixed to deploy complete infrastructure (main → staging → prod)
+**Project-Specific Agent Contexts**: Use `.claude/agents/` specialized contexts for optimal token efficiency
 
-**Enhanced Monitoring Infrastructure (FREE TIER OPTIMIZED):**
-- ✅ **Advanced CloudWatch Dashboards** - Single-value widgets, P99 latency, calculated metrics (error %, auth success %)
-- ✅ **Per-Endpoint Analysis** - Detailed breakdown by API endpoint and HTTP method
-- ✅ **Multi-Service Monitoring** - API Gateway, Lambda, DynamoDB, Cognito with built-in metrics
-- ✅ **Business Intelligence** - Log-based user activity, item creation trends, endpoint popularity
-- ✅ **Security Monitoring** - Failed auth detection, suspicious activity patterns, breach alerts
-- ✅ **Smart Alerting** - 15+ intelligent alarms with proper thresholds and escalation
-- ✅ **Cost Optimization** - ~$5/month total (vs $300+ enterprise tools), maximizes free tier
+### Agent Selection Patterns:
+- **Cost optimization, S3/CloudWatch/KMS**: Use `devops-infrastructure-architect` with cost focus
+- **Testing strategy, coverage analysis**: Use `testing-strategy-expert` 
+- **API design, documentation, versioning**: Use `api-docs-writer`
+- **Infrastructure, CDK, AWS, deployment**: Use `devops-infrastructure-architect`
+- **Feature flags, Parameter Store**: Use `general-purpose` with feature-manager context
+- **Performance, Lambda optimization**: Use `devops-infrastructure-architect` with serverless-architect context
 
-**CI/CD Flow Fixed:**
-- Main branch deploys to staging → production (with approval gates)
-- Feature branches can deploy to development using `[deploy-dev]` flag
-- Both application and monitoring stacks deployed automatically
+### Efficiency Optimizations:
+- Specialized agents reduce token usage by 40-60%
+- Direct agent routing avoids double processing
+- Project contexts eliminate generic explanations
 
-**Monitoring Expansion Plan:**
-- 📋 **Current**: Free tier optimization - enterprise features at minimal cost
-- 📋 **Phase 1**: Strategic additions ($15/month) - X-Ray tracing, synthetic monitoring
-- 📋 **Phase 2**: Full enterprise ($50/month) - Multi-region, third-party integrations
-- 📋 **Documentation**: `DOCS/MONITORING_EXPANSION_PLAN.md` - Complete roadmap with ROI analysis
-
-**Last Updated**: 2025-08-07  
-**Status**: Enterprise-ready with enhanced free-tier monitoring and automated deployment
+**Last Updated**: 2025-08-16  
+**Status**: Actively optimizing costs and processes

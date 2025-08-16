@@ -209,19 +209,60 @@ jobs:
       run: |
         cd infra
         export ENVIRONMENT=dev
-        cdk diff ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
-        cdk diff ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        echo "🔍 Checking if deployment is necessary..."
+        
+        # Check if JAR has changed since last deployment
+        JAR_HASH=$(sha256sum ../service/target/toyapi-service-1.0-SNAPSHOT.jar | cut -d' ' -f1)
+        echo "Current JAR hash: ${JAR_HASH}"
+        
+        # Get last deployed hash from Parameter Store (if exists)
+        LAST_HASH=$(aws ssm get-parameter --name "/toyapi/dev/jar-hash" --query 'Parameter.Value' --output text 2>/dev/null || echo "none")
+        echo "Last deployed hash: ${LAST_HASH}"
+        
+        if [ "${JAR_HASH}" = "${LAST_HASH}" ]; then
+          echo "⏭️  JAR unchanged - skipping deployment to save S3 requests"
+          echo "skip-deployment=true" >> $GITHUB_ENV
+        else
+          echo "🚀 JAR changed - deployment required"
+          echo "skip-deployment=false" >> $GITHUB_ENV
+        fi
+        
+        # Show infrastructure changes only if deployment is needed
+        if [ "${JAR_HASH}" != "${LAST_HASH}" ]; then
+          cdk diff ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+          cdk diff ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} || true
+        fi
         
     - name: Deploy main infrastructure
       run: |
         cd infra
         export ENVIRONMENT=dev
+        
+        # Skip deployment if JAR hasn't changed
+        if [ "${skip-deployment}" = "true" ]; then
+          echo "⏭️  Skipping main infrastructure deployment - no changes detected"
+          exit 0
+        fi
+        
+        echo "🚀 Deploying main infrastructure..."
         cdk deploy ToyApiStack-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
+        
+        # Update the deployed JAR hash in Parameter Store
+        JAR_HASH=$(sha256sum ../service/target/toyapi-service-1.0-SNAPSHOT.jar | cut -d' ' -f1)
+        aws ssm put-parameter --name "/toyapi/dev/jar-hash" --value "${JAR_HASH}" --type String --overwrite
         
     - name: Deploy monitoring stack
       run: |
         cd infra
         export ENVIRONMENT=dev
+        
+        # Skip deployment if JAR hasn't changed
+        if [ "${skip-deployment}" = "true" ]; then
+          echo "⏭️  Skipping monitoring stack deployment - no changes detected"
+          exit 0
+        fi
+        
+        echo "📊 Deploying monitoring stack..."
         cdk deploy ToyApiMonitoring-${ENVIRONMENT} --context environment=${ENVIRONMENT} --require-approval never
         
     - name: Run integration tests
