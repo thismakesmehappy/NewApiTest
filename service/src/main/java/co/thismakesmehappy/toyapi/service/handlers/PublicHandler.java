@@ -4,6 +4,14 @@ import co.thismakesmehappy.toyapi.service.services.publicendpoint.GetPublicMessa
 import co.thismakesmehappy.toyapi.service.versioning.ApiVersion;
 import co.thismakesmehappy.toyapi.service.versioning.ApiVersioningService;
 import co.thismakesmehappy.toyapi.service.versioning.VersionedResponseBuilder;
+import co.thismakesmehappy.toyapi.service.security.SecurityService;
+import co.thismakesmehappy.toyapi.service.security.SecurityInterceptor;
+import co.thismakesmehappy.toyapi.service.security.SecurityCheckResult;
+import co.thismakesmehappy.toyapi.service.utils.FeatureFlagService;
+import co.thismakesmehappy.toyapi.service.utils.ParameterStoreFeatureFlagService;
+import co.thismakesmehappy.toyapi.service.utils.ParameterStoreService;
+import co.thismakesmehappy.toyapi.service.utils.AwsParameterStoreService;
+import software.amazon.awssdk.services.ssm.SsmClient;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -28,6 +36,7 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
     
     private final GetPublicMessageService getPublicMessageService;
     private final ApiVersioningService versioningService;
+    private final SecurityInterceptor securityInterceptor;
     
     /**
      * Default constructor for Lambda runtime.
@@ -36,6 +45,15 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
         String environment = System.getenv("ENVIRONMENT");
         this.getPublicMessageService = new GetPublicMessageService(environment);
         this.versioningService = new ApiVersioningService();
+        
+        // Initialize security components
+        SsmClient ssmClient = SsmClient.builder()
+                .region(software.amazon.awssdk.regions.Region.US_EAST_1)
+                .build();
+        ParameterStoreService parameterStoreService = new AwsParameterStoreService(ssmClient);
+        FeatureFlagService featureFlagService = new ParameterStoreFeatureFlagService(parameterStoreService);
+        SecurityService securityService = new SecurityService(featureFlagService);
+        this.securityInterceptor = new SecurityInterceptor(securityService, featureFlagService);
     }
     
     /**
@@ -46,6 +64,7 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
     public PublicHandler(GetPublicMessageService getPublicMessageService) {
         this.getPublicMessageService = getPublicMessageService;
         this.versioningService = new ApiVersioningService();
+        this.securityInterceptor = null; // For testing
     }
     
     /**
@@ -57,6 +76,21 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
     public PublicHandler(GetPublicMessageService getPublicMessageService, ApiVersioningService versioningService) {
         this.getPublicMessageService = getPublicMessageService;
         this.versioningService = versioningService;
+        this.securityInterceptor = null; // For testing
+    }
+    
+    /**
+     * Constructor for dependency injection with security (testing).
+     * 
+     * @param getPublicMessageService The service for GET /public/message
+     * @param versioningService The versioning service
+     * @param securityInterceptor The security interceptor
+     */
+    public PublicHandler(GetPublicMessageService getPublicMessageService, ApiVersioningService versioningService, 
+                        SecurityInterceptor securityInterceptor) {
+        this.getPublicMessageService = getPublicMessageService;
+        this.versioningService = versioningService;
+        this.securityInterceptor = securityInterceptor;
     }
 
     @Override
@@ -67,6 +101,16 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
             // Extract API version from request
             ApiVersion requestedVersion = versioningService.extractVersion(input);
             logger.info("API version: {}", requestedVersion.getVersionString());
+            
+            // Security checks
+            if (securityInterceptor != null) {
+                SecurityCheckResult securityResult = securityInterceptor.checkRequest(input, requestedVersion);
+                if (securityResult.isBlocked()) {
+                    logger.warn("Request blocked by security: {}", securityResult.getReason());
+                    return securityInterceptor.enhanceResponse(
+                        securityInterceptor.createBlockedResponse(securityResult, requestedVersion));
+                }
+            }
             
             // Check if version is supported
             if (!versioningService.isVersionSupported(requestedVersion)) {
@@ -89,8 +133,9 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
         } catch (Exception e) {
             logger.error("Error handling request", e);
             ApiVersion fallbackVersion = ApiVersion.getDefault();
-            return VersionedResponseBuilder.createErrorResponse(
+            APIGatewayProxyResponseEvent errorResponse = VersionedResponseBuilder.createErrorResponse(
                 fallbackVersion, 500, "Internal server error: " + e.getMessage(), "INTERNAL_ERROR");
+            return securityInterceptor != null ? securityInterceptor.enhanceResponse(errorResponse) : errorResponse;
         }
     }
     
@@ -103,16 +148,20 @@ public class PublicHandler implements RequestHandler<APIGatewayProxyRequestEvent
             
             logger.info("Returning public message for version {}", version.getVersionString());
             
-            return new VersionedResponseBuilder(versioningService)
+            APIGatewayProxyResponseEvent apiResponse = new VersionedResponseBuilder(versioningService)
                     .withVersion(version)
                     .withStatusCode(200)
                     .withBody(response)
                     .build();
             
+            // Apply security headers
+            return securityInterceptor != null ? securityInterceptor.enhanceResponse(apiResponse) : apiResponse;
+            
         } catch (Exception e) {
             logger.error("Error creating public message response", e);
-            return VersionedResponseBuilder.createErrorResponse(
+            APIGatewayProxyResponseEvent errorResponse = VersionedResponseBuilder.createErrorResponse(
                 version, 500, "Failed to create response: " + e.getMessage(), "INTERNAL_ERROR");
+            return securityInterceptor != null ? securityInterceptor.enhanceResponse(errorResponse) : errorResponse;
         }
     }
     
