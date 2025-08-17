@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 import java.time.Instant;
 import java.util.*;
 import java.util.Base64;
+import java.util.UUID;
 
 import co.thismakesmehappy.toyapi.service.utils.MockDatabase;
 import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
@@ -168,16 +169,13 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
      */
     private APIGatewayProxyResponseEvent handleListItems(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
-            String userId = getUserIdFromRequest(input);
+            User user = getUserFromRequest(input);
             
-            // Use the enhanced GetItemsService
-            GetItemsService.GetItemsRequest request = new GetItemsService.GetItemsRequest(
-                userId, null, null, "desc"
-            );
+            // Get all items accessible to the user (own items + team items + admin access)
+            Map<String, Object> response = getAccessibleItems(user);
             
-            Map<String, Object> response = getItemsService.execute(request);
-            
-            logger.info("Returning response for user: {} with version {}", userId, version.getVersionString());
+            logger.info("Returning {} items for user: {} (role: {}) with version {}", 
+                       response.get("count"), user.getUserId(), user.getRole(), version.getVersionString());
             return new VersionedResponseBuilder(versioningService)
                     .withVersion(version)
                     .withStatusCode(200)
@@ -192,12 +190,12 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     }
     
     /**
-     * Handles POST /items - create a new item
+     * Handles POST /items - create a new item with team support
      */
     private APIGatewayProxyResponseEvent handleCreateItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
-        String userId = null;
+        User user = null;
         try {
-            userId = getUserIdFromRequest(input);
+            user = getUserFromRequest(input);
             String body = input.getBody();
             
             if (body == null || body.trim().isEmpty()) {
@@ -207,22 +205,45 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             
             JsonNode requestJson = objectMapper.readTree(body);
             String message = requestJson.get("message") != null ? requestJson.get("message").asText() : null;
+            String teamId = requestJson.get("teamId") != null ? requestJson.get("teamId").asText() : null;
+            String accessLevelStr = requestJson.get("accessLevel") != null ? requestJson.get("accessLevel").asText() : null;
             
             if (message == null || message.trim().isEmpty()) {
                 return VersionedResponseBuilder.createErrorResponse(
                     version, 400, "Message is required", "BAD_REQUEST");
             }
             
-            // Use the enhanced PostItemsService
-            logger.info("Creating item for user: {} with message length: {} version: {}", userId, message.length(), version.getVersionString());
-            PostItemsService.CreateItemRequest request = new PostItemsService.CreateItemRequest(
-                message.trim(), userId
-            );
+            // Validate team assignment
+            if (teamId != null && !authorizationService.isValidTeamAssignment(user, teamId)) {
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 403, "User does not have access to the specified team", "FORBIDDEN");
+            }
             
-            logger.info("Executing PostItemsService for user: {}", userId);
-            Map<String, Object> response = postItemsService.execute(request);
+            // Determine access level
+            Item.AccessLevel accessLevel = Item.AccessLevel.INDIVIDUAL; // default
+            if (accessLevelStr != null) {
+                try {
+                    accessLevel = Item.AccessLevel.valueOf(accessLevelStr.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    return VersionedResponseBuilder.createErrorResponse(
+                        version, 400, "Invalid access level. Must be: INDIVIDUAL, TEAM, or PUBLIC", "BAD_REQUEST");
+                }
+            } else if (teamId != null) {
+                // If teamId is provided but no access level, default to TEAM
+                accessLevel = Item.AccessLevel.TEAM;
+            }
             
-            logger.info("Created item for user: {}", userId);
+            // Validate access level consistency
+            if (accessLevel == Item.AccessLevel.TEAM && teamId == null) {
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 400, "teamId is required when accessLevel is TEAM", "BAD_REQUEST");
+            }
+            
+            // Create the item with team support
+            Map<String, Object> response = createItemWithTeamSupport(user, message.trim(), teamId, accessLevel);
+            
+            logger.info("Created item for user: {} with teamId: {} accessLevel: {} version: {}", 
+                       user.getUserId(), teamId, accessLevel, version.getVersionString());
             return new VersionedResponseBuilder(versioningService)
                     .withVersion(version)
                     .withStatusCode(201)
@@ -230,6 +251,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     .build();
             
         } catch (Exception e) {
+            String userId = user != null ? user.getUserId() : "unknown";
             logger.error("Error creating item for user: {} - Exception type: {} - Message: {}", userId, e.getClass().getSimpleName(), e.getMessage(), e);
             return VersionedResponseBuilder.createErrorResponse(
                 version, 500, "Failed to create item: " + e.getClass().getSimpleName() + ": " + e.getMessage(), "INTERNAL_ERROR");
@@ -237,30 +259,125 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     }
     
     /**
-     * Handles GET /items/{id} - get a specific item
+     * Handles GET /items/{id} - get a specific item with authorization
      */
     private APIGatewayProxyResponseEvent handleGetItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
-            String userId = getUserIdFromRequest(input);
+            User user = getUserFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
             
             if (useLocalMock) {
-                // Use mock database for local development
-                Optional<MockDatabase.Item> item = MockDatabase.getItem(itemId, userId);
-                if (item.isPresent()) {
-                    logger.info("Retrieved item {} for user: {} (using mock database) version: {}", itemId, userId, version.getVersionString());
-                    return new VersionedResponseBuilder(versioningService)
-                            .withVersion(version)
-                            .withStatusCode(200)
-                            .withBody(item.get().toMap())
-                            .build();
-                } else {
-                    return VersionedResponseBuilder.createErrorResponse(
-                        version, 404, "Item not found", "NOT_FOUND");
-                }
+                return handleGetItemFromMock(user, itemId, version);
+            } else {
+                return handleGetItemFromDynamoDB(user, itemId, version);
             }
             
-            // Get item from DynamoDB
+        } catch (Exception e) {
+            logger.error("Error getting item", e);
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 500, "Failed to get item: " + e.getMessage(), "INTERNAL_ERROR");
+        }
+    }
+    
+    /**
+     * Handles getting item from mock database with authorization
+     */
+    private APIGatewayProxyResponseEvent handleGetItemFromMock(User user, String itemId, ApiVersion version) {
+        // For mock, try to find the item by scanning all items (since mock doesn't support team queries well)
+        List<MockDatabase.Item> allItems = MockDatabase.getAllItems();
+        
+        for (MockDatabase.Item mockItem : allItems) {
+            if (mockItem.id.equals(itemId)) {
+                // Convert to Item model for permission checking
+                Item item = new Item.Builder()
+                    .id(mockItem.id)
+                    .message(mockItem.message)
+                    .userId(mockItem.userId)
+                    .accessLevel(Item.AccessLevel.INDIVIDUAL) // Mock items are individual
+                    .build();
+                item.setCreatedAt(Instant.parse(mockItem.createdAt));
+                item.setUpdatedAt(Instant.parse(mockItem.updatedAt));
+                
+                // Check permissions
+                if (!authorizationService.canUserAccessItem(user, item)) {
+                    return VersionedResponseBuilder.createErrorResponse(
+                        version, 403, "Access denied to this item", "FORBIDDEN");
+                }
+                
+                Map<String, Object> response = mockItem.toMap();
+                response.put("accessLevel", "individual"); // Add for consistency
+                
+                logger.info("Retrieved item {} for user: {} (using mock database) version: {}", 
+                           itemId, user.getUserId(), version.getVersionString());
+                return new VersionedResponseBuilder(versioningService)
+                        .withVersion(version)
+                        .withStatusCode(200)
+                        .withBody(response)
+                        .build();
+            }
+        }
+        
+        return VersionedResponseBuilder.createErrorResponse(
+            version, 404, "Item not found", "NOT_FOUND");
+    }
+    
+    /**
+     * Handles getting item from DynamoDB with authorization
+     */
+    private APIGatewayProxyResponseEvent handleGetItemFromDynamoDB(User user, String itemId, ApiVersion version) {
+        // First, try to get the item directly from user's partition
+        Item item = getItemFromUserPartition(user.getUserId(), itemId);
+        
+        // If not found in user's partition, search team partitions (if user has teams)
+        if (item == null && user.getTeamIds() != null && !user.getTeamIds().isEmpty()) {
+            item = findItemInTeams(itemId, user);
+        }
+        
+        // If still not found and user is admin, search all partitions
+        if (item == null && user.isAdmin()) {
+            item = findItemInAllPartitions(itemId);
+        }
+        
+        if (item == null) {
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 404, "Item not found", "NOT_FOUND");
+        }
+        
+        // Check permissions
+        if (!authorizationService.canUserAccessItem(user, item)) {
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 403, "Access denied to this item", "FORBIDDEN");
+        }
+        
+        // Build response
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", item.getId());
+        response.put("message", item.getMessage());
+        response.put("userId", item.getUserId());
+        response.put("createdAt", item.getCreatedAt().toString());
+        response.put("updatedAt", item.getUpdatedAt().toString());
+        response.put("accessLevel", item.getAccessLevel().toString().toLowerCase());
+        
+        if (item.getTeamId() != null) {
+            response.put("teamId", item.getTeamId());
+        }
+        if (item.getCreatedBy() != null) {
+            response.put("createdBy", item.getCreatedBy());
+        }
+        
+        logger.info("Retrieved item {} for user: {} version: {}", itemId, user.getUserId(), version.getVersionString());
+        return new VersionedResponseBuilder(versioningService)
+                .withVersion(version)
+                .withStatusCode(200)
+                .withBody(response)
+                .build();
+    }
+    
+    /**
+     * Gets item from user's own partition
+     */
+    private Item getItemFromUserPartition(String userId, String itemId) {
+        try {
             Map<String, AttributeValue> key = new HashMap<>();
             key.put("PK", AttributeValue.builder().s("USER#" + userId).build());
             key.put("SK", AttributeValue.builder().s("ITEM#" + itemId).build());
@@ -272,39 +389,80 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             
             GetItemResponse getResponse = dynamoDbService.getItem(getRequest);
             
-            if (!getResponse.hasItem() || getResponse.item().isEmpty()) {
-                return VersionedResponseBuilder.createErrorResponse(
-                    version, 404, "Item not found", "NOT_FOUND");
+            if (getResponse.hasItem() && !getResponse.item().isEmpty()) {
+                return convertDynamoItemToItem(getResponse.item());
             }
-            
-            Map<String, AttributeValue> item = getResponse.item();
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", itemId);
-            response.put("message", item.get("message").s());
-            response.put("userId", item.get("userId").s());
-            response.put("createdAt", item.get("createdAt").s());
-            response.put("updatedAt", item.get("updatedAt").s());
-            
-            logger.info("Retrieved item {} for user: {} version: {}", itemId, userId, version.getVersionString());
-            return new VersionedResponseBuilder(versioningService)
-                    .withVersion(version)
-                    .withStatusCode(200)
-                    .withBody(response)
-                    .build();
-            
         } catch (Exception e) {
-            logger.error("Error getting item", e);
-            return VersionedResponseBuilder.createErrorResponse(
-                version, 500, "Failed to get item: " + e.getMessage(), "INTERNAL_ERROR");
+            logger.error("Error getting item from user partition: userId={}, itemId={}", userId, itemId, e);
         }
+        
+        return null;
     }
     
     /**
-     * Handles PUT /items/{id} - update an existing item
+     * Finds item in user's team partitions
+     */
+    private Item findItemInTeams(String itemId, User user) {
+        // This would be more efficient with a GSI in production
+        // For now, we'll scan with filter for team items
+        try {
+            ScanRequest scanRequest = ScanRequest.builder()
+                .tableName(tableName)
+                .filterExpression("SK = :sk AND accessLevel = :accessLevel")
+                .expressionAttributeValues(Map.of(
+                    ":sk", AttributeValue.builder().s("ITEM#" + itemId).build(),
+                    ":accessLevel", AttributeValue.builder().s("TEAM").build()
+                ))
+                .build();
+            
+            ScanResponse response = dynamoDbService.scan(scanRequest);
+            
+            for (Map<String, AttributeValue> dynamoItem : response.items()) {
+                Item item = convertDynamoItemToItem(dynamoItem);
+                
+                // Check if user has access to this team item
+                if (item.getTeamId() != null && user.isMemberOfTeam(item.getTeamId())) {
+                    return item;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error finding item in teams: itemId={}", itemId, e);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Finds item in all partitions (admin only)
+     */
+    private Item findItemInAllPartitions(String itemId) {
+        try {
+            ScanRequest scanRequest = ScanRequest.builder()
+                .tableName(tableName)
+                .filterExpression("SK = :sk")
+                .expressionAttributeValues(Map.of(
+                    ":sk", AttributeValue.builder().s("ITEM#" + itemId).build()
+                ))
+                .build();
+            
+            ScanResponse response = dynamoDbService.scan(scanRequest);
+            
+            if (!response.items().isEmpty()) {
+                return convertDynamoItemToItem(response.items().get(0));
+            }
+        } catch (Exception e) {
+            logger.error("Error finding item in all partitions: itemId={}", itemId, e);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Handles PUT /items/{id} - update an existing item with authorization
      */
     private APIGatewayProxyResponseEvent handleUpdateItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
-            String userId = getUserIdFromRequest(input);
+            User user = getUserFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
             String body = input.getBody();
             
@@ -321,65 +479,23 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
                     version, 400, "Message is required", "BAD_REQUEST");
             }
             
-            if (useLocalMock) {
-                // Use mock database for local development
-                boolean updated = MockDatabase.updateItem(itemId, userId, message.trim());
-                if (updated) {
-                    Optional<MockDatabase.Item> updatedItem = MockDatabase.getItem(itemId, userId);
-                    if (updatedItem.isPresent()) {
-                        logger.info("Updated item {} for user: {} (using mock database) version: {}", itemId, userId, version.getVersionString());
-                        return new VersionedResponseBuilder(versioningService)
-                                .withVersion(version)
-                                .withStatusCode(200)
-                                .withBody(updatedItem.get().toMap())
-                                .build();
-                    }
-                }
+            // First, find and validate the item exists and user can modify it
+            Item existingItem = findItemForModification(user, itemId);
+            if (existingItem == null) {
                 return VersionedResponseBuilder.createErrorResponse(
                     version, 404, "Item not found", "NOT_FOUND");
             }
             
-            String now = Instant.now().toString();
-            
-            // Update item in DynamoDB
-            Map<String, AttributeValue> key = new HashMap<>();
-            key.put("PK", AttributeValue.builder().s("USER#" + userId).build());
-            key.put("SK", AttributeValue.builder().s("ITEM#" + itemId).build());
-            
-            Map<String, AttributeValue> attributeValues = new HashMap<>();
-            attributeValues.put(":message", AttributeValue.builder().s(message.trim()).build());
-            attributeValues.put(":updatedAt", AttributeValue.builder().s(now).build());
-            
-            UpdateItemRequest updateRequest = UpdateItemRequest.builder()
-                    .tableName(tableName)
-                    .key(key)
-                    .updateExpression("SET message = :message, updatedAt = :updatedAt")
-                    .expressionAttributeValues(attributeValues)
-                    .conditionExpression("attribute_exists(PK)")
-                    .returnValues(ReturnValue.ALL_NEW)
-                    .build();
-            
-            try {
-                UpdateItemResponse updateResponse = dynamoDbService.updateItem(updateRequest);
-                Map<String, AttributeValue> updatedItem = updateResponse.attributes();
-                
-                Map<String, Object> response = new HashMap<>();
-                response.put("id", itemId);
-                response.put("message", updatedItem.get("message").s());
-                response.put("userId", updatedItem.get("userId").s());
-                response.put("createdAt", updatedItem.get("createdAt").s());
-                response.put("updatedAt", updatedItem.get("updatedAt").s());
-                
-                logger.info("Updated item {} for user: {} version: {}", itemId, userId, version.getVersionString());
-                return new VersionedResponseBuilder(versioningService)
-                        .withVersion(version)
-                        .withStatusCode(200)
-                        .withBody(response)
-                        .build();
-                
-            } catch (ConditionalCheckFailedException e) {
+            // Check modify permissions
+            if (!authorizationService.canUserModifyItem(user, existingItem)) {
                 return VersionedResponseBuilder.createErrorResponse(
-                    version, 404, "Item not found", "NOT_FOUND");
+                    version, 403, "Access denied - insufficient permissions to modify this item", "FORBIDDEN");
+            }
+            
+            if (useLocalMock) {
+                return handleUpdateItemInMock(user, itemId, message.trim(), version);
+            } else {
+                return handleUpdateItemInDynamoDB(user, existingItem, message.trim(), version);
             }
             
         } catch (Exception e) {
@@ -390,52 +506,133 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     }
     
     /**
-     * Handles DELETE /items/{id} - delete an existing item
+     * Finds item for modification (includes permission pre-check)
+     */
+    private Item findItemForModification(User user, String itemId) {
+        if (useLocalMock) {
+            // For mock, find the item by scanning all items
+            List<MockDatabase.Item> allItems = MockDatabase.getAllItems();
+            for (MockDatabase.Item mockItem : allItems) {
+                if (mockItem.id.equals(itemId)) {
+                    return new Item.Builder()
+                        .id(mockItem.id)
+                        .message(mockItem.message)
+                        .userId(mockItem.userId)
+                        .accessLevel(Item.AccessLevel.INDIVIDUAL)
+                        .build();
+                }
+            }
+            return null;
+        }
+        
+        // For DynamoDB, use the same search logic as get item
+        Item item = getItemFromUserPartition(user.getUserId(), itemId);
+        
+        if (item == null && user.getTeamIds() != null && !user.getTeamIds().isEmpty()) {
+            item = findItemInTeams(itemId, user);
+        }
+        
+        if (item == null && user.isAdmin()) {
+            item = findItemInAllPartitions(itemId);
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Handles updating item in mock database
+     */
+    private APIGatewayProxyResponseEvent handleUpdateItemInMock(User user, String itemId, String message, ApiVersion version) {
+        // For mock, we'll update based on the original user (mock limitation)
+        boolean updated = MockDatabase.updateItem(itemId, user.getUserId(), message);
+        if (updated) {
+            Optional<MockDatabase.Item> updatedItem = MockDatabase.getItem(itemId, user.getUserId());
+            if (updatedItem.isPresent()) {
+                Map<String, Object> response = updatedItem.get().toMap();
+                response.put("accessLevel", "individual"); // Add for consistency
+                
+                logger.info("Updated item {} for user: {} (using mock database) version: {}", 
+                           itemId, user.getUserId(), version.getVersionString());
+                return new VersionedResponseBuilder(versioningService)
+                        .withVersion(version)
+                        .withStatusCode(200)
+                        .withBody(response)
+                        .build();
+            }
+        }
+        return VersionedResponseBuilder.createErrorResponse(
+            version, 404, "Item not found or update failed", "NOT_FOUND");
+    }
+    
+    /**
+     * Handles updating item in DynamoDB
+     */
+    private APIGatewayProxyResponseEvent handleUpdateItemInDynamoDB(User user, Item existingItem, String message, ApiVersion version) {
+        String now = Instant.now().toString();
+        
+        // Build the key for the original item location
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("PK", AttributeValue.builder().s("USER#" + existingItem.getUserId()).build());
+        key.put("SK", AttributeValue.builder().s("ITEM#" + existingItem.getId()).build());
+        
+        Map<String, AttributeValue> attributeValues = new HashMap<>();
+        attributeValues.put(":message", AttributeValue.builder().s(message).build());
+        attributeValues.put(":updatedAt", AttributeValue.builder().s(now).build());
+        
+        UpdateItemRequest updateRequest = UpdateItemRequest.builder()
+                .tableName(tableName)
+                .key(key)
+                .updateExpression("SET message = :message, updatedAt = :updatedAt")
+                .expressionAttributeValues(attributeValues)
+                .conditionExpression("attribute_exists(PK)")
+                .returnValues(ReturnValue.ALL_NEW)
+                .build();
+        
+        try {
+            UpdateItemResponse updateResponse = dynamoDbService.updateItem(updateRequest);
+            Map<String, AttributeValue> updatedItem = updateResponse.attributes();
+            
+            Map<String, Object> response = convertDynamoItemToMap(updatedItem);
+            
+            logger.info("Updated item {} for user: {} (modifier: {}) version: {}", 
+                       existingItem.getId(), existingItem.getUserId(), user.getUserId(), version.getVersionString());
+            return new VersionedResponseBuilder(versioningService)
+                    .withVersion(version)
+                    .withStatusCode(200)
+                    .withBody(response)
+                    .build();
+            
+        } catch (ConditionalCheckFailedException e) {
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 404, "Item not found or was modified by another user", "NOT_FOUND");
+        }
+    }
+    
+    /**
+     * Handles DELETE /items/{id} - delete an existing item with authorization
      */
     private APIGatewayProxyResponseEvent handleDeleteItem(APIGatewayProxyRequestEvent input, Context context, ApiVersion version) {
         try {
-            String userId = getUserIdFromRequest(input);
+            User user = getUserFromRequest(input);
             String itemId = extractItemIdFromPath(input.getPath());
             
-            if (useLocalMock) {
-                // Use mock database for local development
-                boolean deleted = MockDatabase.deleteItem(itemId, userId);
-                if (deleted) {
-                    logger.info("Deleted item {} for user: {} (using mock database) version: {}", itemId, userId, version.getVersionString());
-                    return new VersionedResponseBuilder(versioningService)
-                            .withVersion(version)
-                            .withStatusCode(204)
-                            .withBody(null)
-                            .build();
-                } else {
-                    return VersionedResponseBuilder.createErrorResponse(
-                        version, 404, "Item not found", "NOT_FOUND");
-                }
-            }
-            
-            // Delete item from DynamoDB
-            Map<String, AttributeValue> key = new HashMap<>();
-            key.put("PK", AttributeValue.builder().s("USER#" + userId).build());
-            key.put("SK", AttributeValue.builder().s("ITEM#" + itemId).build());
-            
-            DeleteItemRequest deleteRequest = DeleteItemRequest.builder()
-                    .tableName(tableName)
-                    .key(key)
-                    .conditionExpression("attribute_exists(PK)")
-                    .build();
-            
-            try {
-                dynamoDbService.deleteItem(deleteRequest);
-                logger.info("Deleted item {} for user: {} version: {}", itemId, userId, version.getVersionString());
-                return new VersionedResponseBuilder(versioningService)
-                        .withVersion(version)
-                        .withStatusCode(204)
-                        .withBody(null)
-                        .build();
-                
-            } catch (ConditionalCheckFailedException e) {
+            // First, find and validate the item exists and user can modify it
+            Item existingItem = findItemForModification(user, itemId);
+            if (existingItem == null) {
                 return VersionedResponseBuilder.createErrorResponse(
                     version, 404, "Item not found", "NOT_FOUND");
+            }
+            
+            // Check modify permissions (delete requires modify permission)
+            if (!authorizationService.canUserModifyItem(user, existingItem)) {
+                return VersionedResponseBuilder.createErrorResponse(
+                    version, 403, "Access denied - insufficient permissions to delete this item", "FORBIDDEN");
+            }
+            
+            if (useLocalMock) {
+                return handleDeleteItemFromMock(user, itemId, version);
+            } else {
+                return handleDeleteItemFromDynamoDB(user, existingItem, version);
             }
             
         } catch (Exception e) {
@@ -443,6 +640,408 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             return VersionedResponseBuilder.createErrorResponse(
                 version, 500, "Failed to delete item: " + e.getMessage(), "INTERNAL_ERROR");
         }
+    }
+    
+    /**
+     * Handles deleting item from mock database
+     */
+    private APIGatewayProxyResponseEvent handleDeleteItemFromMock(User user, String itemId, ApiVersion version) {
+        // For mock, we'll try to delete by scanning all items first
+        List<MockDatabase.Item> allItems = MockDatabase.getAllItems();
+        String originalUserId = null;
+        
+        for (MockDatabase.Item mockItem : allItems) {
+            if (mockItem.id.equals(itemId)) {
+                originalUserId = mockItem.userId;
+                break;
+            }
+        }
+        
+        if (originalUserId == null) {
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 404, "Item not found", "NOT_FOUND");
+        }
+        
+        boolean deleted = MockDatabase.deleteItem(itemId, originalUserId);
+        if (deleted) {
+            logger.info("Deleted item {} (original owner: {}) by user: {} (using mock database) version: {}", 
+                       itemId, originalUserId, user.getUserId(), version.getVersionString());
+            return new VersionedResponseBuilder(versioningService)
+                    .withVersion(version)
+                    .withStatusCode(204)
+                    .withBody(null)
+                    .build();
+        } else {
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 404, "Item not found or delete failed", "NOT_FOUND");
+        }
+    }
+    
+    /**
+     * Handles deleting item from DynamoDB
+     */
+    private APIGatewayProxyResponseEvent handleDeleteItemFromDynamoDB(User user, Item existingItem, ApiVersion version) {
+        // Build the key for the original item location
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("PK", AttributeValue.builder().s("USER#" + existingItem.getUserId()).build());
+        key.put("SK", AttributeValue.builder().s("ITEM#" + existingItem.getId()).build());
+        
+        DeleteItemRequest deleteRequest = DeleteItemRequest.builder()
+                .tableName(tableName)
+                .key(key)
+                .conditionExpression("attribute_exists(PK)")
+                .build();
+        
+        try {
+            dynamoDbService.deleteItem(deleteRequest);
+            logger.info("Deleted item {} (owner: {}) by user: {} version: {}", 
+                       existingItem.getId(), existingItem.getUserId(), user.getUserId(), version.getVersionString());
+            return new VersionedResponseBuilder(versioningService)
+                    .withVersion(version)
+                    .withStatusCode(204)
+                    .withBody(null)
+                    .build();
+            
+        } catch (ConditionalCheckFailedException e) {
+            return VersionedResponseBuilder.createErrorResponse(
+                version, 404, "Item not found or was deleted by another user", "NOT_FOUND");
+        }
+    }
+    
+    /**
+     * Gets all items accessible to the user based on their permissions
+     */
+    private Map<String, Object> getAccessibleItems(User user) {
+        if (useLocalMock) {
+            return getAccessibleItemsFromMock(user);
+        }
+        
+        // For DynamoDB, we need to query for items the user can access
+        return getAccessibleItemsFromDynamoDB(user);
+    }
+    
+    /**
+     * Gets accessible items from mock database (for local development)
+     */
+    private Map<String, Object> getAccessibleItemsFromMock(User user) {
+        // For mock, get all items and filter by access
+        List<MockDatabase.Item> allItems = MockDatabase.getAllItems();
+        List<Map<String, Object>> accessibleItems = new ArrayList<>();
+        
+        for (MockDatabase.Item mockItem : allItems) {
+            // Convert mock item to Item model for permission checking
+            Item item = new Item.Builder()
+                .id(mockItem.id)
+                .message(mockItem.message)
+                .userId(mockItem.userId)
+                .accessLevel(Item.AccessLevel.INDIVIDUAL) // Mock items are individual for now
+                .build();
+            item.setCreatedAt(Instant.parse(mockItem.createdAt));
+            item.setUpdatedAt(Instant.parse(mockItem.updatedAt));
+            
+            if (authorizationService.canUserAccessItem(user, item)) {
+                accessibleItems.add(mockItem.toMap());
+            }
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("items", accessibleItems);
+        response.put("count", accessibleItems.size());
+        response.put("hasMore", false);
+        
+        return response;
+    }
+    
+    /**
+     * Gets accessible items from DynamoDB based on user permissions
+     */
+    private Map<String, Object> getAccessibleItemsFromDynamoDB(User user) {
+        List<Map<String, Object>> accessibleItems = new ArrayList<>();
+        
+        if (user.isAdmin()) {
+            // Admin can see all items - scan the entire table
+            accessibleItems.addAll(scanAllItems());
+        } else {
+            // Regular users: get their own items + team items they can access
+            accessibleItems.addAll(getUserOwnItems(user.getUserId()));
+            
+            // Add team items if user has team memberships
+            if (user.getTeamIds() != null && !user.getTeamIds().isEmpty()) {
+                for (String teamId : user.getTeamIds()) {
+                    accessibleItems.addAll(getTeamItems(teamId, user));
+                }
+            }
+        }
+        
+        // Remove duplicates (in case user owns items that are also in their teams)
+        Map<String, Map<String, Object>> uniqueItems = new HashMap<>();
+        for (Map<String, Object> item : accessibleItems) {
+            uniqueItems.put((String) item.get("id"), item);
+        }
+        
+        List<Map<String, Object>> finalItems = new ArrayList<>(uniqueItems.values());
+        
+        // Sort by updatedAt desc (most recent first)
+        finalItems.sort((a, b) -> {
+            String timeA = (String) a.get("updatedAt");
+            String timeB = (String) b.get("updatedAt");
+            return timeB.compareTo(timeA);
+        });
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("items", finalItems);
+        response.put("count", finalItems.size());
+        response.put("hasMore", false);
+        
+        return response;
+    }
+    
+    /**
+     * Gets user's own items from DynamoDB
+     */
+    private List<Map<String, Object>> getUserOwnItems(String userId) {
+        List<Map<String, Object>> items = new ArrayList<>();
+        
+        try {
+            QueryRequest queryRequest = QueryRequest.builder()
+                .tableName(tableName)
+                .keyConditionExpression("PK = :pk AND begins_with(SK, :sk)")
+                .expressionAttributeValues(Map.of(
+                    ":pk", AttributeValue.builder().s("USER#" + userId).build(),
+                    ":sk", AttributeValue.builder().s("ITEM#").build()
+                ))
+                .build();
+            
+            QueryResponse response = dynamoDbService.query(queryRequest);
+            
+            for (Map<String, AttributeValue> item : response.items()) {
+                items.add(convertDynamoItemToMap(item));
+            }
+        } catch (Exception e) {
+            logger.error("Error querying user items for userId: {}", userId, e);
+        }
+        
+        return items;
+    }
+    
+    /**
+     * Gets team items from DynamoDB for a specific team
+     */
+    private List<Map<String, Object>> getTeamItems(String teamId, User user) {
+        List<Map<String, Object>> items = new ArrayList<>();
+        
+        try {
+            // Query for team items using GSI (if available) or scan with filter
+            // For now, we'll use scan with filter - in production, a GSI would be better
+            ScanRequest scanRequest = ScanRequest.builder()
+                .tableName(tableName)
+                .filterExpression("teamId = :teamId AND accessLevel = :accessLevel")
+                .expressionAttributeValues(Map.of(
+                    ":teamId", AttributeValue.builder().s(teamId).build(),
+                    ":accessLevel", AttributeValue.builder().s("TEAM").build()
+                ))
+                .build();
+            
+            ScanResponse response = dynamoDbService.scan(scanRequest);
+            
+            for (Map<String, AttributeValue> dynamoItem : response.items()) {
+                // Convert to Item model for permission checking
+                Item item = convertDynamoItemToItem(dynamoItem);
+                if (authorizationService.canUserAccessItem(user, item)) {
+                    items.add(convertDynamoItemToMap(dynamoItem));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error querying team items for teamId: {}", teamId, e);
+        }
+        
+        return items;
+    }
+    
+    /**
+     * Scans all items for admin users
+     */
+    private List<Map<String, Object>> scanAllItems() {
+        List<Map<String, Object>> items = new ArrayList<>();
+        
+        try {
+            ScanRequest scanRequest = ScanRequest.builder()
+                .tableName(tableName)
+                .filterExpression("begins_with(SK, :sk)")
+                .expressionAttributeValues(Map.of(
+                    ":sk", AttributeValue.builder().s("ITEM#").build()
+                ))
+                .build();
+            
+            ScanResponse response = dynamoDbService.scan(scanRequest);
+            
+            for (Map<String, AttributeValue> item : response.items()) {
+                items.add(convertDynamoItemToMap(item));
+            }
+        } catch (Exception e) {
+            logger.error("Error scanning all items", e);
+        }
+        
+        return items;
+    }
+    
+    /**
+     * Converts DynamoDB item to Item model
+     */
+    private Item convertDynamoItemToItem(Map<String, AttributeValue> dynamoItem) {
+        String itemId = extractItemIdFromSortKey(dynamoItem.get("SK").s());
+        String message = dynamoItem.get("message") != null ? dynamoItem.get("message").s() : "";
+        String userId = dynamoItem.get("userId") != null ? dynamoItem.get("userId").s() : "";
+        String teamId = dynamoItem.get("teamId") != null ? dynamoItem.get("teamId").s() : null;
+        String accessLevelStr = dynamoItem.get("accessLevel") != null ? dynamoItem.get("accessLevel").s() : "INDIVIDUAL";
+        
+        Item.AccessLevel accessLevel;
+        try {
+            accessLevel = Item.AccessLevel.valueOf(accessLevelStr);
+        } catch (IllegalArgumentException e) {
+            accessLevel = Item.AccessLevel.INDIVIDUAL;
+        }
+        
+        Item item = new Item.Builder()
+            .id(itemId)
+            .message(message)
+            .userId(userId)
+            .teamId(teamId)
+            .accessLevel(accessLevel)
+            .build();
+        
+        // Set timestamps if available
+        if (dynamoItem.get("createdAt") != null) {
+            item.setCreatedAt(Instant.parse(dynamoItem.get("createdAt").s()));
+        }
+        if (dynamoItem.get("updatedAt") != null) {
+            item.setUpdatedAt(Instant.parse(dynamoItem.get("updatedAt").s()));
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Converts DynamoDB item to response map
+     */
+    private Map<String, Object> convertDynamoItemToMap(Map<String, AttributeValue> dynamoItem) {
+        Map<String, Object> item = new HashMap<>();
+        
+        String itemId = extractItemIdFromSortKey(dynamoItem.get("SK").s());
+        item.put("id", itemId);
+        item.put("message", dynamoItem.get("message") != null ? dynamoItem.get("message").s() : "");
+        item.put("userId", dynamoItem.get("userId") != null ? dynamoItem.get("userId").s() : "");
+        item.put("createdAt", dynamoItem.get("createdAt") != null ? dynamoItem.get("createdAt").s() : "");
+        item.put("updatedAt", dynamoItem.get("updatedAt") != null ? dynamoItem.get("updatedAt").s() : "");
+        
+        // Add team fields if present
+        if (dynamoItem.get("teamId") != null) {
+            item.put("teamId", dynamoItem.get("teamId").s());
+        }
+        if (dynamoItem.get("accessLevel") != null) {
+            item.put("accessLevel", dynamoItem.get("accessLevel").s());
+        } else {
+            item.put("accessLevel", "INDIVIDUAL"); // Default for backward compatibility
+        }
+        
+        return item;
+    }
+    
+    /**
+     * Creates an item with team support
+     */
+    private Map<String, Object> createItemWithTeamSupport(User user, String message, String teamId, Item.AccessLevel accessLevel) {
+        if (useLocalMock) {
+            return createItemInMock(user, message, teamId, accessLevel);
+        } else {
+            return createItemInDynamoDB(user, message, teamId, accessLevel);
+        }
+    }
+    
+    /**
+     * Creates item in mock database for local development
+     */
+    private Map<String, Object> createItemInMock(User user, String message, String teamId, Item.AccessLevel accessLevel) {
+        // For mock database, we'll create a simple item (team features limited in mock)
+        String itemId = MockDatabase.createItem(user.getUserId(), message);
+        Optional<MockDatabase.Item> createdItem = MockDatabase.getItem(itemId, user.getUserId());
+        
+        if (!createdItem.isPresent()) {
+            throw new RuntimeException("Failed to create item in mock database");
+        }
+        
+        Map<String, Object> response = createdItem.get().toMap();
+        
+        // Add team fields to response even though mock doesn't fully support them
+        if (teamId != null) {
+            response.put("teamId", teamId);
+        }
+        response.put("accessLevel", accessLevel.toString().toLowerCase());
+        
+        return response;
+    }
+    
+    /**
+     * Creates item in DynamoDB with full team support
+     */
+    private Map<String, Object> createItemInDynamoDB(User user, String message, String teamId, Item.AccessLevel accessLevel) {
+        String itemId = "item-" + UUID.randomUUID().toString();
+        String now = Instant.now().toString();
+        
+        // Build the DynamoDB item
+        Map<String, AttributeValue> item = new HashMap<>();
+        item.put("PK", AttributeValue.builder().s("USER#" + user.getUserId()).build());
+        item.put("SK", AttributeValue.builder().s("ITEM#" + itemId).build());
+        item.put("message", AttributeValue.builder().s(message).build());
+        item.put("userId", AttributeValue.builder().s(user.getUserId()).build());
+        item.put("createdAt", AttributeValue.builder().s(now).build());
+        item.put("updatedAt", AttributeValue.builder().s(now).build());
+        item.put("createdBy", AttributeValue.builder().s(user.getUserId()).build());
+        item.put("accessLevel", AttributeValue.builder().s(accessLevel.toString()).build());
+        
+        // Add team fields if applicable
+        if (teamId != null) {
+            item.put("teamId", AttributeValue.builder().s(teamId).build());
+        }
+        
+        PutItemRequest putRequest = PutItemRequest.builder()
+                .tableName(tableName)
+                .item(item)
+                .build();
+        
+        try {
+            dynamoDbService.putItem(putRequest);
+            
+            // Build response
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", itemId);
+            response.put("message", message);
+            response.put("userId", user.getUserId());
+            response.put("createdAt", now);
+            response.put("updatedAt", now);
+            response.put("createdBy", user.getUserId());
+            response.put("accessLevel", accessLevel.toString().toLowerCase());
+            
+            if (teamId != null) {
+                response.put("teamId", teamId);
+            }
+            
+            return response;
+            
+        } catch (Exception e) {
+            logger.error("Failed to create item in DynamoDB", e);
+            throw new RuntimeException("Failed to create item: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Extracts item ID from sort key like "ITEM#item-123"
+     */
+    private String extractItemIdFromSortKey(String sortKey) {
+        if (sortKey.startsWith("ITEM#")) {
+            return sortKey.substring(5);
+        }
+        return sortKey;
     }
     
     /**

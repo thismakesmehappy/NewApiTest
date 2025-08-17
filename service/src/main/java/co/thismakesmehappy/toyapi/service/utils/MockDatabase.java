@@ -181,4 +181,15 @@ public class MockDatabase {
         loadData();
         return items.size();
     }
+    
+    /**
+     * Gets all items from the database (for admin/team access scenarios)
+     */
+    public static List<Item> getAllItems() {
+        loadData();
+        return items.values().stream()
+                .map(Item::fromMap)
+                .sorted((a, b) -> b.createdAt.compareTo(a.createdAt)) // Newest first
+                .collect(Collectors.toList());
+    }
 }
