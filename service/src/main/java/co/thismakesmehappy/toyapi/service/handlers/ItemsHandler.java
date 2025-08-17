@@ -29,6 +29,9 @@ import co.thismakesmehappy.toyapi.service.services.items.PostItemsService;
 import co.thismakesmehappy.toyapi.service.versioning.ApiVersion;
 import co.thismakesmehappy.toyapi.service.versioning.ApiVersioningService;
 import co.thismakesmehappy.toyapi.service.versioning.VersionedResponseBuilder;
+import co.thismakesmehappy.toyapi.service.models.User;
+import co.thismakesmehappy.toyapi.service.models.Item;
+import co.thismakesmehappy.toyapi.service.services.auth.AuthorizationService;
 
 /**
  * Lambda handler for items CRUD operations.
@@ -45,6 +48,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final boolean useLocalMock;
     private final FeatureFlagService featureFlagService;
     private final ApiVersioningService versioningService;
+    private final AuthorizationService authorizationService;
     
     // Service layer
     private final GetItemsService getItemsService;
@@ -85,6 +89,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         // FeatureFlagService is optional - only initialize in production AWS environments
         this.featureFlagService = null; // Will be initialized later if needed
         this.versioningService = new ApiVersioningService();
+        this.authorizationService = new AuthorizationService();
                            
         // Initialize services - PostItemsService has a constructor without FeatureFlagService for backward compatibility
         this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
@@ -108,6 +113,7 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         // For testing, use a mock feature flag service
         this.featureFlagService = null; // Tests can pass null since validation service handles it
         this.versioningService = new ApiVersioningService();
+        this.authorizationService = new AuthorizationService();
         
         // Initialize services
         this.getItemsService = new GetItemsService(this.dynamoDbService, this.tableName, this.useLocalMock);
@@ -493,8 +499,106 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     }
     
     /**
+     * Extracts full User object from JWT token information
+     * This assumes API Gateway has already validated the token
+     */
+    private User getUserFromRequest(APIGatewayProxyRequestEvent input) {
+        // Use mock authentication for local development
+        String mockAuth = System.getenv("MOCK_AUTHENTICATION") != null ? System.getenv("MOCK_AUTHENTICATION") :
+                         System.getProperty("MOCK_AUTHENTICATION");
+        if ("true".equals(mockAuth)) {
+            String localUserId = System.getenv("LOCAL_TEST_USER_ID") != null ? System.getenv("LOCAL_TEST_USER_ID") :
+                                System.getProperty("LOCAL_TEST_USER_ID");
+            if (localUserId != null) {
+                return authorizationService.createUserFromJWT(localUserId, "testuser", "test@example.com");
+            }
+            return authorizationService.createUserFromJWT("local-user-12345", "testuser", "test@example.com");
+        }
+        
+        // JWT token validation for AWS Cognito environments
+        Map<String, String> headers = input.getHeaders();
+        if (headers != null) {
+            String authHeader = headers.get("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                
+                // Extract user information from real JWT token
+                try {
+                    return extractUserFromJWT(token);
+                } catch (Exception e) {
+                    logger.warn("Failed to extract user from JWT token: {}", e.getMessage());
+                }
+                
+                // Mock fallback for testing
+                if (token.startsWith("mock-jwt-token-")) {
+                    String mockUserId = "user-" + Math.abs(token.hashCode() % 100000);
+                    return authorizationService.createUserFromJWT(mockUserId, "mockuser", "mock@example.com");
+                }
+            }
+        }
+        
+        // Fallback to mock user
+        return authorizationService.createUserFromJWT("user-12345", "fallbackuser", "fallback@example.com");
+    }
+
+    /**
+     * Extracts User object from JWT token without verification
+     * This assumes API Gateway has already validated the token
+     */
+    private User extractUserFromJWT(String token) {
+        try {
+            // Split JWT token (header.payload.signature)
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) {
+                logger.warn("Invalid JWT token format");
+                return null;
+            }
+            
+            // Decode the payload (second part)
+            String payload = parts[1];
+            
+            // Add padding if needed for Base64 decoding
+            while (payload.length() % 4 != 0) {
+                payload += "=";
+            }
+            
+            // Decode Base64 payload
+            byte[] decodedBytes = Base64.getDecoder().decode(payload);
+            String decodedPayload = new String(decodedBytes);
+            
+            // Parse JSON to extract user information
+            JsonNode jsonNode = objectMapper.readTree(decodedPayload);
+            
+            String userId = getJsonNodeValue(jsonNode, "sub");
+            String username = getJsonNodeValue(jsonNode, "cognito:username");
+            String email = getJsonNodeValue(jsonNode, "email");
+            
+            if (userId != null) {
+                logger.debug("Extracted user from JWT: userId={}, username={}, email={}", userId, username, email);
+                return authorizationService.createUserFromJWT(userId, username, email);
+            } else {
+                logger.warn("No 'sub' claim found in JWT token");
+                return null;
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error extracting user from JWT token: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+    
+    /**
+     * Helper method to safely extract string values from JsonNode
+     */
+    private String getJsonNodeValue(JsonNode jsonNode, String fieldName) {
+        JsonNode node = jsonNode.get(fieldName);
+        return (node != null && !node.isNull()) ? node.asText() : null;
+    }
+
+    /**
      * Extracts user ID (sub claim) from JWT token without verification
      * This assumes API Gateway has already validated the token
+     * @deprecated Use getUserFromRequest() instead for full user context
      */
     private String extractUserIdFromJWT(String token) {
         try {
