@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.ssm.SsmClient;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.Base64;
 
 import co.thismakesmehappy.toyapi.service.utils.MockDatabase;
 import co.thismakesmehappy.toyapi.service.utils.DynamoDbService;
@@ -469,7 +470,18 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
             String authHeader = headers.get("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
-                // Mock: extract user ID from token (in real implementation, decode JWT)
+                
+                // Extract user ID from real JWT token
+                try {
+                    String userId = extractUserIdFromJWT(token);
+                    if (userId != null && !userId.isEmpty()) {
+                        return userId;
+                    }
+                } catch (Exception e) {
+                    logger.warn("Failed to extract user ID from JWT token: {}", e.getMessage());
+                }
+                
+                // Mock fallback for testing
                 if (token.startsWith("mock-jwt-token-")) {
                     return "user-" + Math.abs(token.hashCode() % 100000);
                 }
@@ -478,6 +490,50 @@ public class ItemsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
         
         // Fallback to mock user ID
         return "user-12345";
+    }
+    
+    /**
+     * Extracts user ID (sub claim) from JWT token without verification
+     * This assumes API Gateway has already validated the token
+     */
+    private String extractUserIdFromJWT(String token) {
+        try {
+            // Split JWT token (header.payload.signature)
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) {
+                logger.warn("Invalid JWT token format");
+                return null;
+            }
+            
+            // Decode the payload (second part)
+            String payload = parts[1];
+            
+            // Add padding if needed for Base64 decoding
+            while (payload.length() % 4 != 0) {
+                payload += "=";
+            }
+            
+            // Decode Base64 payload
+            byte[] decodedBytes = Base64.getDecoder().decode(payload);
+            String decodedPayload = new String(decodedBytes);
+            
+            // Parse JSON to extract 'sub' field
+            JsonNode jsonNode = objectMapper.readTree(decodedPayload);
+            JsonNode subNode = jsonNode.get("sub");
+            
+            if (subNode != null && !subNode.isNull()) {
+                String userId = subNode.asText();
+                logger.debug("Extracted user ID from JWT: {}", userId);
+                return userId;
+            } else {
+                logger.warn("No 'sub' claim found in JWT token");
+                return null;
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error extracting user ID from JWT token: {}", e.getMessage(), e);
+            return null;
+        }
     }
     
     /**
