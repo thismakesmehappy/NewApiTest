@@ -161,15 +161,25 @@ git commit -m "fix: something [deploy-dev]" && git push  # → deploys to dev en
 ### Agent Selection Patterns:
 - **Cost optimization, S3/CloudWatch/KMS**: Use `devops-infrastructure-architect` with cost focus
 - **Testing strategy, coverage analysis**: Use `testing-strategy-expert` 
-- **API design, documentation, versioning**: Use `api-docs-writer`
+- **API design, documentation, versioning, team sharing**: Use `api-docs-writer` with api-specialist context
 - **Infrastructure, CDK, AWS, deployment**: Use `devops-infrastructure-architect`
 - **Feature flags, Parameter Store**: Use `general-purpose` with feature-manager context
 - **Performance, Lambda optimization**: Use `devops-infrastructure-architect` with serverless-architect context
+- **Team/organization sharing, authorization**: Use `api-docs-writer` with api-specialist context
+- **User roles, permissions, security models**: Use `api-docs-writer` with api-specialist context
 
 ### Efficiency Optimizations:
 - Specialized agents reduce token usage by 40-60%
 - Direct agent routing avoids double processing
 - Project contexts eliminate generic explanations
+
+### 🎯 CURRENT IMPLEMENTATION FOCUS:
+**Team/Organization Sharing Implementation** - Use `api-docs-writer` with api-specialist context for:
+- Updating API endpoints to support team assignment (`teamId`, `accessLevel`)
+- Implementing authorization checks (User can access own + team items, Admins can access all)
+- Adding role-based permissions (USER/TEAM_ADMIN/ADMIN roles)
+- Modifying request/response formats for team sharing
+- Testing team sharing authorization flows
 
 **Last Updated**: 2025-08-16  
 **Status**: Actively optimizing costs and processes

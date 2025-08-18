@@ -52,6 +52,20 @@ public class AuthorizationService {
         if (email != null && email.endsWith("@admin.toyapi.com")) {
             return User.Role.ADMIN;
         }
+        
+        // Team sharing test users
+        if (username != null) {
+            switch (username) {
+                case "globaladmin":
+                    return User.Role.ADMIN;
+                case "engteamadmin":
+                case "marketingteamadmin":
+                    return User.Role.TEAM_ADMIN;
+                case "standarduser":
+                    return User.Role.USER;
+            }
+        }
+        
         return User.Role.USER;
     }
     
@@ -70,6 +84,31 @@ public class AuthorizationService {
         if (userId.contains("demo")) {
             teams.add("team-demo");
             teams.add("team-qa");
+        }
+        
+        // Team sharing test users - determine membership by userId patterns
+        if (userId != null) {
+            // Standard user - member of team-engineering
+            if (userId.contains("standarduser")) {
+                teams.add("team-engineering");
+            }
+            
+            // Engineering team admin - admin of team-engineering
+            if (userId.contains("engteamadmin")) {
+                teams.add("team-engineering");
+            }
+            
+            // Marketing team admin - admin of team-marketing
+            if (userId.contains("marketingteamadmin")) {
+                teams.add("team-marketing");
+            }
+            
+            // Global admin - access to all teams (handled by role, but adding for clarity)
+            if (userId.contains("globaladmin")) {
+                teams.add("team-engineering");
+                teams.add("team-marketing");
+                teams.add("team-qa");
+            }
         }
         
         return teams;
