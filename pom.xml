@@ -19,7 +19,7 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
         
         <!-- Dependency versions -->
-        <aws.sdk.version>2.32.21</aws.sdk.version>
+        <aws.sdk.version>2.32.24</aws.sdk.version>
         <aws.lambda.version>1.3.0</aws.lambda.version>
         <jackson.version>2.19.2</jackson.version>
         <junit.version>5.13.0</junit.version>
@@ -56,7 +56,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-events</artifactId>
-                <version>3.16.0</version>
+                <version>3.16.1</version>
             </dependency>
             
             <!-- Jackson for JSON processing -->
